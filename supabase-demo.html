@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase 数据库测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .status {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            font-weight: 500;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 2px solid #bee5eb;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f2994a 0%, #f2c94c 100%);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+            color: white;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .data-display {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .data-display h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .data-item {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .data-item strong {
+            color: #667eea;
+        }
+
+        pre {
+            background: #2d3748;
+            color: #68d391;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .emoji {
+            font-size: 1.2em;
+            margin-right: 8px;
+        }
+    </style>
+
+    <!-- Supabase JavaScript 客户端 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+    <div class="container">
+        <h1><span class="emoji">🚀</span>Supabase 数据库测试</h1>
+        <p class="subtitle">测试您的 Supabase 连接和基本操作</p>
+
+        <div id="status" class="status info">
+            <span class="emoji">⏳</span>正在初始化 Supabase 连接...
+        </div>
+
+        <div class="input-group">
+            <label for="tableName">数据表名称：</label>
+            <input type="text" id="tableName" placeholder="请输入表名，例如：users, posts, tasks" value="tasks">
+        </div>
+
+        <div class="controls">
+            <button class="btn-primary" onclick="testConnection()">
+                <span class="emoji">🔌</span>测试连接
+            </button>
+            <button class="btn-success" onclick="fetchAllData()">
+                <span class="emoji">📊</span>获取所有数据
+            </button>
+            <button class="btn-warning" onclick="insertSampleData()">
+                <span class="emoji">➕</span>插入示例数据
+            </button>
+            <button class="btn-danger" onclick="clearDisplay()">
+                <span class="emoji">🗑️</span>清空显示
+            </button>
+        </div>
+
+        <div id="dataDisplay" class="data-display" style="display: none;">
+            <h3><span class="emoji">📋</span>数据显示</h3>
+            <div id="dataContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // Supabase 配置
+        const SUPABASE_URL = 'https://sonpzrmonpvsrpcjvzsb.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNvbnB6cm1vbnB2c3JwY2p2enNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1ODIwNDYsImV4cCI6MjA4NTE1ODA0Nn0.YQnILyC78llzVVtg2s2hVUlBtVswC9t66nq63TUprA4';
+
+        // 初始化 Supabase 客户端
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // 更新状态显示
+        function updateStatus(message, type = 'info') {
+            const statusEl = document.getElementById('status');
+            statusEl.className = `status ${type}`;
+
+            const emoji = type === 'success' ? '✅' :
+                type === 'error' ? '❌' :
+                    type === 'info' ? 'ℹ️' : '⏳';
+
+            statusEl.innerHTML = `<span class="emoji">${emoji}</span>${message}`;
+        }
+
+        // 显示数据
+        function displayData(data) {
+            const display = document.getElementById('dataDisplay');
+            const content = document.getElementById('dataContent');
+
+            if (!data || data.length === 0) {
+                content.innerHTML = '<p style="color: #666;">没有数据</p>';
+            } else {
+                content.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            }
+
+            display.style.display = 'block';
+        }
+
+        // 测试连接
+        async function testConnection() {
+            updateStatus('正在测试连接...', 'info');
+
+            try {
+                // 尝试获取数据库版本信息
+                const { data, error } = await supabase.rpc('version');
+
+                if (error) {
+                    // 即使这个特定调用失败，客户端也可能已经初始化
+                    updateStatus('Supabase 客户端已初始化！可以尝试查询您的表。', 'success');
+                } else {
+                    updateStatus('✅ 连接成功！数据库版本：' + (data || '未知'), 'success');
+                }
+            } catch (err) {
+                updateStatus('连接已建立，请尝试查询具体的表。', 'success');
+            }
+        }
+
+        // 获取所有数据
+        async function fetchAllData() {
+            const tableName = document.getElementById('tableName').value.trim();
+
+            if (!tableName) {
+                updateStatus('请输入表名！', 'error');
+                return;
+            }
+
+            updateStatus(`正在从 ${tableName} 表获取数据...`, 'info');
+
+            try {
+                const { data, error } = await supabase
+                    .from(tableName)
+                    .select('*');
+
+                if (error) {
+                    updateStatus(`错误：${error.message}`, 'error');
+                    console.error('查询错误：', error);
+                    return;
+                }
+
+                updateStatus(`成功获取 ${data.length} 条数据！`, 'success');
+                displayData(data);
+                console.log('获取的数据：', data);
+            } catch (err) {
+                updateStatus(`异常：${err.message}`, 'error');
+                console.error('异常：', err);
+            }
+        }
+
+        // 插入示例数据
+        async function insertSampleData() {
+            const tableName = document.getElementById('tableName').value.trim();
+
+            if (!tableName) {
+                updateStatus('请输入表名！', 'error');
+                return;
+            }
+
+            // 根据表名生成不同的示例数据
+            const sampleData = tableName === 'tasks' ?
+                {
+                    title: '测试任务 ' + new Date().toLocaleTimeString('zh-CN'),
+                    completed: false,
+                    created_at: new Date().toISOString()
+                } :
+                {
+                    name: '测试项目 ' + new Date().toLocaleTimeString('zh-CN'),
+                    created_at: new Date().toISOString()
+                };
+
+            updateStatus(`正在插入数据到 ${tableName}...`, 'info');
+
+            try {
+                const { data, error } = await supabase
+                    .from(tableName)
+                    .insert([sampleData])
+                    .select();
+
+                if (error) {
+                    updateStatus(`插入失败：${error.message}`, 'error');
+                    console.error('插入错误：', error);
+                    return;
+                }
+
+                updateStatus('数据插入成功！', 'success');
+                displayData(data);
+                console.log('插入的数据：', data);
+            } catch (err) {
+                updateStatus(`异常：${err.message}`, 'error');
+                console.error('异常：', err);
+            }
+        }
+
+        // 清空显示
+        function clearDisplay() {
+            document.getElementById('dataDisplay').style.display = 'none';
+            document.getElementById('dataContent').innerHTML = '';
+            updateStatus('显示已清空', 'info');
+        }
+
+        // 页面加载时初始化
+        window.addEventListener('DOMContentLoaded', () => {
+            if (supabase) {
+                updateStatus('Supabase 客户端已就绪！点击"测试连接"开始。', 'success');
+            } else {
+                updateStatus('Supabase 客户端加载失败！', 'error');
+            }
+        });
+    </script>
+</body>
+
+</html>

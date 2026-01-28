@@ -1,0 +1,182 @@
+:root {
+    --bg-dark: #1e1e1e;
+    --bg-sidebar: #252526;
+    --bg-active: #1e1e1e;
+    --bg-tab: #2d2d2d;
+    --border: #333333;
+    --text-primary: #cccccc;
+    --text-active: #ffffff;
+    --accent: #007acc;
+    --keyword: #569cd6;
+    --string: #ce9178;
+    --comment: #6a9955;
+    --function: #dcdcaa;
+    --variable: #9cdcfe;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+    height: 100vh;
+    overflow: hidden;
+}
+
+.editor-container {
+    display: flex;
+    height: 100%;
+}
+
+.sidebar {
+    width: 250px;
+    background-color: var(--bg-sidebar);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-header {
+    padding: 0.8rem 1rem;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.file-tree {
+    list-style: none;
+    margin-top: 0.5rem;
+}
+
+.file-item {
+    padding: 0.4rem 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.file-item:hover {
+    background-color: #2a2d2e;
+}
+
+.file-item.active {
+    background-color: #37373d;
+    color: var(--text-active);
+}
+
+.main-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.tab-bar {
+    display: flex;
+    background-color: var(--bg-sidebar);
+    height: 35px;
+}
+
+.tab {
+    padding: 0 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: var(--bg-tab);
+    color: #969696;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border-right: 1px solid var(--border);
+}
+
+.tab.active {
+    background-color: var(--bg-active);
+    color: var(--text-active);
+    border-top: 2px solid var(--accent);
+}
+
+.close-tab:hover {
+    color: white;
+}
+
+.code-area {
+    flex: 1;
+    display: flex;
+    background-color: var(--bg-dark);
+    font-family: 'Fira Code', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    padding-top: 1rem;
+    overflow: auto;
+}
+
+.line-numbers {
+    width: 50px;
+    text-align: right;
+    padding-right: 1rem;
+    color: #858585;
+    user-select: none;
+}
+
+.code-content {
+    color: #d4d4d4;
+    padding-left: 0.5rem;
+}
+
+.keyword {
+    color: var(--keyword);
+}
+
+.string {
+    color: var(--string);
+}
+
+.comment {
+    color: var(--comment);
+}
+
+.function {
+    color: var(--function);
+}
+
+.variable {
+    color: var(--variable);
+}
+
+/* Fallback for variable */
+.variable-name {
+    color: var(--variable);
+}
+
+.method {
+    color: #dcdcaa;
+}
+
+.built-in {
+    color: #4ec9b0;
+}
+
+.status-bar {
+    height: 22px;
+    background-color: #007acc;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1rem;
+    font-size: 0.75rem;
+}
+
+.status-left,
+.status-right {
+    display: flex;
+    gap: 1.5rem;
+}

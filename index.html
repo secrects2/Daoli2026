@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Antigravity 編輯器</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Noto+Sans+TC:wght@400;500;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Supabase JavaScript 客户端 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+    <div class="editor-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h3>檔案總管</h3>
+            </div>
+            <ul class="file-tree">
+                <li class="file-item active">
+                    <span class="icon">📄</span> <span class="filename">主要.js</span>
+                </li>
+                <li class="file-item">
+                    <span class="icon">🎨</span> <span class="filename">樣式.css</span>
+                </li>
+                <li class="file-item">
+                    <span class="icon">📝</span> <span class="filename">說明.md</span>
+                </li>
+            </ul>
+        </aside>
+
+        <main class="main-area">
+            <div class="tab-bar">
+                <div class="tab active">
+                    <span class="tab-name">主要.js</span>
+                    <span class="close-tab">×</span>
+                </div>
+                <div class="tab">
+                    <span class="tab-name">樣式.css</span>
+                    <span class="close-tab">×</span>
+                </div>
+            </div>
+
+            <div class="code-area">
+                <div class="line-numbers">
+                    1<br>2<br>3<br>4<br>5<br>6<br>7<br>8
+                </div>
+                <div class="code-content">
+                    <span class="keyword">function</span> <span class="function">你好世界</span>() {<br>
+                    &nbsp;&nbsp;<span class="comment">// 這是 Antigravity 編輯器</span><br>
+                    &nbsp;&nbsp;<span class="variable">const</span> <span class="variable-name">訊息</span> = <span
+                        class="string">"歡迎使用繁體中文介面"</span>;<br>
+                    &nbsp;&nbsp;<span class="built-in">console</span>.<span class="method">log</span>(<span
+                        class="variable-name">訊息</span>);<br>
+                    &nbsp;&nbsp;<span class="keyword">return</span> <span class="variable-name">true</span>;<br>
+                    }<br>
+                    <br>
+                    <span class="function">你好世界</span>();
+                </div>
+            </div>
+
+            <div class="status-bar">
+                <div class="status-left">
+                    <span>繁體中文 (台灣)</span>
+                    <span>UTF-8</span>
+                </div>
+                <div class="status-right">
+                    <span>行 8, 列 1</span>
+                    <span>JavaScript</span>
+                    <span>Antigravity 核心</span>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Supabase 配置和工具函数 -->
+    <script src="supabase-config.js"></script>
+    <!-- 主应用脚本 -->
+    <script src="script.js"></script>
+</body>
+
+</html>
