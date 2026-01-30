@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase 迁移脚本</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1a1a2e;
+            color: #eee;
+        }
+
+        h1 {
+            color: #00d4ff;
+        }
+
+        .instructions {
+            background: #16213e;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .step {
+            margin: 15px 0;
+            padding: 10px;
+            background: #0f3460;
+            border-radius: 5px;
+        }
+
+        .step-number {
+            background: #00d4ff;
+            color: #000;
+            padding: 2px 10px;
+            border-radius: 3px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 400px;
+            background: #0d1117;
+            color: #c9d1d9;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 16px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 12px;
+            resize: vertical;
+        }
+
+        .copy-btn {
+            background: #238636;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        .copy-btn:hover {
+            background: #2ea043;
+        }
+
+        .link {
+            color: #58a6ff;
+            text-decoration: none;
+        }
+
+        .link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🎯 地壺球平台 - 数据库迁移</h1>
+
+    <div class="instructions">
+        <h2>📋 操作步骤</h2>
+
+        <div class="step">
+            <span class="step-number">1</span>
+            点击下方按钮复制 SQL 脚本
+        </div>
+
+        <div class="step">
+            <span class="step-number">2</span>
+            打开 <a class="link" href="https://app.supabase.com/project/sonpzrmonpvsrpcjvzsb/sql/new"
+                target="_blank">Supabase SQL Editor ↗</a>
+        </div>
+
+        <div class="step">
+            <span class="step-number">3</span>
+            在 SQL Editor 中点击 "New Query"，粘贴脚本，然后点击 "Run"
+        </div>
+
+        <div class="step">
+            <span class="step-number">4</span>
+            创建 Storage 存储桶：进入 <a class="link"
+                href="https://app.supabase.com/project/sonpzrmonpvsrpcjvzsb/storage/buckets" target="_blank">Storage
+                ↗</a>，创建名为 "evidence" 的公共存储桶
+        </div>
+    </div>
+
+    <h2>📝 SQL 迁移脚本</h2>
+    <button class="copy-btn" onclick="copySQL()">📋 复制 SQL 脚本到剪贴板</button>
+
+    <textarea id="sqlScript" readonly>
+-- =====================================================
+-- 地壺球 (Floor Curling) 平台数据库迁移脚本
+-- Supabase PostgreSQL Schema
+-- =====================================================
+
+-- 启用必要的扩展
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- =====================================================
+-- 1. 创建枚举类型
+-- =====================================================
+
+-- 用户角色枚举
+CREATE TYPE user_role AS ENUM ('admin', 'pharmacist', 'family', 'elder');
+
+-- 比赛队伍颜色枚举
+CREATE TYPE team_color AS ENUM ('red', 'yellow');
+
+-- =====================================================
+-- 2. 创建核心表
+-- =====================================================
+
+-- 用户档案表 (扩展 auth.users)
+CREATE TABLE public.profiles (
+    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    role user_role NOT NULL DEFAULT 'elder',
+    store_id TEXT,
+    linked_family_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- 钱包表 (双账户系统)
+CREATE TABLE public.wallets (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL UNIQUE REFERENCES public.profiles(id) ON DELETE CASCADE,
+    global_points BIGINT NOT NULL DEFAULT 0 CHECK (global_points >= 0),
+    local_points BIGINT NOT NULL DEFAULT 0 CHECK (local_points >= 0),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- 装备表 (RPG 风格装备)
+CREATE TABLE public.equipment (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name TEXT NOT NULL UNIQUE,
+    description TEXT,
+    stats JSONB NOT NULL DEFAULT '{}',
+    rarity TEXT,
+    image_url TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- 背包/库存表
+CREATE TABLE public.inventory (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    equipment_id UUID NOT NULL REFERENCES public.equipment(id) ON DELETE CASCADE,
+    quantity INT NOT NULL DEFAULT 1 CHECK (quantity > 0),
+    is_equipped BOOLEAN NOT NULL DEFAULT FALSE,
+    acquired_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT unique_user_equipment UNIQUE (user_id, equipment_id)
+);
+
+-- 比赛表
+CREATE TABLE public.matches (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    store_id TEXT NOT NULL,
+    red_team_elder_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE RESTRICT,
+    yellow_team_elder_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE RESTRICT,
+    winner_color team_color,
+    status TEXT NOT NULL DEFAULT 'in_progress',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    completed_at TIMESTAMPTZ,
+    CONSTRAINT different_elders CHECK (red_team_elder_id != yellow_team_elder_id)
+);
+
+-- 比赛回合表
+CREATE TABLE public.match_ends (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    match_id UUID NOT NULL REFERENCES public.matches(id) ON DELETE CASCADE,
+    end_number INT NOT NULL CHECK (end_number >= 1 AND end_number <= 6),
+    red_score INT NOT NULL DEFAULT 0 CHECK (red_score >= 0),
+    yellow_score INT NOT NULL DEFAULT 0 CHECK (yellow_score >= 0),
+    house_snapshot_url TEXT,
+    vibe_video_url TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT unique_match_end UNIQUE (match_id, end_number)
+);
+
+-- 交易记录表 (用于触发通知)
+CREATE TABLE public.transactions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    transaction_type TEXT NOT NULL,
+    amount BIGINT NOT NULL DEFAULT 0,
+    balance_after BIGINT NOT NULL DEFAULT 0,
+    description TEXT,
+    match_id UUID REFERENCES public.matches(id),
+    metadata JSONB DEFAULT '{}',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- 通知表
+CREATE TABLE public.notifications (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    recipient_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    notification_type TEXT NOT NULL DEFAULT 'LINE',
+    title TEXT NOT NULL,
+    message TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending',
+    sent_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- =====================================================
+-- 3. 启用 RLS
+-- =====================================================
+
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.wallets ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.equipment ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.inventory ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.matches ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.match_ends ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.transactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
+
+-- =====================================================
+-- 4. 创建基本 RLS 策略 (允许服务访问)
+-- =====================================================
+
+-- 允许所有认证用户查看数据 (简化版本，生产环境应更严格)
+CREATE POLICY "Enable read access for authenticated users" ON public.profiles FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Enable read access for authenticated users" ON public.wallets FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Enable read access for all" ON public.equipment FOR SELECT USING (true);
+CREATE POLICY "Enable read access for authenticated users" ON public.inventory FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Enable read access for authenticated users" ON public.matches FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Enable read access for authenticated users" ON public.match_ends FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Enable read access for authenticated users" ON public.transactions FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Enable read access for authenticated users" ON public.notifications FOR SELECT TO authenticated USING (true);
+
+-- 允许插入
+CREATE POLICY "Enable insert for authenticated users" ON public.profiles FOR INSERT TO authenticated WITH CHECK (true);
+CREATE POLICY "Enable insert for authenticated users" ON public.wallets FOR INSERT TO authenticated WITH CHECK (true);
+CREATE POLICY "Enable insert for authenticated users" ON public.matches FOR INSERT TO authenticated WITH CHECK (true);
+CREATE POLICY "Enable insert for authenticated users" ON public.match_ends FOR INSERT TO authenticated WITH CHECK (true);
+CREATE POLICY "Enable insert for authenticated users" ON public.transactions FOR INSERT TO authenticated WITH CHECK (true);
+CREATE POLICY "Enable insert for authenticated users" ON public.notifications FOR INSERT TO authenticated WITH CHECK (true);
+
+-- 允许更新
+CREATE POLICY "Enable update for authenticated users" ON public.profiles FOR UPDATE TO authenticated USING (true);
+CREATE POLICY "Enable update for authenticated users" ON public.wallets FOR UPDATE TO authenticated USING (true);
+CREATE POLICY "Enable update for authenticated users" ON public.matches FOR UPDATE TO authenticated USING (true);
+CREATE POLICY "Enable update for authenticated users" ON public.notifications FOR UPDATE TO authenticated USING (true);
+
+-- =====================================================
+-- 5. 插入示例装备
+-- =====================================================
+
+INSERT INTO public.equipment (name, description, stats, rarity) VALUES
+    ('Speed Base', '提升滑行速度的基座', '{"speed": 15, "control": 5}', 'common'),
+    ('Blocker Base', '增强防守能力的基座', '{"defense": 20, "stability": 10}', 'rare'),
+    ('Precision Pusher', '提升精准度的推杆', '{"accuracy": 25, "control": 15}', 'epic'),
+    ('Power Grip', '增加推力的握把', '{"power": 30, "speed": 10}', 'legendary');
+
+-- =====================================================
+-- 迁移完成！
+-- =====================================================
+    </textarea>
+
+    <script>
+        function copySQL() {
+            const textarea = document.getElementById('sqlScript');
+            textarea.select();
+            document.execCommand('copy');
+            alert('✅ SQL 脚本已复制到剪贴板！\n\n请前往 Supabase SQL Editor 粘贴并执行。');
+        }
+    </script>
+</body>
+
+</html>
