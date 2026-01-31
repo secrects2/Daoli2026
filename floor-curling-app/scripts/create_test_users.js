@@ -16,7 +16,8 @@ const supabase = createClient(supabaseUrl, serviceRoleKey, {
 const users = [
     { email: 'admin@daoli.com', password: 'daoli_admin_2026', role: 'admin', name: 'System Admin' },
     { email: 'pharmacist@daoli.com', password: 'password123', role: 'pharmacist', name: 'Demo Pharmacist' },
-    { email: 'family@daoli.com', password: 'password123', role: 'family', name: 'Demo Family' }
+    { email: 'family@daoli.com', password: 'password123', role: 'family', name: 'Demo Family' },
+    { email: 'elder@daoli.com', password: 'password123', role: 'elder', name: 'Demo Elder' }
 ];
 
 async function seedUsers() {

@@ -42,11 +42,12 @@ export default function LoginForm() {
         window.location.href = '/api/auth/line/login'
     }
 
-    const handleQuickLogin = async (role: 'admin' | 'pharmacist' | 'family') => {
+    const handleQuickLogin = async (role: 'admin' | 'pharmacist' | 'family' | 'elder') => {
         const creds = {
             admin: { email: 'admin@daoli.com', password: 'daoli_admin_2026' },
             pharmacist: { email: 'pharmacist@daoli.com', password: 'password123' },
-            family: { email: 'family@daoli.com', password: 'password123' }
+            family: { email: 'family@daoli.com', password: 'password123' },
+            elder: { email: 'elder@daoli.com', password: 'password123' }
         }
 
         setEmail(creds[role].email)
@@ -194,6 +195,13 @@ export default function LoginForm() {
                         className="px-2 py-2 bg-green-50 text-green-700 rounded-lg text-xs font-medium hover:bg-green-100"
                     >
                         🏠 家屬
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => handleQuickLogin('elder')}
+                        className="px-2 py-2 bg-orange-50 text-orange-700 rounded-lg text-xs font-medium hover:bg-orange-100"
+                    >
+                        🧓 長輩
                     </button>
                 </div>
             </div>
