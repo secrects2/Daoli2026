@@ -38,59 +38,84 @@ export async function GET(request: Request) {
         )
 
         // 4. Find or Create User
-        // Check if user exists by querying profiles table directly via admin (or checking auth users)
-        // We use the dummy email strategy from the prompt
+        // Strategy: Profile -> Auth (Paginated) -> Create
         const dummyEmail = `line_${lineUserId}@daoli.local`
+        let userId: string
 
-        // Check if user already exists in Auth
-        const { data: { users } } = await supabaseAdmin.auth.admin.listUsers()
-        // Simple search (in production maybe use more efficient lookup)
-        let user = users.find(u => u.email === dummyEmail)
+        // A. Try finding via Profile (Most reliable for existing users)
+        const { data: existingProfile } = await supabaseAdmin
+            .from('profiles')
+            .select('id')
+            .eq('line_user_id', lineUserId)
+            .single()
 
-        if (!user) {
-            console.log('📝 Creating new LINE user:', dummyEmail)
-            const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
-                email: dummyEmail,
-                email_confirm: true,
-                user_metadata: {
-                    line_user_id: lineUserId,
-                    full_name: displayName,
-                    avatar_url: pictureUrl,
-                    iss: 'https://access.line.me'
-                }
-            })
-            if (createError) throw createError
-            user = newUser.user!
+        if (existingProfile) {
+            userId = existingProfile.id
+            console.log('✅ Found existing LINE user via Profile:', userId)
 
-            // Create Profile entry manually if trigger doesn't exist
-            // (Assuming triggers might fail or we want to be sure)
-            await supabaseAdmin.from('profiles').upsert({
-                id: user.id,
-                role: 'family',
-                store_id: null,
-                line_user_id: lineUserId, // Store real LINE ID in profile
+            // Update latest info
+            await supabaseAdmin.from('profiles').update({
                 full_name: displayName,
                 avatar_url: pictureUrl
-            })
-
-            // Init wallet
-            await supabaseAdmin.from('wallets').insert({
-                user_id: user.id,
-                global_points: 0,
-                local_points: 0
-            })
+            }).eq('id', userId)
         } else {
-            // Update profile with latest LINE info
-            await supabaseAdmin.from('profiles').update({
+            // B. Profile missing? Check Auth System (Handle Pagination)
+            // Previous error "User already registered" meant listUsers failed to find it (default limit 50)
+            const { data: { users } } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 })
+            const existingAuthUser = users.find(u => u.email === dummyEmail)
+
+            if (existingAuthUser) {
+                userId = existingAuthUser.id
+                console.log('⚠️ Found Auth User but missing Profile, verifying profile...', userId)
+            } else {
+                console.log('📝 Creating NEW LINE user:', dummyEmail)
+                const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+                    email: dummyEmail,
+                    email_confirm: true,
+                    user_metadata: {
+                        line_user_id: lineUserId,
+                        full_name: displayName,
+                        avatar_url: pictureUrl,
+                        iss: 'https://access.line.me'
+                    }
+                })
+
+                if (createError) {
+                    // Double safety catch
+                    if (createError.message.includes('already registered')) {
+                        console.log('⚠️ Race condition collision, retrying fetch...')
+                        const { data: { users: retryUsers } } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 })
+                        const racedUser = retryUsers.find(u => u.email === dummyEmail)
+                        if (!racedUser) throw createError
+                        userId = racedUser.id
+                    } else {
+                        throw createError
+                    }
+                } else {
+                    userId = newUser.user!.id
+                    // Init Wallet for BRAND NEW users only
+                    await supabaseAdmin.from('wallets').insert({
+                        user_id: userId,
+                        global_points: 0,
+                        local_points: 0
+                    })
+                }
+            }
+
+            // Ensure Profile Exists (Upsert handles both New and "Auth-only" cases)
+            await supabaseAdmin.from('profiles').upsert({
+                id: userId,
+                role: 'family',
+                store_id: null,
                 line_user_id: lineUserId,
                 full_name: displayName,
                 avatar_url: pictureUrl
-            }).eq('id', user.id)
+            })
         }
 
         // 5. Create Session
         const { data: sessionData, error: sessionError } = await (supabaseAdmin.auth.admin as any).createSession({
-            user_id: user.id
+            user_id: userId
         })
 
         if (sessionError) throw sessionError
