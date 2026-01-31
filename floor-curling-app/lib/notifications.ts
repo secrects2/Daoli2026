@@ -44,22 +44,35 @@ export async function createNotification(data: NotificationData) {
 }
 
 
-async function sendExternalPush(data: NotificationData) {
-    // 這裡模擬調用 LINE API 或其他推送服務
-    console.log(`[Mock Push] Sending to ${data.userId}: ${data.title} - ${data.message}`)
 
-    // 檢查用戶是否有關聯的 LINE ID (假設存儲在 profiles 或 linked_accounts 表)
-    /*
-    const { data: profile } = await supabaseAdmin
-        .from('profiles')
-        .select('line_user_id')
-        .eq('id', data.userId)
-        .single()
-        
-    if (profile?.line_user_id) {
-        // Call LINE API
+async function sendExternalPush(data: NotificationData) {
+    try {
+        // 1. Get user's LINE ID from profile
+        const { data: profile } = await supabaseAdmin
+            .from('profiles')
+            .select('line_user_id')
+            .eq('id', data.userId)
+            .single()
+
+        // 2. If LINE ID exists, send push message
+        if (profile?.line_user_id) {
+
+            // Construct message based on type
+            let lineMessage = {
+                type: 'text',
+                text: `${data.title}\n\n${data.message}`
+            }
+
+            // Customize message for rich content if needed (e.g. flex message) in future
+
+            // Dynamic import to avoid circular dependencies if any
+            const { pushMessage } = await import('./line')
+            await pushMessage(profile.line_user_id, [lineMessage])
+        }
+    } catch (error) {
+        console.error('External Push Failed:', error)
     }
-    */
 
     return true
 }
+
