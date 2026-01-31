@@ -12,6 +12,7 @@ export default function ElderDashboard() {
     const [familyMembers, setFamilyMembers] = useState<any[]>([])
     const [cheers, setCheers] = useState<any[]>([])
     const [stats, setStats] = useState<any>(null)
+    const [inventory, setInventory] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
@@ -23,6 +24,8 @@ export default function ElderDashboard() {
             }
             setUser(user)
             setLoading(false)
+            // Fetch linked family members
+            const { data: family } = await supabase.from('profiles').select('*').eq('linked_elder_id', user.id)
             if (family) setFamilyMembers(family)
 
             // Fetch recent cheers
@@ -32,6 +35,16 @@ export default function ElderDashboard() {
             // Fetch weekly stats
             const statsData = await fetch(`/api/elder/stats?id=${user.id}`).then(res => res.json())
             setStats(statsData)
+
+            // Fetch inventory
+            // Need a new API or just join via Supabase client directly
+            const { data: inventoryData } = await supabase
+                .from('inventory')
+                .select('*, products(*)')
+                .eq('user_id', user.id)
+                .eq('status', 'active')
+
+            if (inventoryData) setInventory(inventoryData)
 
             setLoading(false)
         }
@@ -111,6 +124,32 @@ export default function ElderDashboard() {
                 </div>
             </div>
 
+
+            {/* My Equipment */}
+            {
+                inventory.length > 0 && (
+                    <div className="bg-white rounded-2xl p-4 shadow-sm">
+                        <h3 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
+                            <span>🎒</span> 我的裝備
+                        </h3>
+                        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                            {inventory.map((item: any) => (
+                                <div key={item.id} className="flex-shrink-0 w-24 flex flex-col items-center gap-2 p-3 bg-gray-50 rounded-xl border border-gray-100">
+                                    <div className="w-12 h-12 flex items-center justify-center">
+                                        {item.products?.image_url ? (
+                                            <img src={item.products.image_url} className="w-full h-full object-contain" />
+                                        ) : (
+                                            <span className="text-2xl">🛡️</span>
+                                        )}
+                                    </div>
+                                    <span className="text-xs font-medium text-center line-clamp-1">{item.products?.name}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )
+            }
+
             {/* Safety Check-in Action */}
             <button
                 onClick={handleCheckIn}
@@ -126,28 +165,30 @@ export default function ElderDashboard() {
             </button>
 
             {/* Latest Cheers */}
-            {cheers.length > 0 && (
-                <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl p-4 shadow-sm border border-orange-100">
-                    <h3 className="font-semibold text-orange-800 mb-3 flex items-center gap-2">
-                        <span>💌</span> 來自家人的鼓勵
-                    </h3>
-                    <div className="space-y-3">
-                        {cheers.slice(0, 3).map((cheer: any) => (
-                            <div key={cheer.id} className="bg-white p-3 rounded-lg shadow-sm flex items-center gap-3 animate-in fade-in slide-in-from-bottom-2">
-                                <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center text-xl">
-                                    {cheer.content.split(' ')[0]}
+            {
+                cheers.length > 0 && (
+                    <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl p-4 shadow-sm border border-orange-100">
+                        <h3 className="font-semibold text-orange-800 mb-3 flex items-center gap-2">
+                            <span>💌</span> 來自家人的鼓勵
+                        </h3>
+                        <div className="space-y-3">
+                            {cheers.slice(0, 3).map((cheer: any) => (
+                                <div key={cheer.id} className="bg-white p-3 rounded-lg shadow-sm flex items-center gap-3 animate-in fade-in slide-in-from-bottom-2">
+                                    <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center text-xl">
+                                        {cheer.content.split(' ')[0]}
+                                    </div>
+                                    <div>
+                                        <p className="font-bold text-gray-900">{cheer.content.split(' ')[1] || cheer.content}</p>
+                                        <p className="text-xs text-gray-500">
+                                            {cheer.sender?.full_name || '家人'} • {new Date(cheer.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        </p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p className="font-bold text-gray-900">{cheer.content.split(' ')[1] || cheer.content}</p>
-                                    <p className="text-xs text-gray-500">
-                                        {cheer.sender?.full_name || '家人'} • {new Date(cheer.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                    </p>
-                                </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
             {/* Linked Family Members */}
             <div className="bg-white rounded-xl overflow-hidden shadow-sm">
@@ -194,7 +235,7 @@ export default function ElderDashboard() {
                     </div>
                 </div>
             </div>
-        </div>
         </div >
+
     )
 }

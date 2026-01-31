@@ -1,0 +1,153 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+
+export default function AdminDashboard() {
+    const router = useRouter()
+    const [stats, setStats] = useState<any>(null)
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const res = await fetch('/api/admin/stats/global')
+                const data = await res.json()
+                if (data.success) {
+                    setStats(data.stats)
+                }
+            } catch (error) {
+                console.error('Failed to load stats', error)
+            } finally {
+                setLoading(false)
+            }
+        }
+        fetchStats()
+    }, [])
+
+    if (loading) return <div className="min-h-screen flex items-center justify-center">載入中...</div>
+
+    return (
+        <div className="min-h-screen bg-gray-50 pb-20">
+            {/* Header */}
+            <div className="bg-white border-b border-gray-200">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex justify-between h-16 items-center">
+                        <div className="flex items-center gap-3">
+                            <span className="text-2xl">🛡️</span>
+                            <h1 className="text-xl font-bold text-gray-900">道里國際總部</h1>
+                        </div>
+                        <div className="flex items-center space-x-4">
+                            <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Admin Mode</span>
+                            <button
+                                onClick={() => router.push('/')}
+                                className="text-sm text-gray-500 hover:text-gray-900"
+                            >
+                                回首頁
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+                {/* Global Pulse Cards */}
+                <section>
+                    <h2 className="text-lg font-bold text-gray-900 mb-4 px-1">全域戰情 (Global Pulse)</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                            <p className="text-sm text-gray-500 font-medium">總比賽場次</p>
+                            <h3 className="text-3xl font-bold text-blue-600 mt-2">{stats?.total_matches || 0}</h3>
+                            <p className="text-xs text-green-600 mt-2 flex items-center">
+                                <span className="mr-1">▲</span> 歷史累計
+                            </p>
+                        </div>
+
+                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                            <p className="text-sm text-gray-500 font-medium">今日比賽</p>
+                            <h3 className="text-3xl font-bold text-indigo-600 mt-2">{stats?.today_matches || 0}</h3>
+                            <p className="text-xs text-gray-400 mt-2">
+                                {(stats?.today_matches || 0) > 0 ? '今日戰況激烈' : '尚無賽事'}
+                            </p>
+                        </div>
+
+                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                            <p className="text-sm text-gray-500 font-medium">本週活躍長輩</p>
+                            <h3 className="text-3xl font-bold text-purple-600 mt-2">{stats?.active_elders_weekly || 0}</h3>
+                            <p className="text-xs text-gray-400 mt-2">
+                                7日內參與過比賽
+                            </p>
+                        </div>
+
+                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                            <p className="text-sm text-gray-500 font-medium">全域總積分</p>
+                            <h3 className="text-3xl font-bold text-amber-500 mt-2">
+                                {stats?.total_points_distributed ? (stats.total_points_distributed / 1000).toFixed(1) + 'k' : '0'}
+                            </h3>
+                            <p className="text-xs text-gray-400 mt-2">
+                                已發放榮譽積分
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {/* Management Tools */}
+                    <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                        <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                            <span>🔧</span> 管理工具
+                        </h3>
+                        <div className="grid grid-cols-2 gap-4">
+                            <Link href="/admin/stores" className="block p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors group">
+                                <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center mb-3 group-hover:bg-blue-200 transition-colors">
+                                    🏢
+                                </div>
+                                <h4 className="font-bold text-gray-900">加盟店管理</h4>
+                                <p className="text-xs text-gray-500 mt-1">審核、暫停、終止店家權限</p>
+                            </Link>
+
+                            <div className="p-4 bg-gray-50 rounded-xl opacity-50 cursor-not-allowed">
+                                <div className="w-10 h-10 bg-gray-200 text-gray-500 rounded-lg flex items-center justify-center mb-3">
+                                    🤖
+                                </div>
+                                <h4 className="font-bold text-gray-900">AI 訓練場</h4>
+                                <p className="text-xs text-gray-500 mt-1">標記照片 (Coming Soon)</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Top Stores */}
+                    <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                        <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                            <span>🏆</span> 熱門據點排行
+                        </h3>
+                        <div className="space-y-4">
+                            {stats?.top_stores && stats.top_stores.length > 0 ? (
+                                stats.top_stores.map((store: any, index: number) => (
+                                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                                        <div className="flex items-center gap-3">
+                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm
+                                                ${index === 0 ? 'bg-yellow-100 text-yellow-700' :
+                                                    index === 1 ? 'bg-gray-200 text-gray-700' :
+                                                        index === 2 ? 'bg-orange-100 text-orange-800' : 'bg-white text-gray-500 border border-gray-100'}
+                                            `}>
+                                                {index + 1}
+                                            </div>
+                                            <span className="font-medium text-gray-900">{store.name}</span>
+                                        </div>
+                                        <span className="font-mono text-sm font-bold text-blue-600">{store.match_count} 場</span>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="text-center py-8 text-gray-400 text-sm">
+                                    尚無數據
+                                </div>
+                            )}
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </div>
+    )
+}

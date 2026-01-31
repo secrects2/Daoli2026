@@ -42,6 +42,30 @@ export default function LoginForm() {
         window.location.href = '/api/auth/line/login'
     }
 
+    const handleQuickLogin = async (role: 'admin' | 'pharmacist' | 'family') => {
+        const creds = {
+            admin: { email: 'admin@daoli.com', password: 'daoli_admin_2026' },
+            pharmacist: { email: 'pharmacist@daoli.com', password: 'password123' },
+            family: { email: 'family@daoli.com', password: 'password123' }
+        }
+
+        setEmail(creds[role].email)
+        setPassword(creds[role].password)
+
+        // Trigger login immediately
+        setLoading(true)
+        setError(null)
+        try {
+            const { error: signInError } = await supabase.auth.signInWithPassword(creds[role])
+            if (signInError) throw signInError
+            router.refresh()
+            router.push('/')
+        } catch (err: any) {
+            setError(err.message)
+            setLoading(false)
+        }
+    }
+
     return (
         <div className="space-y-6">
             {error && (
@@ -145,6 +169,34 @@ export default function LoginForm() {
                     </div>
                 </form>
             )}
+
+            {/* Quick Login for Dev/Test */}
+            <div className="pt-6 border-t border-gray-100">
+                <p className="text-center text-xs text-gray-400 mb-3">🧪 測試專用快速登入 (Dev Mode)</p>
+                <div className="grid grid-cols-3 gap-2">
+                    <button
+                        type="button"
+                        onClick={() => handleQuickLogin('admin')}
+                        className="px-2 py-2 bg-purple-50 text-purple-700 rounded-lg text-xs font-medium hover:bg-purple-100"
+                    >
+                        👑 Admin
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => handleQuickLogin('pharmacist')}
+                        className="px-2 py-2 bg-blue-50 text-blue-700 rounded-lg text-xs font-medium hover:bg-blue-100"
+                    >
+                        💊 藥師
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => handleQuickLogin('family')}
+                        className="px-2 py-2 bg-green-50 text-green-700 rounded-lg text-xs font-medium hover:bg-green-100"
+                    >
+                        🏠 家屬
+                    </button>
+                </div>
+            </div>
         </div>
     )
 }
