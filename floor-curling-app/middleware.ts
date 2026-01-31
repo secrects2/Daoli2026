@@ -71,6 +71,14 @@ export async function middleware(request: NextRequest) {
         }
     }
 
+    // 保護 /admin 路由
+    if (request.nextUrl.pathname.startsWith('/admin')) {
+        if (userRole !== 'admin') {
+            console.log('⛔ 無權訪問管理員頁面，角色:', userRole)
+            return NextResponse.redirect(new URL('/login', request.url))
+        }
+    }
+
     // 保護 /family 路由
     if (request.nextUrl.pathname.startsWith('/family')) {
         if (userRole !== 'family') {
@@ -87,5 +95,6 @@ export const config = {
     matcher: [
         '/pharmacist/:path*',
         '/family/:path*',
+        '/admin/:path*',
     ],
 }
