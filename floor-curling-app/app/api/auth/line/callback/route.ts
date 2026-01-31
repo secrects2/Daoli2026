@@ -133,8 +133,8 @@ export async function GET(request: Request) {
         console.log('✅ Magic Link Generated. Redirecting user...')
 
         // 6. Redirect User to Magic Link (Supabase will set cookies and redirect back)
-        if (!linkData.action_link) throw new Error('No action link returned')
-        return NextResponse.redirect(linkData.action_link)
+        if (!linkData.properties?.action_link) throw new Error('No action link returned')
+        return NextResponse.redirect(linkData.properties.action_link)
 
     } catch (error: any) {
         console.error('LINE Login Error:', error)
