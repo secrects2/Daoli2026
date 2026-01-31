@@ -11,6 +11,7 @@ export default function ElderDashboard() {
     const [user, setUser] = useState<any>(null)
     const [familyMembers, setFamilyMembers] = useState<any[]>([])
     const [cheers, setCheers] = useState<any[]>([])
+    const [stats, setStats] = useState<any>(null)
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
@@ -22,62 +23,91 @@ export default function ElderDashboard() {
             }
             setUser(user)
             setLoading(false)
+            if (family) setFamilyMembers(family)
+
+            // Fetch recent cheers
+            const { data: interactionData } = await fetch(`/api/interactions?userId=${user.id}`).then(res => res.json())
+            if (interactionData?.interactions) setCheers(interactionData.interactions)
+
+            // Fetch weekly stats
+            const statsData = await fetch(`/api/elder/stats?id=${user.id}`).then(res => res.json())
+            setStats(statsData)
+
+            setLoading(false)
         }
-        fetchUser()
-    }
         fetchUser()
     }, [router, supabase])
 
-const handleCheckIn = async () => {
-    if (!confirm('發送「我已安全抵達」給家屬嗎？')) return
+    const handleCheckIn = async () => {
+        if (!confirm('發送「我已安全抵達」給家屬嗎？')) return
 
-    try {
-        const res = await fetch('/api/interactions', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                type: 'checkin',
-                content: '📍 我已安全抵達'
+        try {
+            const res = await fetch('/api/interactions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'checkin',
+                    content: '📍 我已安全抵達'
+                })
             })
-        })
 
-        const data = await res.json()
-        if (!res.ok) throw new Error(data.error || '發送失敗')
+            const data = await res.json()
+            if (!res.ok) throw new Error(data.error || '發送失敗')
 
-        alert(`已通知 ${data.notified?.length || 0} 位家屬！`)
-    } catch (error: any) {
-        console.error(error)
-        alert('報平安失敗，請稍後再試')
+            alert(`已通知 ${data.notified?.length || 0} 位家屬！`)
+        } catch (error: any) {
+            console.error(error)
+            alert('報平安失敗，請稍後再試')
+        }
     }
-}
 
-if (loading) return <div className="min-h-screen flex items-center justify-center">載入中...</div>
+    if (loading) return <div className="min-h-screen flex items-center justify-center">載入中...</div>
 
-return (
-    <div className="min-h-screen bg-gray-50 pb-20">
-        {/* Header */}
-        <div className="sticky top-0 z-10 bg-[#F2F2F7]/90 backdrop-blur-md pt-5 pb-2 px-4 border-b border-black/5">
-            <div className="flex justify-between items-end">
-                <h1 className="ios-large-title">我的條碼</h1>
-                <div className="w-8 h-8 rounded-full bg-gray-200 overflow-hidden">
-                    {user?.user_metadata?.avatar_url && <img src={user.user_metadata.avatar_url} className="w-full h-full object-cover" />}
+    return (
+        <div className="min-h-screen bg-gray-50 pb-20">
+            {/* Header */}
+            <div className="sticky top-0 z-10 bg-[#F2F2F7]/90 backdrop-blur-md pt-5 pb-2 px-4 border-b border-black/5">
+                <div className="flex justify-between items-end">
+                    <h1 className="ios-large-title">我的條碼</h1>
+                    <div className="w-8 h-8 rounded-full bg-gray-200 overflow-hidden">
+                        {user?.user_metadata?.avatar_url && <img src={user.user_metadata.avatar_url} className="w-full h-full object-cover" />}
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div className="p-4 space-y-6">
-            <div className="bg-white rounded-2xl p-8 shadow-sm text-center space-y-6">
-                <div className="flex justify-center">
-                    <QRCodeGenerator
-                        value={generateElderQRContent(user.id)}
-                        size={250}
-                        className="rounded-xl border-4 border-gray-100"
-                    />
+            <div className="p-4 space-y-6">
+                <div className="bg-white rounded-2xl p-8 shadow-sm text-center space-y-6">
+                    <div className="flex justify-center">
+                        <QRCodeGenerator
+                            value={generateElderQRContent(user.id)}
+                            size={250}
+                            className="rounded-xl border-4 border-gray-100"
+                        />
+                    </div>
+
+                    <div>
+                        <h2 className="text-xl font-bold">{user.user_metadata?.full_name || '長輩'}</h2>
+                        <p className="text-gray-500 text-sm mt-1">請家屬掃描此條碼進行綁定</p>
+                    </div>
                 </div>
+            </div>
 
-                <div>
-                    <h2 className="text-xl font-bold">{user.user_metadata?.full_name || '長輩'}</h2>
-                    <p className="text-gray-500 text-sm mt-1">請家屬掃描此條碼進行綁定</p>
+            {/* Weekly Activity Stat Card */}
+            <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl p-6 shadow-lg text-white relative overflow-hidden">
+                <div className="relative z-10 flex justify-between items-center">
+                    <div>
+                        <p className="text-blue-100 text-sm font-medium mb-1">本週健康存摺</p>
+                        <h3 className="text-3xl font-bold flex items-baseline gap-2">
+                            {stats?.weeklyMatches || 0}
+                            <span className="text-lg font-normal opacity-80">場比賽</span>
+                        </h3>
+                        <p className="text-blue-100 text-xs mt-2">
+                            累積榮譽積分: {stats?.totalPoints || 0}
+                        </p>
+                    </div>
+                    <div className="bg-white/20 p-3 rounded-full backdrop-blur-sm">
+                        <span className="text-3xl">🏃‍♂️</span>
+                    </div>
                 </div>
             </div>
 
@@ -165,6 +195,6 @@ return (
                 </div>
             </div>
         </div>
-    </div>
-)
+        </div >
+    )
 }

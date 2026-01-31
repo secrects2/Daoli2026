@@ -48,6 +48,7 @@ export default function FamilyDashboard() {
     const [user, setUser] = useState<any>(null)
     const [elder, setElder] = useState<Elder | null>(null)
     const [wallet, setWallet] = useState<Wallet | null>(null)
+    const [stats, setStats] = useState<any>(null)
     const [recentMatches, setRecentMatches] = useState<Match[]>([])
     const [loading, setLoading] = useState(true)
     const [isLineLinked, setIsLineLinked] = useState(false)
@@ -97,6 +98,11 @@ export default function FamilyDashboard() {
                     .limit(5)
 
                 if (matchesData) setRecentMatches(matchesData)
+                if (matchesData) setRecentMatches(matchesData)
+
+                // Fetch weekly stats
+                const statsData = await fetch(`/api/elder/stats?id=${elderData.id}`).then(res => res.json())
+                setStats(statsData)
             }
         } catch (err) {
             console.error(err)
@@ -248,83 +254,103 @@ export default function FamilyDashboard() {
                     >
                         解除綁定
                     </button>
-                </div>
+                </button>
+            </div>
 
-                {/* Points Cards */}
-                <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-white rounded-xl p-4 shadow-sm">
-                        <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">榮譽積分</p>
-                        <p className="text-3xl font-bold text-primary">{wallet?.global_points || 0}</p>
+            {/* Weekly Activity Stat Card */}
+            <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl p-6 shadow-lg text-white relative overflow-hidden">
+                <div className="relative z-10 flex justify-between items-center">
+                    <div>
+                        <p className="text-indigo-100 text-sm font-medium mb-1">長輩本週活動量</p>
+                        <h3 className="text-3xl font-bold flex items-baseline gap-2">
+                            {stats?.weeklyMatches || 0}
+                            <span className="text-lg font-normal opacity-80">場比賽</span>
+                        </h3>
+                        <p className="text-indigo-100 text-xs mt-2">
+                            本週表現優異，請給予鼓勵！
+                        </p>
                     </div>
-                    <div className="bg-white rounded-xl p-4 shadow-sm">
-                        <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">兌換積分</p>
-                        <p className="text-3xl font-bold text-orange-500">{wallet?.local_points || 0}</p>
-                    </div>
-                </div>
-
-                {/* Actions */}
-                <div className="bg-white rounded-xl overflow-hidden shadow-sm divide-y divide-gray-100">
-                    <Link href="/family/matches" className="flex items-center justify-between p-4 active:bg-gray-50 transition-colors">
-                        <div className="flex items-center gap-3">
-                            <span className="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">🏃</span>
-                            <span className="font-medium">比賽記錄</span>
-                        </div>
-                        <svg className="w-4 h-4 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                    </Link>
-                    <Link href="/family/notifications" className="flex items-center justify-between p-4 active:bg-gray-50 transition-colors">
-                        <div className="flex items-center gap-3">
-                            <span className="w-8 h-8 rounded-lg bg-red-100 text-red-600 flex items-center justify-center">🔔</span>
-                            <span className="font-medium">通知中心</span>
-                        </div>
-                        <svg className="w-4 h-4 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                    </Link>
-
-                    {!isLineLinked && (
-                        <button onClick={handleLineBind} className="w-full flex items-center justify-between p-4 active:bg-gray-50 transition-colors text-left">
-                            <div className="flex items-center gap-3">
-                                <span className="w-8 h-8 rounded-lg bg-[#06C755] text-white flex items-center justify-center">💬</span>
-                                <div>
-                                    <span className="font-medium">綁定 LINE 通知</span>
-                                    <p className="text-xs text-muted-foreground">開啟即時比賽推播</p>
-                                </div>
-                            </div>
-                            <span className="text-xs font-bold text-blue-600">立即設定</span>
-                        </button>
-                    )}
-                </div>
-
-                {/* Recent Matches */}
-                <div>
-                    <h3 className="ios-section-header">最近比賽</h3>
-                    <div className="bg-white rounded-xl overflow-hidden shadow-sm">
-                        {recentMatches.length === 0 ? (
-                            <div className="p-8 text-center text-muted-foreground text-sm">暫無記錄</div>
-                        ) : (
-                            <div className="divide-y divide-gray-100">
-                                {recentMatches.map(match => {
-                                    const result = getMatchResult(match)
-                                    return (
-                                        <div key={match.id} className="p-4 flex items-center justify-between">
-                                            <div className="flex items-center gap-3">
-                                                <span className="text-xl">{result.icon}</span>
-                                                <div>
-                                                    <p className={`font-semibold text-sm ${result.color}`}>{result.text}</p>
-                                                    <p className="text-xs text-muted-foreground">
-                                                        {new Date(match.created_at).toLocaleDateString()}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <span className="text-xs text-gray-400 font-mono tracking-tighter">
-                                                {match.id.slice(0, 8)}
-                                            </span>
-                                        </div>
-                                    )
-                                })}
-                            </div>
-                        )}
+                    <div className="bg-white/20 p-3 rounded-full backdrop-blur-sm">
+                        <span className="text-3xl">📊</span>
                     </div>
                 </div>
             </div>
+
+            {/* Points Cards */}
+            <div className="grid grid-cols-2 gap-3">
+                <div className="bg-white rounded-xl p-4 shadow-sm">
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">榮譽積分</p>
+                    <p className="text-3xl font-bold text-primary">{wallet?.global_points || 0}</p>
+                </div>
+                <div className="bg-white rounded-xl p-4 shadow-sm">
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">兌換積分</p>
+                    <p className="text-3xl font-bold text-orange-500">{wallet?.local_points || 0}</p>
+                </div>
+            </div>
+
+            {/* Actions */}
+            <div className="bg-white rounded-xl overflow-hidden shadow-sm divide-y divide-gray-100">
+                <Link href="/family/matches" className="flex items-center justify-between p-4 active:bg-gray-50 transition-colors">
+                    <div className="flex items-center gap-3">
+                        <span className="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">🏃</span>
+                        <span className="font-medium">比賽記錄</span>
+                    </div>
+                    <svg className="w-4 h-4 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </Link>
+                <Link href="/family/notifications" className="flex items-center justify-between p-4 active:bg-gray-50 transition-colors">
+                    <div className="flex items-center gap-3">
+                        <span className="w-8 h-8 rounded-lg bg-red-100 text-red-600 flex items-center justify-center">🔔</span>
+                        <span className="font-medium">通知中心</span>
+                    </div>
+                    <svg className="w-4 h-4 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </Link>
+
+                {!isLineLinked && (
+                    <button onClick={handleLineBind} className="w-full flex items-center justify-between p-4 active:bg-gray-50 transition-colors text-left">
+                        <div className="flex items-center gap-3">
+                            <span className="w-8 h-8 rounded-lg bg-[#06C755] text-white flex items-center justify-center">💬</span>
+                            <div>
+                                <span className="font-medium">綁定 LINE 通知</span>
+                                <p className="text-xs text-muted-foreground">開啟即時比賽推播</p>
+                            </div>
+                        </div>
+                        <span className="text-xs font-bold text-blue-600">立即設定</span>
+                    </button>
+                )}
+            </div>
+
+            {/* Recent Matches */}
+            <div>
+                <h3 className="ios-section-header">最近比賽</h3>
+                <div className="bg-white rounded-xl overflow-hidden shadow-sm">
+                    {recentMatches.length === 0 ? (
+                        <div className="p-8 text-center text-muted-foreground text-sm">暫無記錄</div>
+                    ) : (
+                        <div className="divide-y divide-gray-100">
+                            {recentMatches.map(match => {
+                                const result = getMatchResult(match)
+                                return (
+                                    <div key={match.id} className="p-4 flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-xl">{result.icon}</span>
+                                            <div>
+                                                <p className={`font-semibold text-sm ${result.color}`}>{result.text}</p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    {new Date(match.created_at).toLocaleDateString()}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <span className="text-xs text-gray-400 font-mono tracking-tighter">
+                                            {match.id.slice(0, 8)}
+                                        </span>
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    )}
+                </div>
+            </div>
         </div>
+        </div >
     )
 }
