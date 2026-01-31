@@ -144,6 +144,29 @@ export default function FamilyDashboard() {
             }
         }
 
+        const handleCheer = async (type: string, content: string) => {
+            if (!elder) return
+
+            try {
+                const res = await fetch('/api/interactions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        receiver_id: elder.id,
+                        type: 'cheer',
+                        content
+                    })
+                })
+
+                if (!res.ok) throw new Error('發送失敗')
+                alert(`已發送「${content}」給長輩！`)
+            } catch (error) {
+                console.error(error)
+                alert('發送加油時發生錯誤')
+            }
+        }
+
+
         const getMatchResult = (match: Match) => {
             if (!elder) return { text: '—', color: 'text-muted-foreground' }
             const isRed = match.red_team_elder_id === elder.id

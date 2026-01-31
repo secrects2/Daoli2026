@@ -10,6 +10,7 @@ export default function ElderDashboard() {
     const supabase = createClientComponentClient()
     const [user, setUser] = useState<any>(null)
     const [familyMembers, setFamilyMembers] = useState<any[]>([])
+    const [cheers, setCheers] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
@@ -54,6 +55,30 @@ export default function ElderDashboard() {
                         <p className="text-gray-500 text-sm mt-1">請家屬掃描此條碼進行綁定</p>
                     </div>
                 </div>
+
+                {/* Latest Cheers */}
+                {cheers.length > 0 && (
+                    <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl p-4 shadow-sm border border-orange-100">
+                        <h3 className="font-semibold text-orange-800 mb-3 flex items-center gap-2">
+                            <span>💌</span> 來自家人的鼓勵
+                        </h3>
+                        <div className="space-y-3">
+                            {cheers.slice(0, 3).map((cheer: any) => (
+                                <div key={cheer.id} className="bg-white p-3 rounded-lg shadow-sm flex items-center gap-3 animate-in fade-in slide-in-from-bottom-2">
+                                    <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center text-xl">
+                                        {cheer.content.split(' ')[0]}
+                                    </div>
+                                    <div>
+                                        <p className="font-bold text-gray-900">{cheer.content.split(' ')[1] || cheer.content}</p>
+                                        <p className="text-xs text-gray-500">
+                                            {cheer.sender?.full_name || '家人'} • {new Date(cheer.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                 {/* Linked Family Members */}
                 <div className="bg-white rounded-xl overflow-hidden shadow-sm">
