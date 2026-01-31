@@ -114,6 +114,14 @@ export async function GET(request: Request) {
         }
 
         // 5. Create Session
+        console.log('Available Admin Methods:', Object.keys(supabaseAdmin.auth.admin))
+
+        // Defensive check
+        if (typeof (supabaseAdmin.auth.admin as any).createSession !== 'function') {
+            console.error('CRITICAL: createSession is missing from Supabase Admin client. Dependency version issue?')
+            throw new Error('ServerAuthError: createSession missing')
+        }
+
         const { data: sessionData, error: sessionError } = await (supabaseAdmin.auth.admin as any).createSession({
             user_id: userId
         })
