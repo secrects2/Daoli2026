@@ -11,7 +11,8 @@ export const metadata = {
         width: 'device-width',
         initialScale: 1,
         maximumScale: 1,
-        userScalable: false, // Make it feel like an app
+        userScalable: false,
+        viewportFit: 'cover', // Critical for full screen under status bar
     },
     appleWebApp: {
         capable: true,

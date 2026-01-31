@@ -62,6 +62,10 @@ export default function FamilyDashboard() {
             }
             setUser(authUser)
 
+            // Check for LINE identity
+            const lineIdentity = authUser.identities?.find(id => id.provider === 'line')
+            setIsLineLinked(!!lineIdentity)
+
             const { data: profile } = await supabase.from('profiles').select('linked_elder_id').eq('id', authUser.id).single()
             if (!profile?.linked_elder_id) {
                 setLoading(false)
@@ -175,6 +179,19 @@ export default function FamilyDashboard() {
                         </div>
                         <svg className="w-4 h-4 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
                     </Link>
+
+                    {!isLineLinked && (
+                        <button onClick={handleLineBind} className="w-full flex items-center justify-between p-4 active:bg-gray-50 transition-colors text-left">
+                            <div className="flex items-center gap-3">
+                                <span className="w-8 h-8 rounded-lg bg-[#06C755] text-white flex items-center justify-center">💬</span>
+                                <div>
+                                    <span className="font-medium">綁定 LINE 通知</span>
+                                    <p className="text-xs text-muted-foreground">開啟即時比賽推播</p>
+                                </div>
+                            </div>
+                            <span className="text-xs font-bold text-blue-600">立即設定</span>
+                        </button>
+                    )}
                 </div>
 
                 {/* Recent Matches */}
