@@ -27,9 +27,14 @@ export default async function AdminStoresPage() {
         }
     )
 
-    // Fetch Stores
-    // Note: If the table doesn't exist yet, this will fail. We should handle it gracefully.
-    let stores = []
+    interface Store {
+        id: string
+        name: string
+        status: string
+        created_at: string
+    }
+
+    let stores: Store[] = []
     let errorMsg = null
 
     try {
@@ -112,8 +117,8 @@ export default async function AdminStoresPage() {
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${store.status === 'active'
-                                                        ? 'bg-green-100 text-green-800'
-                                                        : 'bg-red-100 text-red-800'
+                                                    ? 'bg-green-100 text-green-800'
+                                                    : 'bg-red-100 text-red-800'
                                                     }`}>
                                                     {store.status.toUpperCase()}
                                                 </span>
