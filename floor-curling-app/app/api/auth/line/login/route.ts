@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
 
 export async function GET(request: Request) {
-    const requestUrl = new URL(request.url)
-    const callbackUrl = `${requestUrl.origin}/api/auth/line/callback`
+    // Force production URL to match LINE Console strict allowlist
+    const callbackUrl = `https://daoli2026.vercel.app/api/auth/line/callback`
     const clientId = process.env.LINE_CHANNEL_ID
     const state = Math.random().toString(36).substring(7) // Simple state for now
 

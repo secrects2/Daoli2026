@@ -15,7 +15,9 @@ export async function GET(request: Request) {
 
     try {
         // 1. Exchange Code for Token
-        const tokenData = await getLineToken(code, `${requestUrl.origin}/api/auth/line/callback`)
+        // Must match exactly what was sent in login step
+        const callbackUrl = `https://daoli2026.vercel.app/api/auth/line/callback`
+        const tokenData = await getLineToken(code, callbackUrl)
 
         // 2. Get LINE Profile
         const lineProfile = await getLineProfile(tokenData.access_token)
