@@ -113,33 +113,28 @@ export async function GET(request: Request) {
             })
         }
 
-        // 5. Create Session
-        console.log('Available Admin Methods:', Object.keys(supabaseAdmin.auth.admin))
+        // 5. Create Session via Magic Link (Fallback strategy since createSession is flaky)
+        // This generates a link that logs the user in and redirects them
+        console.log('🔄 Generating Magic Link for passwordless login...')
 
-        // Defensive check
-        if (typeof (supabaseAdmin.auth.admin as any).createSession !== 'function') {
-            console.error('CRITICAL: createSession is missing from Supabase Admin client. Dependency version issue?')
-            throw new Error('ServerAuthError: createSession missing')
+        const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+            type: 'magiclink',
+            email: dummyEmail,
+            options: {
+                redirectTo: `https://daoli2026.vercel.app/auth/callback`
+            }
+        })
+
+        if (linkError) {
+            console.error('❌ Generate Link Error:', linkError)
+            throw linkError
         }
 
-        const { data: sessionData, error: sessionError } = await (supabaseAdmin.auth.admin as any).createSession({
-            user_id: userId
-        })
+        console.log('✅ Magic Link Generated. Redirecting user...')
 
-        if (sessionError) throw sessionError
-
-        // 6. Set Cookies (The Bridge)
-        // We use auth-helpers to set the session on the response
-        const cookieStore = cookies()
-        const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
-
-        await supabase.auth.setSession({
-            access_token: sessionData.session.access_token,
-            refresh_token: sessionData.session.refresh_token
-        })
-
-        // 7. Redirect
-        return NextResponse.redirect(new URL('/family/dashboard', request.url))
+        // 6. Redirect User to Magic Link (Supabase will set cookies and redirect back)
+        if (!linkData.action_link) throw new Error('No action link returned')
+        return NextResponse.redirect(linkData.action_link)
 
     } catch (error: any) {
         console.error('LINE Login Error:', error)
