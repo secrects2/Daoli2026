@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { getLineToken, getLineProfile } from '@/lib/line'
@@ -7,7 +7,6 @@ import { getLineToken, getLineProfile } from '@/lib/line'
 export async function GET(request: Request) {
     const requestUrl = new URL(request.url)
     const code = requestUrl.searchParams.get('code')
-    const state = requestUrl.searchParams.get('state')
 
     if (!code) {
         return NextResponse.json({ error: 'Missing code' }, { status: 400 })
@@ -60,7 +59,6 @@ export async function GET(request: Request) {
             }).eq('id', userId)
         } else {
             // B. Profile missing? Check Auth System (Handle Pagination)
-            // Previous error "User already registered" meant listUsers failed to find it (default limit 50)
             const { data: { users } } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 })
             const existingAuthUser = users.find(u => u.email === dummyEmail)
 
@@ -81,7 +79,6 @@ export async function GET(request: Request) {
                 })
 
                 if (createError) {
-                    // Double safety catch
                     if (createError.message.includes('already registered')) {
                         console.log('⚠️ Race condition collision, retrying fetch...')
                         const { data: { users: retryUsers } } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 })
@@ -93,7 +90,6 @@ export async function GET(request: Request) {
                     }
                 } else {
                     userId = newUser.user!.id
-                    // Init Wallet for BRAND NEW users only
                     await supabaseAdmin.from('wallets').insert({
                         user_id: userId,
                         global_points: 0,
@@ -102,7 +98,6 @@ export async function GET(request: Request) {
                 }
             }
 
-            // Ensure Profile Exists (Upsert handles both New and "Auth-only" cases)
             await supabaseAdmin.from('profiles').upsert({
                 id: userId,
                 role: 'family',
@@ -113,28 +108,60 @@ export async function GET(request: Request) {
             })
         }
 
-        // 5. Create Session via Magic Link (Fallback strategy since createSession is flaky)
-        // This generates a link that logs the user in and redirects them
-        console.log('🔄 Generating Magic Link for passwordless login...')
+        // 5. Create Session via Password Swap Strategy
+        // (Bypasses PKCE/Verifier issues and createSession missing issues)
+        console.log('🔄 Performing Password Swap for seamless login...')
 
-        const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
-            type: 'magiclink',
-            email: dummyEmail,
-            options: {
-                redirectTo: `https://daoli2026.vercel.app/auth/callback`
-            }
+        const tempPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8) + "Aa1!"
+
+        // A. Set Temp Password
+        const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(userId, {
+            password: tempPassword
         })
 
-        if (linkError) {
-            console.error('❌ Generate Link Error:', linkError)
-            throw linkError
+        if (updateError) {
+            console.error('❌ Failed to set temp password:', updateError)
+            throw updateError
         }
 
-        console.log('✅ Magic Link Generated. Redirecting user...')
+        // B. Sign In with Temp Password (Sets Cookies using SSR client)
+        // This ensures the cookies are compatible with middleware
+        const cookieStore = await cookies()
+        const supabase = createServerClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+            {
+                cookies: {
+                    getAll() {
+                        return cookieStore.getAll()
+                    },
+                    setAll(cookiesToSet) {
+                        try {
+                            cookiesToSet.forEach(({ name, value, options }) =>
+                                cookieStore.set(name, value, options)
+                            )
+                        } catch {
+                            // Ignored in route handler usually
+                        }
+                    },
+                },
+            }
+        )
 
-        // 6. Redirect User to Magic Link (Supabase will set cookies and redirect back)
-        if (!linkData.properties?.action_link) throw new Error('No action link returned')
-        return NextResponse.redirect(linkData.properties.action_link)
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+            email: dummyEmail,
+            password: tempPassword
+        })
+
+        if (signInError) {
+            console.error('❌ Sign In Failed:', signInError)
+            throw signInError
+        }
+
+        console.log('✅ Logged in via Password Swap. Redirecting to Family Dashboard...')
+
+        // 7. Redirect
+        return NextResponse.redirect(new URL('/family/dashboard', request.url))
 
     } catch (error: any) {
         console.error('LINE Login Error:', error)
