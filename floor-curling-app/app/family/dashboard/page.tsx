@@ -48,10 +48,15 @@ export default function FamilyDashboard() {
     const [wallet, setWallet] = useState<Wallet | null>(null)
     const [recentMatches, setRecentMatches] = useState<Match[]>([])
     const [loading, setLoading] = useState(true)
+    const [isLineLinked, setIsLineLinked] = useState(false)
 
     useEffect(() => {
         fetchData()
     }, [])
+
+    const handleLineBind = () => {
+        window.location.href = '/api/auth/line/login'
+    }
 
     const fetchData = async () => {
         try {
