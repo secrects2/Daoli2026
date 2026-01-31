@@ -40,10 +40,7 @@ export default async function AdminStoresPage() {
     try {
         const { data, error } = await supabase
             .from('stores')
-            .select`
-                *,
-                profiles:profiles(count)
-            `
+            .select('*, profiles:profiles(count)')
             .order('created_at', { ascending: false })
 
         if (error) throw error
