@@ -42,7 +42,7 @@ async function seedUsers() {
                 if (existing) {
                     userId = existing.id;
                     // Reset password to ensure test credentials work
-                    await supabase.auth.admin.updateUserById(userId, { password: u.password });
+                    await supabase.auth.admin.updateUserById(userId, { password: u.password, email_confirm: true });
                 }
             } else {
                 console.error('   Error creating:', error.message);

@@ -39,28 +39,36 @@ export async function middleware(request: NextRequest) {
 
     console.log('✅ 中間件：用戶已登錄:', user.email)
 
-    // 使用內部 API 端點獲取用戶角色（使用 service role 繞過 RLS）
+    // Fetach user role (Use Service Role Key to bypass RLS and Network Protection)
     let userRole: string | undefined = undefined
 
     try {
-        const profileRes = await fetch(
-            `${request.nextUrl.origin}/api/profile?userId=${user.id}`,
+        // Create a temporary admin client just for this check
+        const supabaseAdmin = createServerClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!,
             {
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                cookies: {
+                    getAll() { return [] },
+                    setAll() { }
+                }
             }
         )
 
-        if (profileRes.ok) {
-            const profile = await profileRes.json()
-            userRole = profile?.role
-            console.log('📋 用戶角色:', userRole, '| Profile:', JSON.stringify(profile))
+        const { data: profile, error } = await supabaseAdmin
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single()
+
+        if (profile && !error) {
+            userRole = profile.role
+            console.log('📋 用戶角色:', userRole)
         } else {
-            console.log('❌ Profile API 請求失敗:', profileRes.status)
+            console.error('❌ 無法讀取用戶角色:', error)
         }
     } catch (error) {
-        console.error('❌ 獲取用戶角色時出錯:', error)
+        console.error('❌ 中間件錯誤:', error)
     }
 
     // 保護 /pharmacist 路由
