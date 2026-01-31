@@ -98,14 +98,6 @@ export async function GET(request: Request) {
                 }
             }
 
-            await supabaseAdmin.from('profiles').upsert({
-                id: userId,
-                role: 'family',
-                store_id: null,
-                line_user_id: lineUserId,
-                full_name: displayName,
-                avatar_url: pictureUrl
-            })
         }
 
         // 5. Create Session via Password Swap Strategy
@@ -158,10 +150,29 @@ export async function GET(request: Request) {
             throw signInError
         }
 
-        console.log('✅ Logged in via Password Swap. Redirecting to Family Dashboard...')
+        console.log('✅ Logged in via Password Swap. Redirecting...')
 
-        // 7. Redirect
-        return NextResponse.redirect(new URL('/family/dashboard', request.url))
+        // 7. Dynamic Redirect based on Role
+        // Fetch the profile *after* ensuring it exists to check the role
+        const { data: finalProfile } = await supabaseAdmin
+            .from('profiles')
+            .select('role')
+            .eq('id', userId)
+            .single()
+
+        let targetUrl = '/onboarding' // Default for new users (role is null)
+
+        if (finalProfile?.role === 'family') {
+            targetUrl = '/family/dashboard'
+        } else if (finalProfile?.role === 'pharmacist') {
+            targetUrl = '/pharmacist/dashboard'
+        } else if (finalProfile?.role === 'elder') {
+            targetUrl = '/elder/dashboard'
+        } else if (finalProfile?.role === 'admin') {
+            targetUrl = '/admin'
+        }
+
+        return NextResponse.redirect(new URL(targetUrl, request.url))
 
     } catch (error: any) {
         console.error('LINE Login Error:', error)

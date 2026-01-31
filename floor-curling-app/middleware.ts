@@ -96,5 +96,7 @@ export const config = {
         '/pharmacist/:path*',
         '/family/:path*',
         '/admin/:path*',
+        '/onboarding/:path*',
+        '/elder/:path*',
     ],
 }

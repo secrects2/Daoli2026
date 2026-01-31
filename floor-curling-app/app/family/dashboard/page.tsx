@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import { createClientComponentClient } from '@/lib/supabase'
 import { useLanguage } from '@/lib/i18n/LanguageContext'
 import Link from 'next/link'
+import { QRCodeScanner } from '@/components/QRCodeScanner'
+import { parseElderQRCode } from '@/components/QRCode'
 
 // Types
 interface Elder {
@@ -49,6 +51,8 @@ export default function FamilyDashboard() {
     const [recentMatches, setRecentMatches] = useState<Match[]>([])
     const [loading, setLoading] = useState(true)
     const [isLineLinked, setIsLineLinked] = useState(false)
+    const [showScanner, setShowScanner] = useState(false)
+    const [bindError, setBindError] = useState<string | null>(null)
 
     useEffect(() => {
         fetchData()
@@ -101,6 +105,32 @@ export default function FamilyDashboard() {
         }
     }
 
+    const handleScan = async (qrContent: string) => {
+        try {
+            if (!parseElderQRCode(qrContent)) {
+                // Ignore non-Daoli QR codes or show error
+                setBindError('這不是有效的道里長輩條碼')
+                return;
+            }
+
+            const res = await fetch('/api/family/bind', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ qrContent })
+            })
+
+            const data = await res.json()
+            if (!res.ok) throw new Error(data.error)
+
+            alert('綁定成功！')
+            setShowScanner(false)
+            fetchData() // Refresh data
+        } catch (error: any) {
+            console.error(error)
+            setBindError(error.message)
+        }
+    }
+
     const getMatchResult = (match: Match) => {
         if (!elder) return { text: '—', color: 'text-muted-foreground' }
         const isRed = match.red_team_elder_id === elder.id
@@ -117,11 +147,31 @@ export default function FamilyDashboard() {
         return (
             <div className="min-h-screen p-4">
                 <h1 className="ios-large-title mb-6">家屬中心</h1>
-                <div className="bg-card p-6 rounded-2xl shadow-sm text-center">
-                    <div className="text-5xl mb-4">🔗</div>
-                    <h3 className="font-semibold text-lg mb-2">尚未綁定長輩</h3>
-                    <p className="text-muted-foreground text-sm mb-6">請聯繫藥局人員或掃描長輩 QR Code 進行綁定。</p>
-                </div>
+                {showScanner ? (
+                    <div className="bg-black rounded-2xl overflow-hidden p-4 relative">
+                        <button
+                            onClick={() => setShowScanner(false)}
+                            className="absolute top-4 right-4 z-10 text-white bg-black/50 p-2 rounded-full"
+                        >
+                            ✕
+                        </button>
+                        <h3 className="text-white text-center mb-4">掃描長輩條碼</h3>
+                        <QRCodeScanner onScan={handleScan} />
+                        {bindError && <p className="text-red-400 text-center mt-4">{bindError}</p>}
+                    </div>
+                ) : (
+                    <div className="bg-card p-6 rounded-2xl shadow-sm text-center">
+                        <div className="text-5xl mb-4">🔗</div>
+                        <h3 className="font-semibold text-lg mb-2">尚未綁定長輩</h3>
+                        <p className="text-muted-foreground text-sm mb-6">請聯繫藥局人員或掃描長輩 QR Code 進行綁定。</p>
+                        <button
+                            onClick={() => setShowScanner(true)}
+                            className="ios-btn bg-blue-600 hover:bg-blue-700 w-full"
+                        >
+                            掃描 QR Code
+                        </button>
+                    </div>
+                )}
             </div>
         )
     }
