@@ -180,7 +180,7 @@ export default function PharmacistDashboard() {
             {/* Header */}
             <div className="sticky top-0 z-10 bg-[#F2F2F7]/90 backdrop-blur-md pt-5 pb-2 px-4 border-b border-black/5 flex justify-between items-end">
                 <div>
-                    <h1 className="ios-large-title">{t('dashboard.title')}</h1>
+                    <h1 className="ios-large-title">加盟店管理平台</h1>
                     <p className="text-xs text-muted-foreground mt-1 ml-1">{profile?.store_id || '總部'}</p>
                 </div>
                 <div className="flex gap-3 mb-1 items-center">

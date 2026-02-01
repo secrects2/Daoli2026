@@ -138,9 +138,9 @@ export default function LoginForm() {
                     <div className="pt-4 text-center">
                         <button
                             onClick={() => setLoginMode('pharmacist')}
-                            className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                            className="w-full py-3 border border-blue-600 text-blue-600 rounded-xl font-bold hover:bg-blue-50 transition-colors"
                         >
-                            我是藥師 / 管理員 &rarr;
+                            我是加盟店 / 管理員
                         </button>
                     </div>
                 </div>
@@ -150,9 +150,9 @@ export default function LoginForm() {
             {loginMode === 'pharmacist' && (
                 <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
                     <div className="text-center space-y-2 mb-6">
-                        <h3 className="font-semibold text-lg text-gray-900">員工登入</h3>
+                        <h3 className="font-semibold text-lg text-gray-900">加盟店登入</h3>
                         <p className="text-sm text-gray-500">
-                            藥師、工作人員與管理員登入
+                            加盟店與管理員登入
                         </p>
                     </div>
 
@@ -201,7 +201,7 @@ export default function LoginForm() {
                                 disabled={loading}
                                 className="ios-btn bg-gray-900 hover:bg-gray-800 shadow-sm"
                             >
-                                {loading ? '登入中...' : '登入'}
+                                {loading ? '登入中...' : '加盟店登入'}
                             </button>
                         </div>
                     </form>
@@ -209,9 +209,9 @@ export default function LoginForm() {
                     <div className="pt-4 text-center">
                         <button
                             onClick={() => setLoginMode('family')}
-                            className="text-sm text-gray-500 hover:text-gray-900 transition-colors"
+                            className="w-full py-3 border border-gray-300 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition-colors"
                         >
-                            &larr; 返回家屬登入
+                            返回家屬登入
                         </button>
                     </div>
                 </div>
@@ -224,7 +224,7 @@ export default function LoginForm() {
                 <p className="text-center text-[10px] text-gray-300 mb-3 uppercase tracking-wider">Development Mode</p>
                 <div className="grid grid-cols-4 gap-2">
                     <button onClick={() => handleQuickLogin('admin')} className="py-2 bg-purple-50 text-purple-600 rounded text-[10px] hover:bg-purple-100 font-bold">Admin</button>
-                    <button onClick={() => handleQuickLogin('pharmacist')} className="py-2 bg-blue-50 text-blue-600 rounded text-[10px] hover:bg-blue-100 font-bold">Staff</button>
+                    <button onClick={() => handleQuickLogin('pharmacist')} className="py-2 bg-blue-50 text-blue-600 rounded text-[10px] hover:bg-blue-100 font-bold">Franchise</button>
                     <button onClick={() => handleQuickLogin('family')} className="py-2 bg-green-50 text-green-600 rounded text-[10px] hover:bg-green-100 font-bold">Family</button>
                     <button onClick={() => handleQuickLogin('elder')} className="py-2 bg-orange-50 text-orange-600 rounded text-[10px] hover:bg-orange-100 font-bold">Elder</button>
                 </div>

@@ -3,11 +3,18 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 
 export default function AdminDashboard() {
     const router = useRouter()
+    const supabase = createClientComponentClient()
     const [stats, setStats] = useState<any>(null)
     const [loading, setLoading] = useState(true)
+
+    const handleLogout = async () => {
+        await supabase.auth.signOut()
+        router.push('/login')
+    }
 
     useEffect(() => {
         const fetchStats = async () => {
@@ -39,12 +46,11 @@ export default function AdminDashboard() {
                             <h1 className="text-xl font-bold text-gray-900">道里國際總部</h1>
                         </div>
                         <div className="flex items-center space-x-4">
-                            <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Admin Mode</span>
                             <button
-                                onClick={() => router.push('/')}
-                                className="text-sm text-gray-500 hover:text-gray-900"
+                                onClick={handleLogout}
+                                className="px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg text-sm font-medium transition-colors"
                             >
-                                回首頁
+                                登出
                             </button>
                         </div>
                     </div>

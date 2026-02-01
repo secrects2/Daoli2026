@@ -35,10 +35,9 @@ export default function RootLayout({
             </head>
             <body>
                 <LanguageProvider>
-                    <main className="pb-[80px]"> {/* Padding for TabBar */}
+                    <main>
                         {children}
                     </main>
-                    <TabBar />
                 </LanguageProvider>
             </body>
         </html>

@@ -250,7 +250,7 @@ export default function FamilyDashboard() {
                     <div className="bg-card p-6 rounded-2xl shadow-sm text-center">
                         <div className="text-5xl mb-4">🔗</div>
                         <h3 className="font-semibold text-lg mb-2">尚未綁定長輩</h3>
-                        <p className="text-muted-foreground text-sm mb-6">請聯繫藥局人員或掃描長輩 QR Code 進行綁定。</p>
+                        <p className="text-muted-foreground text-sm mb-6">請聯繫工作人員或掃描長輩 QR Code 進行綁定。</p>
                         <button
                             onClick={() => setShowScanner(true)}
                             className="ios-btn bg-blue-600 hover:bg-blue-700 w-full"

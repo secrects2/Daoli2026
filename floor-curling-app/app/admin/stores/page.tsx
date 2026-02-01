@@ -61,9 +61,18 @@ export default async function AdminStoresPage() {
                         <h1 className="text-2xl font-bold text-gray-900">加盟店管理 (Franchise Control)</h1>
                         <p className="text-gray-500">管理各分店的營運狀態與權限</p>
                     </div>
-                    <Link href="/admin" className="text-blue-600 hover:text-blue-800">
-                        ← 返回儀表板
-                    </Link>
+                    <div>
+                        <h1 className="text-2xl font-bold text-gray-900">加盟店管理 (Franchise Control)</h1>
+                        <p className="text-gray-500">管理各分店的營運狀態與權限</p>
+                    </div>
+                    <div className="flex gap-3">
+                        <Link href="/admin/stores/new" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors">
+                            + 新增加盟店
+                        </Link>
+                        <Link href="/admin" className="px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg hover:text-gray-900 transition-colors">
+                            ← 返回
+                        </Link>
+                    </div>
                 </div>
 
                 {isTableMissing ? (
@@ -93,7 +102,7 @@ export default async function AdminStoresPage() {
                                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         成員數
                                     </th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         操作
                                     </th>
                                 </tr>
@@ -123,8 +132,14 @@ export default async function AdminStoresPage() {
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 {store.profiles && store.profiles[0] ? store.profiles[0].count : '-'}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex justify-end gap-2 items-center">
                                                 <StoreStatusToggle storeId={store.id} currentStatus={store.status} />
+                                                <Link
+                                                    href={`/admin/stores/${store.id}`}
+                                                    className="text-indigo-600 hover:text-indigo-900 bg-indigo-50 px-3 py-1 rounded-md"
+                                                >
+                                                    編輯
+                                                </Link>
                                             </td>
                                         </tr>
                                     ))

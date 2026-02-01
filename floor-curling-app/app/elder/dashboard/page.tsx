@@ -74,16 +74,31 @@ export default function ElderDashboard() {
         }
     }
 
+    const handleLogout = async () => {
+        if (confirm('確定要登出嗎？')) {
+            await supabase.auth.signOut()
+            router.push('/login')
+        }
+    }
+
     if (loading) return <div className="min-h-screen flex items-center justify-center">載入中...</div>
 
     return (
         <div className="min-h-screen bg-gray-50 pb-20">
             {/* Header */}
             <div className="sticky top-0 z-10 bg-[#F2F2F7]/90 backdrop-blur-md pt-5 pb-2 px-4 border-b border-black/5">
-                <div className="flex justify-between items-end">
+                <div className="flex justify-between items-center">
                     <h1 className="ios-large-title">我的條碼</h1>
-                    <div className="w-8 h-8 rounded-full bg-gray-200 overflow-hidden">
-                        {user?.user_metadata?.avatar_url && <img src={user.user_metadata.avatar_url} className="w-full h-full object-cover" />}
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={handleLogout}
+                            className="text-sm text-red-500 font-medium bg-white/50 px-3 py-1 rounded-full border border-red-100"
+                        >
+                            登出
+                        </button>
+                        <div className="w-8 h-8 rounded-full bg-gray-200 overflow-hidden">
+                            {user?.user_metadata?.avatar_url && <img src={user.user_metadata.avatar_url} className="w-full h-full object-cover" />}
+                        </div>
                     </div>
                 </div>
             </div>
