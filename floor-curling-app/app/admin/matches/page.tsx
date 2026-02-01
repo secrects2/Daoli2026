@@ -9,7 +9,6 @@ export default function AdminMatchesPage() {
     const [matches, setMatches] = useState<any[]>([])
     const [chartData, setChartData] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
-    // Removed direct supabase client usage for data fetching
 
     useEffect(() => {
         const fetchMatches = async () => {
@@ -89,36 +88,37 @@ export default function AdminMatchesPage() {
                             <thead className="bg-gray-50 text-gray-900 font-medium">
                                 <tr>
                                     <th className="p-4">時間</th>
-                                    <th className="p-4">長輩姓名</th>
-                                    <th className="p-4">對手</th>
-                                    <th className="p-4">據點</th>
-                                    <th className="p-4 text-center">結果</th>
-                                    <th className="p-4 text-right">獲得積分</th>
+                                    <th className="p-4">紅隊 (長輩)</th>
+                                    <th className="p-4">黃隊 (長輩)</th>
+                                    <th className="p-4">比賽據點</th>
+                                    <th className="p-4 text-center">勝利方</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
                                 {matches.map((match) => (
                                     <tr key={match.id} className="hover:bg-gray-50 transition-colors">
                                         <td className="p-4 whitespace-nowrap">
-                                            {new Date(match.created_at).toLocaleString('zh-TW')}
-                                        </td>
-                                        <td className="p-4 font-bold text-gray-900">
-                                            {match.profiles?.full_name || '未知用戶'}
+                                            {new Date(match.completed_at || match.created_at).toLocaleString('zh-TW')}
                                         </td>
                                         <td className="p-4">
-                                            {match.data?.opponent || 'AI'}
+                                            <div className="font-bold text-red-600">
+                                                {match.red_elder?.nickname || match.red_elder?.full_name || '未知'}
+                                            </div>
                                         </td>
                                         <td className="p-4">
-                                            {match.data?.store_name || '未知據點'}
+                                            <div className="font-bold text-yellow-600">
+                                                {match.yellow_elder?.nickname || match.yellow_elder?.full_name || '未知'}
+                                            </div>
+                                        </td>
+                                        <td className="p-4 text-gray-900">
+                                            {match.store?.name || '未知據點'}
                                         </td>
                                         <td className="p-4 text-center">
-                                            <span className={`px-2 py-1 rounded-full text-xs font-bold 
-                                                ${match.data?.result === 'win' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-600'}`}>
-                                                {match.data?.result === 'win' ? '勝利 🎉' : '惜敗'}
+                                            <span className={`px-3 py-1 rounded-full text-xs font-bold 
+                                                ${match.winner_color === 'red' ? 'bg-red-100 text-red-800' :
+                                                    match.winner_color === 'yellow' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-600'}`}>
+                                                {match.winner_color === 'red' ? '紅隊勝' : match.winner_color === 'yellow' ? '黃隊勝' : '平局'}
                                             </span>
-                                        </td>
-                                        <td className="p-4 text-right font-mono font-bold text-blue-600">
-                                            +{match.data?.points_earned || 0}
                                         </td>
                                     </tr>
                                 ))}
