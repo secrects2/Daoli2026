@@ -12,105 +12,114 @@ if (!supabaseUrl || !supabaseKey) {
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function bindFamilyToTaipeiElder() {
-    console.log('--- Binding Family to Taipei Elder ---');
+    console.log('--- Binding Family to Taipei Elder (Debug Mode) ---');
 
     // 1. Find the Taipei Store
+    console.log('Searching for Taipei store...');
     const { data: stores, error: storeError } = await supabase
         .from('stores')
         .select('id, name')
         .ilike('name', '%台北%')
-        .single();
+        .maybeSingle(); // Use maybeSingle to avoid 406 error if multiple found or 0
 
-    if (storeError || !stores) {
-        console.error('Taipei Store not found!', storeError);
-        // Fallback to any store
-    }
-    const storeId = stores?.id;
-    console.log(`Target Store: ${stores?.name} (${storeId})`);
+    if (storeError) console.error('Store Query Error:', storeError);
 
-    // 2. Find an Elder in this store
-    let query = supabase.from('profiles').select('id, full_name, role').eq('role', 'elder').limit(1);
-    if (storeId) {
-        // If store_id column exists on profiles? Or use a junction?
-        // Based on schema from previous logs, profiles might have store_id.
-        // Let's check if we can filter by store_id.
-        // If not, we just pick a random elder and force update their store_id to Taipei.
+    let storeId = stores?.id;
+    if (!storeId) {
+        console.log('Taipei store not found, fetching ANY store...');
+        const { data: anyStore } = await supabase.from('stores').select('id, name').limit(1).single();
+        storeId = anyStore?.id;
+        console.log(`Fallback Store: ${anyStore?.name}`);
+    } else {
+        console.log(`Target Store: ${stores?.name} (${storeId})`);
     }
 
-    // Let's just pick a random elder and UPDATE them to be in Taipei store to be sure.
-    const { data: elder } = await supabase.from('profiles').select('id, full_name').eq('role', 'elder').limit(1).single();
+    if (!storeId) {
+        console.error('CRITICAL: No stores found in database.');
+        return;
+    }
+
+    // 2. Find an Elder
+    console.log('Searching for an Elder...');
+    const { data: elder, error: elderError } = await supabase
+        .from('profiles')
+        .select('id, full_name, role')
+        .eq('role', 'elder')
+        .limit(1)
+        .maybeSingle();
+
+    if (elderError) console.error('Elder Query Error:', elderError);
 
     if (!elder) {
-        console.error('No elder found!');
+        console.error('CRITICAL: No elder profile found!');
+        // Check if ANY profiles exist to debug
+        const { count } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
+        console.log(`Total profiles in DB: ${count}`);
         return;
     }
-    console.log(`Selected Elder: ${elder.full_name} (${elder.id})`);
+    console.log(`Selected Elder: ${elder.full_name || 'Unnamed'} (${elder.id})`);
 
-    // Update Elder to be in Taipei Store (if we have store_id on profiles, assuming we do from context)
-    if (storeId) {
-        await supabase.from('profiles').update({ store_id: storeId }).eq('id', elder.id);
-        console.log(`Updated Elder to Store: ${stores.name}`);
-    }
-
-    // 3. Find a User (Simulate Family)
-    // Fetch more profiles and filter in JS to be safe against NULL roles
-    const { data: allProfiles } = await supabase
+    // Update Elder to be in the Store
+    const { error: updateError } = await supabase
         .from('profiles')
-        .select('id, email, role')
+        .update({ store_id: storeId })
+        .eq('id', elder.id);
+
+    if (updateError) console.error('Failed to update elder store:', updateError);
+    else console.log(`Updated Elder store_id to ${storeId}`);
+
+    // 3. Find a Family User
+    console.log('Searching for Family Candidates...');
+    // Simplest query possible to debug
+    // Removing 'email' in case it doesn't exist in profiles table
+    const { data: allProfiles, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, role')
         .limit(50);
 
-    const families = allProfiles.filter(p => p.id !== elder.id && p.role !== 'elder' && p.role !== 'admin');
-
-    if (!families || families.length === 0) {
-        console.error('No potential family users found (users who are not elder/admin).');
+    if (profileError) {
+        console.error('Profile Fetch Error:', JSON.stringify(profileError, null, 2));
         return;
     }
 
-    console.log(`Found ${families.length} family users. Binding them to ${elder.full_name}...`);
+    // Filter in JS to strictly avoid the elder and admins
+    const families = allProfiles?.filter(p => p.id !== elder.id && p.role !== 'elder' && p.role !== 'admin') || [];
 
-    for (const family of families) {
-        const { error } = await supabase
-            .from('profiles')
-            .update({ linked_family_id: elder.id }) // Wait, usually family has 'linked_elder_id' or elder has 'linked_family_id'?
-            // System usually links FAMILY -> ELDER. 
-            // Let's check the previous code in page.tsx:
-            // "if (profile?.linked_family_id)" -> This implies the logged in user (family/user) has `linked_family_id` pointing to... elder?
-            // Actually, usually it's `linked_elder_id` on the family profile.
-            // Let's check `app/family/portal/page.tsx` lines 30: "if (profile?.linked_family_id)" 
-            // Wait, if I am family, why would I have linked_family_id? That sounds backwards.
-            // Line 30: `if (profile?.linked_family_id)` then fetch from `profiles` where id = `linked_family_id`.
-            // If the code says `setElderProfile(elder)`, then `profile.linked_family_id` IS the Elder ID.
-            // Variable name is confusing but we follow the code.
-            .eq('id', family.id);
-
-        // Let's UPDATE `linked_family_id` to the elder's ID.
-        // Ideally column should be `linked_elder_id`.
-        // NOTE: In `app/family/dashboard/page.tsx` (File 1309 line 70), it uses `.select('linked_elder_id')`.
-        // BUT `app/family/portal/page.tsx` (File 1291 line 30) used `linked_family_id`.
-        // This inconsistency might be why it's failing!
-        // I will update BOTH columns to be safe if they exist, or check which one exists.
-
-        // Let's try updating `linked_elder_id` as that is semantically correct and used in the dashboard.
-        await supabase.from('profiles').update({ linked_elder_id: elder.id }).eq('id', family.id);
-
-        // Also update `linked_family_id` just in case the portal page is using that specific column name
-        // (even if it's named effectively wrong).
-        await supabase.from('profiles').update({ linked_family_id: elder.id }).eq('id', family.id);
-
-        console.log(`Bound Family ${family.id} to Elder ${elder.id}`);
+    if (families.length === 0) {
+        console.error('No suitable family users found (non-elder, non-admin).');
+        console.log('Dumping first 5 profiles found for inspection:');
+        console.log(allProfiles?.slice(0, 5));
+        return;
     }
 
-    // 4. Ensure Matches Exist for this Elder
-    // Check if matches exist
-    const { count } = await supabase.from('matches').select('*', { count: 'exact', head: true }).or(`red_team_elder_id.eq.${elder.id},yellow_team_elder_id.eq.${elder.id}`);
+    console.log(`Found ${families.length} potential family users. Binding first one: ${families[0].email} (${families[0].id})`);
 
-    if (count === 0) {
+    // Bind the first family user found
+    const familyUser = families[0];
+
+    // Update both potential binding columns
+    const { error: bindError1 } = await supabase.from('profiles').update({ linked_elder_id: elder.id }).eq('id', familyUser.id);
+    const { error: bindError2 } = await supabase.from('profiles').update({ linked_family_id: elder.id }).eq('id', familyUser.id);
+
+    if (bindError1 && bindError2) console.error('Binding Error:', bindError1, bindError2);
+    else console.log(`Successfully bound User ${familyUser.id} to Elder ${elder.id}`);
+
+    // 4. Ensure Matches Exist
+    console.log('Checking matches...');
+    const { count: matchCount } = await supabase
+        .from('matches')
+        .select('*', { count: 'exact', head: true })
+        .or(`red_team_elder_id.eq.${elder.id},yellow_team_elder_id.eq.${elder.id}`);
+
+    console.log(`Elder has ${matchCount} matches.`);
+
+    if (matchCount === 0) {
         console.log('Creating fake matches for this elder...');
-        await supabase.from('matches').insert([
+        const { error: insertError } = await supabase.from('matches').insert([
             {
                 store_id: storeId,
                 red_team_elder_id: elder.id,
-                yellow_team_elder_id: families[0].id, // dummy opponent
+                yellow_team_elder_id: families.length > 1 ? families[1].id : familyUser.id, // Use another user as dummy opponent if possible
                 status: 'completed',
                 winner_color: 'red',
                 created_at: new Date().toISOString()
@@ -118,12 +127,14 @@ async function bindFamilyToTaipeiElder() {
             {
                 store_id: storeId,
                 red_team_elder_id: elder.id,
-                yellow_team_elder_id: families[0].id,
+                yellow_team_elder_id: families.length > 1 ? families[1].id : familyUser.id,
                 status: 'completed',
                 winner_color: 'yellow',
                 created_at: new Date(Date.now() - 86400000).toISOString()
             }
         ]);
+        if (insertError) console.error('Match Insert Error:', insertError);
+        else console.log('Created 2 dummy matches.');
     }
 }
 
