@@ -14,35 +14,24 @@ export default function AdminLocationsPage() {
     )
 
     useEffect(() => {
-        const fetchData = async () => {
-            // Need to join stores with match counts.
-            // Since we don't have an easy join view, we'll fetch stores and matches roughly
-            // Or better: use the RPC if available, but for now client side aggregation is fast enough for fake data
+        const fetchStats = async () => {
+            try {
+                const res = await fetch('/api/admin/locations')
+                const data = await res.json()
 
-            // 1. Get Stores
-            const { data: storeList } = await supabase.from('stores').select('*')
+                if (!res.ok) throw new Error(data.error || 'Failed to fetch')
 
-            // 2. Get Matches to count
-            const { data: matches } = await supabase
-                .from('user_interactions')
-                .select('data')
-                .eq('interaction_type', 'match_result')
-
-            if (storeList && matches) {
-                const stats = storeList.map(store => {
-                    const count = matches.filter((m: any) => m.data?.store_id === store.id).length
-                    return {
-                        ...store,
-                        match_count: count
-                    }
-                }).sort((a, b) => b.match_count - a.match_count)
-
-                setStores(stats)
+                if (data.success) {
+                    setStores(data.stores)
+                }
+            } catch (error) {
+                console.error('Error loading location stats:', error)
+            } finally {
+                setLoading(false)
             }
-            setLoading(false)
         }
-        fetchData()
-    }, [supabase])
+        fetchStats()
+    }, [])
 
     if (loading) return <div className="p-8 text-center text-gray-500">載入數據中...</div>
 
