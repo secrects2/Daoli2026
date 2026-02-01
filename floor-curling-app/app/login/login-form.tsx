@@ -124,16 +124,35 @@ export default function LoginForm() {
                         </p>
                     </div>
 
-                    <button
-                        type="button"
-                        onClick={handleLineLogin}
-                        className="ios-btn bg-[#00C300] hover:bg-[#00B300] focus-visible:outline-[#00C300] flex items-center justify-center gap-3 text-[15px] shadow-sm transform transition active:scale-95"
-                    >
-                        <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M20.5 10c0-4.8-4.5-8.7-10-8.7S.5 5.2.5 10c0 4.3 3.6 7.9 8.5 8.6.3.1.5.2.5.5v2.2c0 .2.1.4.3.4.1 0 .2 0 .3-.1.9-.5 4.1-2.4 5.7-4.1 3-2.6 4.7-5.3 4.7-8.5z" />
-                        </svg>
-                        使用 LINE 帳號登入
-                    </button>
+                    <div className="space-y-4">
+                        <button
+                            type="button"
+                            onClick={handleLineLogin}
+                            className="ios-btn bg-[#00C300] hover:bg-[#00B300] focus-visible:outline-[#00C300] flex items-center justify-center gap-3 text-[15px] shadow-sm transform transition active:scale-95 w-full py-4 text-lg font-bold"
+                        >
+                            <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M20.5 10c0-4.8-4.5-8.7-10-8.7S.5 5.2.5 10c0 4.3 3.6 7.9 8.5 8.6.3.1.5.2.5.5v2.2c0 .2.1.4.3.4.1 0 .2 0 .3-.1.9-.5 4.1-2.4 5.7-4.1 3-2.6 4.7-5.3 4.7-8.5z" />
+                            </svg>
+                            家屬登入 (使用 LINE)
+                        </button>
+
+                        <div className="relative flex items-center py-2">
+                            <div className="flex-grow border-t border-gray-200"></div>
+                            <span className="flex-shrink-0 mx-4 text-gray-400 text-xs">或是</span>
+                            <div className="flex-grow border-t border-gray-200"></div>
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={handleLineLogin}
+                            className="ios-btn bg-white border-2 border-[#00C300] text-[#00C300] hover:bg-green-50 focus-visible:outline-[#00C300] flex items-center justify-center gap-3 text-[15px] shadow-sm transform transition active:scale-95 w-full py-4 text-lg font-bold"
+                        >
+                            <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M20.5 10c0-4.8-4.5-8.7-10-8.7S.5 5.2.5 10c0 4.3 3.6 7.9 8.5 8.6.3.1.5.2.5.5v2.2c0 .2.1.4.3.4.1 0 .2 0 .3-.1.9-.5 4.1-2.4 5.7-4.1 3-2.6 4.7-5.3 4.7-8.5z" />
+                            </svg>
+                            家人登入 (使用 LINE)
+                        </button>
+                    </div>
 
                     <div className="pt-4 text-center">
                         <button
