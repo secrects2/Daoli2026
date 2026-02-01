@@ -305,6 +305,15 @@ export default function EldersPage() {
                                             </p>
                                         </div>
                                     )}
+                                    {/* Link to Details */}
+                                    <div className="mt-4 pt-4 border-t border-gray-100 text-center">
+                                        <Link
+                                            href={`/pharmacist/elders/${elder.id}`}
+                                            className="text-blue-600 font-bold hover:underline text-sm block w-full"
+                                        >
+                                            {t('elders.viewDetails') || '查看詳細資料'}
+                                        </Link>
+                                    </div>
                                 </div>
                             )
                         })}
