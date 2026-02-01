@@ -99,43 +99,49 @@ export default function FamilyPortal() {
                 {/* 功能卡片 */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {/* 比賽紀錄 */}
-                    <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">
-                        <div className="flex items-center justify-between mb-4">
-                            <div className="p-3 bg-blue-100 rounded-lg">
-                                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                                </svg>
+                    <Link href="/family/matches" className="block group">
+                        <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow group-hover:border-blue-200 border border-transparent">
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="p-3 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors">
+                                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                    </svg>
+                                </div>
                             </div>
+                            <h3 className="text-lg font-semibold text-gray-900 mb-2">比賽紀錄</h3>
+                            <p className="text-sm text-gray-600">查看長輩的比賽歷程</p>
                         </div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">比賽紀錄</h3>
-                        <p className="text-sm text-gray-600">查看長輩的比賽歷程</p>
-                    </div>
+                    </Link>
 
                     {/* 照片與影片 */}
-                    <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">
-                        <div className="flex items-center justify-between mb-4">
-                            <div className="p-3 bg-green-100 rounded-lg">
-                                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
+                    <Link href="/family/photos" className="block group">
+                        <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow group-hover:border-green-200 border border-transparent">
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="p-3 bg-green-100 rounded-lg group-hover:bg-green-200 transition-colors">
+                                    <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
                             </div>
+                            <h3 className="text-lg font-semibold text-gray-900 mb-2">照片與影片</h3>
+                            <p className="text-sm text-gray-600">查看精彩瞬間</p>
                         </div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">照片與影片</h3>
-                        <p className="text-sm text-gray-600">查看精彩瞬間</p>
-                    </div>
+                    </Link>
 
                     {/* 積分查詢 */}
-                    <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">
-                        <div className="flex items-center justify-between mb-4">
-                            <div className="p-3 bg-yellow-100 rounded-lg">
-                                <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
+                    <Link href="/family/points" className="block group">
+                        <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow group-hover:border-yellow-200 border border-transparent">
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="p-3 bg-yellow-100 rounded-lg group-hover:bg-yellow-200 transition-colors">
+                                    <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
                             </div>
+                            <h3 className="text-lg font-semibold text-gray-900 mb-2">積分查詢</h3>
+                            <p className="text-sm text-gray-600">查看榮譽與兌換積分</p>
                         </div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">積分查詢</h3>
-                        <p className="text-sm text-gray-600">查看榮譽與兌換積分</p>
-                    </div>
+                    </Link>
                 </div>
 
                 {/* 如果未關聯長輩，顯示提示 */}
