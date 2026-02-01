@@ -145,7 +145,7 @@ export default function LoginForm() {
                         <button
                             type="button"
                             onClick={() => handleLineLogin('elder')}
-                            className="ios-btn bg-white border-2 border-[#00C300] text-[#00C300] hover:bg-green-50 focus-visible:outline-[#00C300] flex items-center justify-center gap-3 text-[15px] shadow-sm transform transition active:scale-95 w-full py-4 text-lg font-bold"
+                            className="ios-btn bg-white border-2 border-[#00C300] !text-[#00C300] hover:bg-green-50 focus-visible:outline-[#00C300] flex items-center justify-center gap-3 text-[15px] shadow-sm transform transition active:scale-95 w-full py-4 text-lg font-bold"
                         >
                             <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M20.5 10c0-4.8-4.5-8.7-10-8.7S.5 5.2.5 10c0 4.3 3.6 7.9 8.5 8.6.3.1.5.2.5.5v2.2c0 .2.1.4.3.4.1 0 .2 0 .3-.1.9-.5 4.1-2.4 5.7-4.1 3-2.6 4.7-5.3 4.7-8.5z" />
