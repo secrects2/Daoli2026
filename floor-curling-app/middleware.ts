@@ -102,6 +102,14 @@ export async function middleware(request: NextRequest) {
         }
     }
 
+    // 保護 /elder 路由
+    if (request.nextUrl.pathname.startsWith('/elder')) {
+        if (userRole !== 'elder' && userRole !== 'admin') {
+            console.log('⛔ 無權訪問長輩頁面，角色:', userRole)
+            return NextResponse.redirect(new URL('/login', request.url))
+        }
+    }
+
     return supabaseResponse
 }
 

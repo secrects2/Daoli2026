@@ -42,20 +42,25 @@ export default function ElderQRCodePage() {
                 .eq('id', user.id)
                 .single()
 
-            if (profile?.store_id) {
-                setStoreId(profile.store_id)
+            const userStoreId = profile?.store_id || null
+            if (userStoreId) setStoreId(userStoreId)
 
-                // 獲取同店鋪的長輩
-                const { data: eldersData, error } = await supabase
-                    .from('profiles')
-                    .select('id, nickname, full_name, store_id, created_at')
-                    .eq('role', 'elder')
-                    .eq('store_id', profile.store_id)
-                    .order('created_at', { ascending: false })
+            // 構建查詢
+            let query = supabase
+                .from('profiles')
+                .select('id, nickname, full_name, store_id, created_at')
+                .eq('role', 'elder')
+                .order('created_at', { ascending: false })
 
-                if (!error && eldersData) {
-                    setElders(eldersData)
-                }
+            // 如果有店鋪 ID，則篩選該店鋪
+            if (userStoreId) {
+                query = query.eq('store_id', userStoreId)
+            }
+
+            const { data: eldersData, error } = await query
+
+            if (!error && eldersData) {
+                setElders(eldersData)
             }
         } catch (err) {
             console.error('獲取長輩列表失敗:', err)
@@ -237,8 +242,8 @@ export default function ElderQRCodePage() {
                                         key={elder.id}
                                         onClick={() => setSelectedElder(elder)}
                                         className={`w-full text-left p-4 rounded-lg border-2 transition-all ${selectedElder?.id === elder.id
-                                                ? 'border-blue-500 bg-blue-50'
-                                                : 'border-gray-200 hover:border-blue-300'
+                                            ? 'border-blue-500 bg-blue-50'
+                                            : 'border-gray-200 hover:border-blue-300'
                                             }`}
                                     >
                                         <div className="flex items-center gap-3">

@@ -6,8 +6,11 @@ import { useEffect, useState } from 'react'
 
 export function TabBar() {
     const pathname = usePathname()
-    // Hide tab bar on login page
-    if (pathname === '/login') return null
+    // Hide tab bar on login page AND pharmacist/admin/elder pages
+    if (pathname === '/login' ||
+        pathname.startsWith('/pharmacist') ||
+        pathname.startsWith('/admin') ||
+        pathname.startsWith('/elder')) return null
 
     const isActive = (path: string) => pathname === path || pathname.startsWith(`${path}/`)
 
