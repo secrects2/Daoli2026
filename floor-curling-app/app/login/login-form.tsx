@@ -111,18 +111,14 @@ export default function LoginForm() {
                 </button>
             </div>
 
-            <div className="relative py-2">
-                <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-200" />
-                </div>
-                <div className="relative flex justify-center text-sm">
-                    <button
-                        onClick={() => setShowPharmacistLogin(!showPharmacistLogin)}
-                        className="bg-white px-2 text-gray-400 hover:text-gray-600 transition-colors text-xs"
-                    >
-                        {showPharmacistLogin ? '隱藏藥師登入' : '我是藥師/管理員'}
-                    </button>
-                </div>
+            <div className="pt-2">
+                <button
+                    type="button"
+                    onClick={() => setShowPharmacistLogin(!showPharmacistLogin)}
+                    className="ios-btn bg-white text-gray-900 border border-gray-200 hover:bg-gray-50 flex items-center justify-center gap-2"
+                >
+                    {showPharmacistLogin ? '隱藏藥師登入' : '我是藥師 / 管理員'}
+                </button>
             </div>
 
             {/* Toggleable View: Pharmacist Login */}
