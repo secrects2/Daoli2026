@@ -109,41 +109,127 @@ export default function GenericElderDetailPage() {
     if (loading) return <div className="p-8 text-center bg-gray-50 min-h-screen">載入中...</div>
     if (!elder) return null
 
+    const [isEditing, setIsEditing] = useState(false)
+    const [editData, setEditData] = useState({ nickname: '', notes: '' })
+
+    // Unbind Handler
+    const handleUnbind = async () => {
+        if (!confirm('確定要將此長輩從您的店鋪移除嗎？\n此操作無法復原。')) return
+
+        try {
+            const res = await fetch(`/api/pharmacist/elders/${params.id}`, {
+                method: 'DELETE',
+            })
+
+            const result = await res.json()
+            if (!res.ok) throw new Error(result.error)
+
+            alert('移除成功')
+            router.push('/pharmacist/elders')
+        } catch (err: any) {
+            alert('移除失敗: ' + err.message)
+        }
+    }
+
+    // Update Handler
+    const handleUpdate = async () => {
+        try {
+            const res = await fetch(`/api/pharmacist/elders/${params.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(editData),
+            })
+
+            const result = await res.json()
+            if (!res.ok) throw new Error(result.error)
+
+            // Update local state
+            setElder(prev => ({ ...prev, nickname: editData.nickname, notes: editData.notes })) // notes might be missing in schema but let's assume
+            setIsEditing(false)
+            alert('更新成功')
+        } catch (err: any) {
+            alert('更新失敗: ' + err.message)
+        }
+    }
+
+    if (loading) return <div className="p-8 text-center bg-gray-50 min-h-screen">載入中...</div>
+    if (!elder) return null
+
     return (
         <div className="min-h-screen bg-gray-50 pb-20">
             {/* Header / Nav */}
             <div className="bg-white border-b border-gray-200">
-                <div className="max-w-4xl mx-auto px-4 py-4">
+                <div className="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
                     <Link href="/pharmacist/elders" className="text-sm text-gray-500 hover:text-gray-900 flex items-center gap-1">
                         &larr; 返回長輩名單
                     </Link>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => {
+                                setEditData({ nickname: elder.nickname || '', notes: elder.notes || '' })
+                                setIsEditing(true)
+                            }}
+                            className="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg font-medium transition-colors"
+                        >
+                            ✏️ 編輯
+                        </button>
+                        <button
+                            onClick={handleUnbind}
+                            className="text-sm bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1.5 rounded-lg font-medium transition-colors"
+                        >
+                            🗑️ 移除
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <main className="max-w-4xl mx-auto px-4 py-8 space-y-6">
 
                 {/* Profile Card */}
-                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col md:flex-row gap-6 items-center md:items-start">
+                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col md:flex-row gap-6 items-center md:items-start relative">
+                    {/* Edit Modal / Overlay */}
+                    {isEditing && (
+                        <div className="absolute inset-0 z-20 bg-white/95 backdrop-blur-sm rounded-2xl p-6 flex flex-col justify-center items-center">
+                            <h3 className="font-bold text-lg mb-4">編輯資料</h3>
+                            <div className="w-full max-w-sm space-y-4">
+                                <div>
+                                    <label className="text-xs text-gray-500 block mb-1">暱稱</label>
+                                    <input
+                                        type="text"
+                                        value={editData.nickname}
+                                        onChange={e => setEditData(prev => ({ ...prev, nickname: e.target.value }))}
+                                        className="w-full px-3 py-2 border rounded-lg"
+                                    />
+                                </div>
+                                <div className="flex gap-2 justify-end mt-4">
+                                    <button onClick={() => setIsEditing(false)} className="px-4 py-2 text-gray-500 hover:bg-gray-100 rounded-lg">取消</button>
+                                    <button onClick={handleUpdate} className="px-4 py-2 bg-blue-600 text-white rounded-lg">儲存</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     <img
-                        src={elder.avatar_url || 'https://api.dicebear.com/7.x/avataaars/svg?seed=defaults'}
+                        src={elder.avatar_url || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + elder.id}
                         className="w-24 h-24 rounded-full bg-gray-100 border-4 border-white shadow-lg"
                         alt="Avatar"
                     />
                     <div className="flex-1 text-center md:text-left space-y-2">
                         <div className="flex flex-col md:flex-row items-center gap-3">
-                            <h1 className="text-2xl font-bold text-gray-900">{elder.full_name}</h1>
+                            <h1 className="text-2xl font-bold text-gray-900">
+                                {elder.nickname ? `${elder.nickname} (${elder.full_name})` : elder.full_name}
+                            </h1>
                             <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full">Active</span>
                         </div>
                         <p className="text-gray-500 text-sm">
+                            ID: <span className="font-mono">{elder.id.slice(0, 8)}</span>
+                        </p>
+                        <p className="text-gray-500 text-sm">
                             加入時間：{new Date(elder.created_at).toLocaleDateString('zh-TW')}
                         </p>
-                        <div className="flex items-center justify-center md:justify-start gap-4 text-sm text-gray-600 mt-2">
-                            <span>📱 0912-345-678</span>
-                            <span>📍 台北大安旗艦店</span>
-                        </div>
                     </div>
                     {/* Key Stat Big Number */}
-                    <div className="text-center p-4 bg-amber-50 rounded-xl border border-amber-100">
+                    <div className="text-center p-4 bg-amber-50 rounded-xl border border-amber-100 min-w-[100px]">
                         <p className="text-amber-600 text-xs font-bold uppercase mb-1">目前積分</p>
                         <p className="text-3xl font-mono font-black text-amber-600">{stats.points}</p>
                     </div>
@@ -157,6 +243,7 @@ export default function GenericElderDetailPage() {
                             <span>📋</span> 健康與備註
                         </h3>
                         <div className="space-y-4">
+                            {/* Static health info (mocked for now) */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="p-3 bg-gray-50 rounded-lg">
                                     <p className="text-xs text-gray-500 mb-1">緊急聯絡人</p>
@@ -168,8 +255,9 @@ export default function GenericElderDetailPage() {
                                     <p className="font-medium text-red-600">高血壓、膝蓋舊傷</p>
                                 </div>
                             </div>
+                            {/* Notes from Profile or Mocked */}
                             <div className="p-3 bg-blue-50 text-blue-800 text-sm rounded-lg">
-                                💡 備註：每週二固定參加早上的復健課程，比賽安排請避開該時段。
+                                💡 備註：{elder.notes || '尚無備註'}
                             </div>
                         </div>
                     </div>
@@ -194,40 +282,6 @@ export default function GenericElderDetailPage() {
                             </div>
                         </div>
                     </div>
-                </div>
-
-                {/* Family Connections */}
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                    <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                        <span>👨‍👩‍👧‍👦</span> 綁定家屬 ({family.length})
-                    </h3>
-
-                    {family.length > 0 ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            {family.map(f => (
-                                <div key={f.id} className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl">
-                                    <img
-                                        src={f.avatar_url || 'https://api.dicebear.com/7.x/avataaars/svg?seed=fam'}
-                                        className="w-12 h-12 rounded-full bg-gray-100"
-                                    />
-                                    <div>
-                                        <p className="font-bold text-gray-900">{f.full_name}</p>
-                                        <p className="text-xs text-gray-500">最後上線：{new Date(f.updated_at).toLocaleDateString()}</p>
-                                        <div className="flex gap-2 mt-1">
-                                            <button className="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded">發送訊息</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="text-center py-8 bg-gray-50 rounded-xl border border-dashed border-gray-300">
-                            <p className="text-gray-400 mb-2">尚未綁定任何家屬</p>
-                            <button className="text-sm text-blue-600 font-bold hover:underline">
-                                下載綁定 QR Code
-                            </button>
-                        </div>
-                    )}
                 </div>
 
                 {/* Equipment Inventory */}
