@@ -177,9 +177,15 @@ export async function GET(request: Request) {
                     },
                     setAll(cookiesToSet) {
                         try {
-                            cookiesToSet.forEach(({ name, value, options }) =>
-                                cookieStore.set(name, value, options)
-                            )
+                            cookiesToSet.forEach(({ name, value, options }) => {
+                                // Force 1 year expiration for persistent login
+                                const persistentOptions = {
+                                    ...options,
+                                    maxAge: 60 * 60 * 24 * 365, // 1 year (seconds)
+                                    path: '/',
+                                }
+                                cookieStore.set(name, value, persistentOptions)
+                            })
                         } catch {
                             // Ignored in route handler usually
                         }
