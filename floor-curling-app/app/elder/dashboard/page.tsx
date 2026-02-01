@@ -165,6 +165,20 @@ export default function ElderDashboard() {
                 )
             }
 
+            {/* Chat Link Action */}
+            <Link
+                href="/elder/messages"
+                className="w-full bg-orange-500 hover:bg-orange-600 active:scale-95 text-white rounded-2xl p-4 shadow-lg shadow-orange-200 transition-all flex items-center justify-center gap-3 mb-4"
+            >
+                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-2xl">
+                    💬
+                </div>
+                <div>
+                    <h3 className="text-xl font-bold">聊天室</h3>
+                    <p className="text-white/80 text-sm">與家人和店長聯絡</p>
+                </div>
+            </Link>
+
             {/* Safety Check-in Action */}
             <button
                 onClick={handleCheckIn}
