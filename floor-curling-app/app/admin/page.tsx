@@ -62,39 +62,47 @@ export default function AdminDashboard() {
                 <section>
                     <h2 className="text-lg font-bold text-gray-900 mb-4 px-1">全域戰情 (Global Pulse)</h2>
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                            <p className="text-sm text-gray-500 font-medium">總比賽場次</p>
-                            <h3 className="text-3xl font-bold text-blue-600 mt-2">{stats?.total_matches || 0}</h3>
-                            <p className="text-xs text-green-600 mt-2 flex items-center">
-                                <span className="mr-1">▲</span> 歷史累計
-                            </p>
-                        </div>
+                        <Link href="/admin/matches" className="block group">
+                            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 group-hover:shadow-md transition-all group-hover:-translate-y-1">
+                                <p className="text-sm text-gray-500 font-medium">總比賽場次</p>
+                                <h3 className="text-3xl font-bold text-blue-600 mt-2">{stats?.total_matches || 0}</h3>
+                                <p className="text-xs text-green-600 mt-2 flex items-center">
+                                    <span className="mr-1">▲</span> 歷史累計
+                                </p>
+                            </div>
+                        </Link>
 
-                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                            <p className="text-sm text-gray-500 font-medium">今日比賽</p>
-                            <h3 className="text-3xl font-bold text-indigo-600 mt-2">{stats?.today_matches || 0}</h3>
-                            <p className="text-xs text-gray-400 mt-2">
-                                {(stats?.today_matches || 0) > 0 ? '今日戰況激烈' : '尚無賽事'}
-                            </p>
-                        </div>
+                        <Link href="/admin/matches" className="block group">
+                            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 group-hover:shadow-md transition-all group-hover:-translate-y-1">
+                                <p className="text-sm text-gray-500 font-medium">今日比賽</p>
+                                <h3 className="text-3xl font-bold text-indigo-600 mt-2">{stats?.today_matches || 0}</h3>
+                                <p className="text-xs text-gray-400 mt-2">
+                                    {(stats?.today_matches || 0) > 0 ? '今日戰況激烈' : '尚無賽事'}
+                                </p>
+                            </div>
+                        </Link>
 
-                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                            <p className="text-sm text-gray-500 font-medium">本週活躍長輩</p>
-                            <h3 className="text-3xl font-bold text-purple-600 mt-2">{stats?.active_elders_weekly || 0}</h3>
-                            <p className="text-xs text-gray-400 mt-2">
-                                7日內參與過比賽
-                            </p>
-                        </div>
+                        <Link href="/admin/elders" className="block group">
+                            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 group-hover:shadow-md transition-all group-hover:-translate-y-1">
+                                <p className="text-sm text-gray-500 font-medium">本週活躍長輩</p>
+                                <h3 className="text-3xl font-bold text-purple-600 mt-2">{stats?.active_elders_weekly || 0}</h3>
+                                <p className="text-xs text-gray-400 mt-2">
+                                    7日內參與過比賽
+                                </p>
+                            </div>
+                        </Link>
 
-                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                            <p className="text-sm text-gray-500 font-medium">全域總積分</p>
-                            <h3 className="text-3xl font-bold text-amber-500 mt-2">
-                                {stats?.total_points_distributed ? (stats.total_points_distributed / 1000).toFixed(1) + 'k' : '0'}
-                            </h3>
-                            <p className="text-xs text-gray-400 mt-2">
-                                已發放榮譽積分
-                            </p>
-                        </div>
+                        <Link href="/admin/points" className="block group">
+                            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 group-hover:shadow-md transition-all group-hover:-translate-y-1">
+                                <p className="text-sm text-gray-500 font-medium">全域總積分</p>
+                                <h3 className="text-3xl font-bold text-amber-500 mt-2">
+                                    {stats?.total_points_distributed ? (stats.total_points_distributed / 1000).toFixed(1) + 'k' : '0'}
+                                </h3>
+                                <p className="text-xs text-gray-400 mt-2">
+                                    已發放榮譽積分
+                                </p>
+                            </div>
+                        </Link>
                     </div>
                 </section>
 
@@ -125,13 +133,18 @@ export default function AdminDashboard() {
 
                     {/* Top Stores */}
                     <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                        <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                            <span>🏆</span> 熱門據點排行
-                        </h3>
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="font-bold text-gray-900 flex items-center gap-2">
+                                <span>🏆</span> 熱門據點排行
+                            </h3>
+                            <Link href="/admin/locations" className="text-xs text-blue-600 font-bold hover:underline">
+                                查看完整報表 &rarr;
+                            </Link>
+                        </div>
                         <div className="space-y-4">
                             {stats?.top_stores && stats.top_stores.length > 0 ? (
                                 stats.top_stores.map((store: any, index: number) => (
-                                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                                    <Link href="/admin/locations" key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
                                         <div className="flex items-center gap-3">
                                             <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm
                                                 ${index === 0 ? 'bg-yellow-100 text-yellow-700' :
@@ -143,7 +156,7 @@ export default function AdminDashboard() {
                                             <span className="font-medium text-gray-900">{store.name}</span>
                                         </div>
                                         <span className="font-mono text-sm font-bold text-blue-600">{store.match_count} 場</span>
-                                    </div>
+                                    </Link>
                                 ))
                             ) : (
                                 <div className="text-center py-8 text-gray-400 text-sm">
