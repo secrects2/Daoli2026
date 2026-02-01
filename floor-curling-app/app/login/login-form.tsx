@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 type LoginMode = 'family' | 'pharmacist'
 
@@ -19,6 +19,9 @@ export default function LoginForm() {
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )
 
+    const searchParams = useSearchParams()
+    const returnTo = searchParams.get('returnTo')
+
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault()
         setLoading(true)
@@ -32,12 +35,12 @@ export default function LoginForm() {
 
             if (error) throw error
             router.refresh()
-            // The middleware or client-side check will handle redirection, 
-            // but we can try to be helpful if we know the role.
-            // Since we don't know the role immediately without a query, we push to root
-            // and let middleware redirect, OR we can query profile.
-            // For now, let's just refresh and go root to be safe, or /pharmacist if this is pharmacist login form.
-            router.push('/pharmacist/dashboard') // Assumption for email/pass login in this context
+
+            if (returnTo) {
+                router.push(returnTo)
+            } else {
+                router.push('/pharmacist/dashboard')
+            }
         } catch (err: any) {
             setError(err.message === 'Invalid login credentials' ? '帳號或密碼錯誤' : err.message)
         } finally {
@@ -46,7 +49,13 @@ export default function LoginForm() {
     }
 
     const handleLineLogin = (role: 'family' | 'elder') => {
-        window.location.href = `/api/auth/line/login?role=${role}`
+        const redirectTo = returnTo
+            ? `${window.location.origin}/api/auth/callback?returnTo=${encodeURIComponent(returnTo)}`
+            : undefined
+        // Note: The Line Login API setup might need adjustment to handle dynamic callbacks or state param
+        // For now, simpler to just let them login and rely on default redirect unless we pass state
+        // Let's assume standard flow for simple LINE integration first.
+        window.location.href = `/api/auth/line/login?role=${role}${returnTo ? `&returnTo=${encodeURIComponent(returnTo)}` : ''}`
     }
 
     const handleQuickLogin = async (role: 'admin' | 'pharmacist' | 'family' | 'elder') => {
@@ -74,6 +83,11 @@ export default function LoginForm() {
             await new Promise(resolve => setTimeout(resolve, 1000))
 
             router.refresh()
+
+            if (returnTo) {
+                router.push(returnTo)
+                return
+            }
 
             // Redirect based on role
             switch (role) {

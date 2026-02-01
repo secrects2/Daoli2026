@@ -195,6 +195,20 @@ export default function GenericElderDetailPage() {
                                     >
                                         關閉
                                     </button>
+
+                                    <div className="border-t border-gray-100 pt-4 mt-2">
+                                        <p className="text-xs text-gray-500 mb-2">或是分享連結給不在現場的家屬：</p>
+                                        <button
+                                            onClick={() => {
+                                                const link = `${window.location.origin}/family/bind?elderId=${elder.id}`
+                                                navigator.clipboard.writeText(link)
+                                                alert('連結已複製！請傳送給家屬')
+                                            }}
+                                            className="w-full py-2 border border-blue-200 text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-50 flex items-center justify-center gap-2"
+                                        >
+                                            <span>📋</span> 複製線上綁定連結
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         )}
