@@ -103,17 +103,41 @@ export async function GET(request: Request) {
                 }
 
                 if (createError) {
-                    if (createError.message.includes('already registered')) {
-                        console.log('⚠️ Race condition collision, retrying fetch...')
-                        const { data: { users: retryUsers } } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 })
-                        const racedUser = retryUsers.find(u => u.email === dummyEmail)
-                        if (!racedUser) throw createError
+                    // Robust Error Recovery
+                    console.log('⚠️ createUser failed:', createError.message)
+
+                    // 1. Re-fetch all users
+                    const { data: { users: retryUsers } } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 })
+
+                    // 2. Try to find by Email OR by Line User ID in metadata (More robust)
+                    const racedUser = retryUsers.find(u =>
+                        u.email === dummyEmail ||
+                        u.user_metadata?.line_user_id === lineUserId
+                    )
+
+                    if (racedUser) {
+                        console.log('✅ Recovered: Found existing auth user during retry:', racedUser.id)
                         userId = racedUser.id
+
+                        // Optional: Ensure the profile exists/is updated since we found the auth user
+                        const { error: upsertError } = await supabaseAdmin.from('profiles').upsert({
+                            id: userId,
+                            full_name: displayName,
+                            avatar_url: pictureUrl,
+                            line_user_id: lineUserId,
+                            role: intendedRole // Ensure role is set for recovered user too if missing
+                        })
+                        if (upsertError) console.log('⚠️ Profile sync warn:', upsertError.message)
+
                     } else {
+                        // Truly cannot find it? Then throw the original error
+                        console.error('❌ Critical: createUser said "already registered" but listUsers cannot find it.')
                         throw createError
                     }
                 } else {
                     userId = newUser.user!.id
+
+                    // Init wallet for brand new user
                     await supabaseAdmin.from('wallets').insert({
                         user_id: userId,
                         global_points: 0,
