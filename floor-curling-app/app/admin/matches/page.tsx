@@ -9,46 +9,40 @@ export default function AdminMatchesPage() {
     const [matches, setMatches] = useState<any[]>([])
     const [chartData, setChartData] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
-    const supabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
+    // Removed direct supabase client usage for data fetching
 
     useEffect(() => {
-        const fetchData = async () => {
-            // 1. Fetch Interactions (Matches)
-            const { data: interactions } = await supabase
-                .from('user_interactions')
-                .select(`
-                    id, 
-                    created_at, 
-                    data,
-                    profiles:user_id (full_name)
-                `)
-                .eq('interaction_type', 'match_result')
-                .order('created_at', { ascending: false })
-                .limit(100)
+        const fetchMatches = async () => {
+            try {
+                const res = await fetch('/api/admin/matches')
+                const data = await res.json()
 
-            if (interactions) {
-                setMatches(interactions)
+                if (!res.ok) throw new Error(data.error || 'Failed to fetch')
 
-                // 2. Process for Chart (GroupBy Date)
-                const grouped = interactions.reduce((acc: any, curr: any) => {
-                    const date = new Date(curr.created_at).toLocaleDateString('zh-TW', { month: 'short', day: 'numeric' })
-                    acc[date] = (acc[date] || 0) + 1
-                    return acc
-                }, {})
+                if (data.success && data.matches) {
+                    setMatches(data.matches)
 
-                const chart = Object.keys(grouped).reverse().map(date => ({
-                    date,
-                    count: grouped[date]
-                }))
-                setChartData(chart)
+                    // Process for Chart
+                    const grouped = data.matches.reduce((acc: any, curr: any) => {
+                        const date = new Date(curr.completed_at || curr.created_at).toLocaleDateString('zh-TW', { month: 'short', day: 'numeric' })
+                        acc[date] = (acc[date] || 0) + 1
+                        return acc
+                    }, {})
+
+                    const chart = Object.keys(grouped).reverse().map(date => ({
+                        date,
+                        count: grouped[date]
+                    }))
+                    setChartData(chart)
+                }
+            } catch (error) {
+                console.error('Error loading matches:', error)
+            } finally {
+                setLoading(false)
             }
-            setLoading(false)
         }
-        fetchData()
-    }, [supabase])
+        fetchMatches()
+    }, [])
 
     if (loading) return <div className="p-8 text-center text-gray-500">載入數據中...</div>
 
