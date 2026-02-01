@@ -4,7 +4,13 @@ export async function GET(request: Request) {
     // Force production URL to match LINE Console strict allowlist
     const callbackUrl = `https://daoli2026.vercel.app/api/auth/line/callback`
     const clientId = process.env.LINE_CHANNEL_ID
-    const state = Math.random().toString(36).substring(7) // Simple state for now
+
+    // Get role from request URL
+    const { searchParams } = new URL(request.url)
+    const role = searchParams.get('role') || 'family' // Default to family if missing
+
+    // Encode role in state: "role_randomstring"
+    const state = `${role}_${Math.random().toString(36).substring(7)}`
 
     if (!clientId) {
         return NextResponse.json({ error: 'LINE_CHANNEL_ID not set' }, { status: 500 })

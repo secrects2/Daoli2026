@@ -7,10 +7,18 @@ import { getLineToken, getLineProfile } from '@/lib/line'
 export async function GET(request: Request) {
     const requestUrl = new URL(request.url)
     const code = requestUrl.searchParams.get('code')
+    const state = requestUrl.searchParams.get('state')
 
     if (!code) {
         return NextResponse.json({ error: 'Missing code' }, { status: 400 })
     }
+
+    // Decode intended role from state ("role_randomstring")
+    let intendedRole = 'family' // Default
+    if (state && state.includes('_')) {
+        intendedRole = state.split('_')[0]
+    }
+    console.log('🎯 Intended Role:', intendedRole)
 
     try {
         // 1. Exchange Code for Token
@@ -77,6 +85,22 @@ export async function GET(request: Request) {
                         iss: 'https://access.line.me'
                     }
                 })
+
+                if (!createError && newUser.user) {
+                    // Set Role in Profiles Table (This is the critical part)
+                    // Because trigger might have created profile with default role (if any)
+                    // or we need to update it now.
+                    // Assuming 'profiles' table has an 'id' linking to auth.users
+
+                    // Upsert profile with correct role
+                    await supabaseAdmin.from('profiles').upsert({
+                        id: newUser.user.id,
+                        full_name: displayName,
+                        avatar_url: pictureUrl,
+                        line_user_id: lineUserId,
+                        role: intendedRole // <--- Set the intended role
+                    })
+                }
 
                 if (createError) {
                     if (createError.message.includes('already registered')) {
