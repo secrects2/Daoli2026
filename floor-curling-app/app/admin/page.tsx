@@ -19,10 +19,17 @@ export default function AdminDashboard() {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const res = await fetch('/api/admin/stats/global')
+                // Add timestamp to prevent browser caching
+                const res = await fetch(`/api/admin/stats/global?t=${Date.now()}`)
+                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`)
+
                 const data = await res.json()
                 if (data.success) {
                     setStats(data.stats)
+                    console.log('✅ Stats loaded:', data.stats)
+                } else {
+                    console.error('Stats API returned error:', data.error)
+                    // Optional: alert('無法載入數據: ' + data.error)
                 }
             } catch (error) {
                 console.error('Failed to load stats', error)

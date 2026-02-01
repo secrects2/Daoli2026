@@ -1,50 +1,101 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
-// Use Service Role to ensure we can execute the RPC if it needs special permissions,
-// though RPC is SECURITY DEFINER. But we need to verify admin role first.
+export const dynamic = 'force-dynamic' // Ensure this route is never cached
+
+// Use Service Role for Admin Stats to bypass RLS/ensure access to all data
 const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
+    process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 )
 
-const supabaseAnon = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    console.error('CRITICAL: SUPABASE_SERVICE_ROLE_KEY is missing in environment variables!')
+}
 
 export async function GET(request: Request) {
     try {
-        // Authenticate User (We need to check cookies in a real app, 
-        // but since we are in API route, we rely on the client sending auth headers usually, 
-        // or we use createRouteHandlerClient from auth-helpers. 
-        // For simplicity and consistency with current codebase pattern (often checking role manually via ID if passed, or just relying on RLS if using client),
-        // Here we want to be strict.
+        console.log('📊 Fetching Global Stats (Direct Query)...')
 
-        // Let's assume the request comes from the frontend which has the session cookie.
-        // We really should use `createRouteHandlerClient` here for proper auth check.
-        // But to keep it simple and dependency-free for this file:
-        // We will just call the RPC. The RPC is SECURITY DEFINER so it runs as owner.
-        // BUT we must ensure the caller is an Admin.
-        // If we use supabaseAnon to call rpc, RLS applies to the auth user.
-        // If the RPC is granted to public/authenticated, anyone can call it?
-        // We should add a check inside the RPC or checking here.
+        // 1. Total Matches (Completed)
+        const { count: totalMatches, error: matchesError } = await supabaseAdmin
+            .from('matches')
+            .select('*', { count: 'exact', head: true })
+            .eq('status', 'completed')
 
-        // For Speed: We will just call it with Admin Client for now, assuming Middleware protects /admin/* routes.
-        // The Middleware ALREADY protects /admin, so we are safe-ish if this API is only called from there.
-        // BUT API routes are not automatically protected by Middleware unless matched.
-        // Middleware config matches '/admin/:path*'.
-        // Does it match '/api/admin/:path*'?
-        // Let's check middleware.ts later. For now, let's implement the logic.
+        if (matchesError) throw matchesError
 
-        const { data, error } = await supabaseAdmin.rpc('get_global_stats')
+        // 2. Today's Matches
+        // Get start of today in UTC (simplified, ideally timezone aware)
+        const startOfDay = new Date().toISOString().split('T')[0]
+        const { count: todayMatches } = await supabaseAdmin
+            .from('matches')
+            .select('*', { count: 'exact', head: true })
+            .eq('status', 'completed')
+            .gte('completed_at', startOfDay)
 
-        if (error) throw error
+        // 3. Active Elders (Weekly)
+        // Harder to distinct count with simple API, will approximate or query recent matches
+        const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+        const { data: recentMatches } = await supabaseAdmin
+            .from('matches')
+            .select('red_team_elder_id, yellow_team_elder_id')
+            .gte('created_at', oneWeekAgo)
+            .limit(1000)
 
-        return NextResponse.json({ success: true, stats: data })
+        const activeElderIds = new Set()
+        recentMatches?.forEach(m => {
+            if (m.red_team_elder_id) activeElderIds.add(m.red_team_elder_id)
+            if (m.yellow_team_elder_id) activeElderIds.add(m.yellow_team_elder_id)
+        })
+        const activeEldersWeekly = activeElderIds.size
+
+        // 4. Total Points (Sum from Wallets)
+        // Summing requires .select() and reduce, or RPC. 
+        // Let's try to fetch wallets. If too many, this is slow, but for <1000 users ok.
+        const { data: wallets } = await supabaseAdmin.from('wallets').select('global_points')
+        const totalPointsDistributed = wallets?.reduce((sum, w) => sum + (w.global_points || 0), 0) || 0
+
+        // 5. Top Stores
+        // GroupBy is hard without RPC. We will fetch matches and aggregate manually (OK for small scale)
+        // Or fetch stores and count their matches?
+        // Let's query ALL completed matches (assuming volume is manageable for this MVP)
+        // Better: Query stores, then for each store count matches? N+1 problem but safe.
+        // OR: Just fetch the matches with store_id.
+        const { data: matchStores } = await supabaseAdmin
+            .from('matches')
+            .select('store_id, stores(name)')
+            .eq('status', 'completed')
+            .limit(500) // Sample size limit for performance
+
+        const storeCounts: Record<string, { name: string, count: number }> = {}
+
+        matchStores?.forEach((m: any) => {
+            if (!m.store_id || !m.stores) return
+            const name = m.stores.name
+            if (!storeCounts[name]) storeCounts[name] = { name, count: 0 }
+            storeCounts[name].count++
+        })
+
+        const topStores = Object.values(storeCounts)
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 5)
+            .map(s => ({ name: s.name, match_count: s.count }))
+
+        const stats = {
+            total_matches: totalMatches || 0,
+            today_matches: todayMatches || 0,
+            active_elders_weekly: activeEldersWeekly,
+            total_points_distributed: totalPointsDistributed,
+            top_stores: topStores
+        }
+
+        console.log('✅ Global Stats:', stats)
+
+        return NextResponse.json({ success: true, stats })
 
     } catch (error: any) {
-        console.error('Admin stats error:', error)
+        console.error('❌ Admin stats error:', error)
         return NextResponse.json(
             { success: false, error: 'Failed to fetch admin stats' },
             { status: 500 }
