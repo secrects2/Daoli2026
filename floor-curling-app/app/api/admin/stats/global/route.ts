@@ -57,15 +57,22 @@ export async function GET(request: Request) {
         const totalPointsDistributed = wallets?.reduce((sum, w) => sum + (w.global_points || 0), 0) || 0
 
         // 5. Top Stores (Manual Join to avoid FK issues)
-        const { data: matchesForStores } = await supabaseAdmin
+        const { data: matchesForStores, error: storeMatchError } = await supabaseAdmin
             .from('matches')
-            .select('store_id')
+            .select('id, store_id')
             .eq('status', 'completed')
+            .order('completed_at', { ascending: false })
             .limit(1000)
+
+        if (storeMatchError) {
+            console.error('Error fetching matches for stores:', storeMatchError)
+        }
 
         const storeCounts: Record<string, number> = {}
         matchesForStores?.forEach((m: any) => {
-            if (m.store_id) storeCounts[m.store_id] = (storeCounts[m.store_id] || 0) + 1
+            if (m.store_id) {
+                storeCounts[m.store_id] = (storeCounts[m.store_id] || 0) + 1
+            }
         })
 
         const topStoreIds = Object.keys(storeCounts)

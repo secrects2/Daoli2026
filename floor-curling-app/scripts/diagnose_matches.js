@@ -49,26 +49,21 @@ async function diagnose() {
         console.log('No completed matches found!');
     }
 
-    // 3. Test Complex API Query (The one likely failing)
-    console.log('--- Testing Complex Join ---');
-    const { data: complexData, error: complexError } = await supabase
+    // 3. Inspect Store IDs
+    console.log('--- Inspecting Store IDs ---');
+    const { data: matchesWithStore } = await supabase
         .from('matches')
-        .select(`
-            id, 
-            status,
-            store:stores(name),
-            red_elder:profiles!red_team_elder_id(full_name),
-            yellow_elder:profiles!yellow_team_elder_id(full_name)
-        `)
+        .select('id, store_id, status')
         .eq('status', 'completed')
-        .limit(5);
+        .limit(10);
 
-    if (complexError) {
-        console.error('❌ Complex Query Failed:', complexError);
-    } else {
-        console.log('✅ Complex Query Success!');
-        console.log('Sample Row:', JSON.stringify(complexData[0], null, 2));
-    }
+    console.log(`Checking ${matchesWithStore?.length} completed matches...`);
+    matchesWithStore?.forEach(m => {
+        console.log(`Match ${m.id} - StoreID: ${m.store_id}`);
+    });
+
+    const { data: stores } = await supabase.from('stores').select('id, name');
+    console.log('Valid Stores:', stores);
 }
 
 diagnose();
