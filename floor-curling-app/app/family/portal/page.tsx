@@ -54,7 +54,7 @@ export default function FamilyPortal() {
             <div className="min-h-screen flex items-center justify-center bg-gray-100">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className="mt-4 text-gray-600">加载中...</p>
+                    <p className="mt-4 text-gray-600">載入中...</p>
                 </div>
             </div>
         )
@@ -62,17 +62,17 @@ export default function FamilyPortal() {
 
     return (
         <div className="min-h-screen bg-gray-100">
-            {/* 导航栏 */}
+            {/* 導航欄 */}
             <nav className="bg-white shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16">
                         <div className="flex items-center">
-                            <h1 className="text-2xl font-bold text-blue-600">家属门户</h1>
+                            <h1 className="text-2xl font-bold text-blue-600">家屬入口</h1>
                         </div>
                         <div className="flex items-center gap-4">
                             <div className="text-sm text-gray-600">
                                 <p className="font-medium">{user?.email}</p>
-                                <p className="text-xs text-gray-500">角色: 家属</p>
+                                <p className="text-xs text-gray-500">角色: 家屬</p>
                             </div>
                             <button
                                 onClick={handleLogout}
@@ -85,20 +85,20 @@ export default function FamilyPortal() {
                 </div>
             </nav>
 
-            {/* 主内容 */}
+            {/* 主內容 */}
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="mb-8">
-                    <h2 className="text-3xl font-bold text-gray-900">欢迎！</h2>
+                    <h2 className="text-3xl font-bold text-gray-900">歡迎！</h2>
                     {elderProfile ? (
-                        <p className="mt-2 text-gray-600">关联长者 ID: {elderProfile.id}</p>
+                        <p className="mt-2 text-gray-600">關聯長輩 ID: {elderProfile.id}</p>
                     ) : (
-                        <p className="mt-2 text-yellow-600">⚠️ 您还未关联长者账户</p>
+                        <p className="mt-2 text-yellow-600">⚠️ 您還未綁定長輩帳戶</p>
                     )}
                 </div>
 
                 {/* 功能卡片 */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {/* 比赛记录 */}
+                    {/* 比賽紀錄 */}
                     <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">
                         <div className="flex items-center justify-between mb-4">
                             <div className="p-3 bg-blue-100 rounded-lg">
@@ -107,11 +107,11 @@ export default function FamilyPortal() {
                                 </svg>
                             </div>
                         </div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">比赛记录</h3>
-                        <p className="text-sm text-gray-600">查看长者的比赛历史</p>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">比賽紀錄</h3>
+                        <p className="text-sm text-gray-600">查看長輩的比賽歷程</p>
                     </div>
 
-                    {/* 照片视频 */}
+                    {/* 照片與影片 */}
                     <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">
                         <div className="flex items-center justify-between mb-4">
                             <div className="p-3 bg-green-100 rounded-lg">
@@ -120,11 +120,11 @@ export default function FamilyPortal() {
                                 </svg>
                             </div>
                         </div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">照片和视频</h3>
-                        <p className="text-sm text-gray-600">查看精彩瞬间</p>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">照片與影片</h3>
+                        <p className="text-sm text-gray-600">查看精彩瞬間</p>
                     </div>
 
-                    {/* 积分查询 */}
+                    {/* 積分查詢 */}
                     <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">
                         <div className="flex items-center justify-between mb-4">
                             <div className="p-3 bg-yellow-100 rounded-lg">
@@ -133,12 +133,12 @@ export default function FamilyPortal() {
                                 </svg>
                             </div>
                         </div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">积分查询</h3>
-                        <p className="text-sm text-gray-600">查看荣誉和兑换积分</p>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">積分查詢</h3>
+                        <p className="text-sm text-gray-600">查看榮譽與兌換積分</p>
                     </div>
                 </div>
 
-                {/* 如果未关联长者，显示提示 */}
+                {/* 如果未關聯長輩，顯示提示 */}
                 {!elderProfile && (
                     <div className="mt-8 bg-yellow-50 border border-yellow-200 rounded-xl p-6">
                         <div className="flex items-start gap-4">
@@ -146,8 +146,8 @@ export default function FamilyPortal() {
                                 <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                             </svg>
                             <div>
-                                <h4 className="text-lg font-semibold text-gray-900 mb-2">需要关联长者账户</h4>
-                                <p className="text-gray-700">请联系药师将您的账户与长者账户关联，以便查看长者的比赛记录和照片。</p>
+                                <h4 className="text-lg font-semibold text-gray-900 mb-2">需要綁定長輩帳戶</h4>
+                                <p className="text-gray-700">請聯繫藥師協助綁定長輩帳戶，以便查看長輩的比賽紀錄與照片。</p>
                             </div>
                         </div>
                     </div>
