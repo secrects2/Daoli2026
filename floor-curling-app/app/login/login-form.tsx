@@ -64,10 +64,27 @@ export default function LoginForm() {
             if (signInError) throw signInError
 
             // Wait a bit for cookies to settle
-            await new Promise(resolve => setTimeout(resolve, 500))
+            await new Promise(resolve => setTimeout(resolve, 1000))
 
             router.refresh()
-            router.push('/')
+
+            // Redirect based on role
+            switch (role) {
+                case 'admin':
+                    router.push('/admin')
+                    break
+                case 'pharmacist':
+                    router.push('/pharmacist') // Or match list
+                    break
+                case 'family':
+                    router.push('/family/dashboard')
+                    break
+                case 'elder':
+                    router.push('/elder/dashboard')
+                    break
+                default:
+                    router.push('/')
+            }
         } catch (err: any) {
             setError(err.message)
             setLoading(false)
@@ -115,7 +132,7 @@ export default function LoginForm() {
                 <button
                     type="button"
                     onClick={() => setShowPharmacistLogin(!showPharmacistLogin)}
-                    className="ios-btn bg-white text-gray-900 border border-gray-200 hover:bg-gray-50 flex items-center justify-center gap-2"
+                    className="w-full flex justify-center py-3 px-4 border border-gray-200 rounded-xl shadow-sm text-sm font-medium transition-all duration-200 active:scale-95 bg-white text-gray-900 hover:bg-gray-50 flex items-center justify-center gap-2"
                 >
                     {showPharmacistLogin ? '隱藏藥師登入' : '我是藥師 / 管理員'}
                 </button>
