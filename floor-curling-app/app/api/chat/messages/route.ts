@@ -82,6 +82,20 @@ export async function POST(request: Request) {
 
         if (error) throw error
 
+        // Trigger Notification (Async, don't await/block response)
+        // Dynamic import to avoid circular dependency issues if any
+        import('@/lib/notifications').then(({ createNotification }) => {
+            createNotification({
+                userId: receiver_id,
+                title: user.user_metadata?.full_name || '新訊息',
+                message: content,
+                type: 'info',
+                metadata: {
+                    senderId: user.id
+                }
+            })
+        })
+
         return NextResponse.json({ success: true, message })
 
     } catch (error: any) {
