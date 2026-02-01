@@ -56,31 +56,37 @@ export async function GET(request: Request) {
         const { data: wallets } = await supabaseAdmin.from('wallets').select('global_points')
         const totalPointsDistributed = wallets?.reduce((sum, w) => sum + (w.global_points || 0), 0) || 0
 
-        // 5. Top Stores
-        // GroupBy is hard without RPC. We will fetch matches and aggregate manually (OK for small scale)
-        // Or fetch stores and count their matches?
-        // Let's query ALL completed matches (assuming volume is manageable for this MVP)
-        // Better: Query stores, then for each store count matches? N+1 problem but safe.
-        // OR: Just fetch the matches with store_id.
-        const { data: matchStores } = await supabaseAdmin
+        // 5. Top Stores (Manual Join to avoid FK issues)
+        const { data: matchesForStores } = await supabaseAdmin
             .from('matches')
-            .select('store_id, stores(name)')
+            .select('store_id')
             .eq('status', 'completed')
-            .limit(500) // Sample size limit for performance
+            .limit(1000)
 
-        const storeCounts: Record<string, { name: string, count: number }> = {}
-
-        matchStores?.forEach((m: any) => {
-            if (!m.store_id || !m.stores) return
-            const name = m.stores.name
-            if (!storeCounts[name]) storeCounts[name] = { name, count: 0 }
-            storeCounts[name].count++
+        const storeCounts: Record<string, number> = {}
+        matchesForStores?.forEach((m: any) => {
+            if (m.store_id) storeCounts[m.store_id] = (storeCounts[m.store_id] || 0) + 1
         })
 
-        const topStores = Object.values(storeCounts)
-            .sort((a, b) => b.count - a.count)
+        const topStoreIds = Object.keys(storeCounts)
+            .sort((a, b) => storeCounts[b] - storeCounts[a])
             .slice(0, 5)
-            .map(s => ({ name: s.name, match_count: s.count }))
+
+        let topStores: any[] = []
+        if (topStoreIds.length > 0) {
+            const { data: storeDetails } = await supabaseAdmin
+                .from('stores')
+                .select('id, name')
+                .in('id', topStoreIds)
+
+            topStores = topStoreIds.map(id => {
+                const store = storeDetails?.find(s => s.id === id)
+                return {
+                    name: store?.name || '未知據點',
+                    match_count: storeCounts[id]
+                }
+            })
+        }
 
         const stats = {
             total_matches: totalMatches || 0,
