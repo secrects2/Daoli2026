@@ -31,13 +31,20 @@ export async function middleware(request: NextRequest) {
     // 刷新 session（重要！）
     const { data: { user } } = await supabase.auth.getUser()
 
+    console.log(`🔍 [Middleware] Path: ${request.nextUrl.pathname}`)
+
     // 如果未登錄，重定向到登錄頁
     if (!user) {
-        console.log('❌ 中間件：用戶未登錄，重定向到 /login')
+        console.log('❌ [Middleware] Use NOT found. Redirecting to /login')
+
+        // Avoid redirect loop if already on login
+        if (request.nextUrl.pathname === '/login') {
+            return supabaseResponse
+        }
         return NextResponse.redirect(new URL('/login', request.url))
     }
 
-    console.log('✅ 中間件：用戶已登錄:', user.email)
+    console.log(`✅ [Middleware] User logged in: ${user.email} (${user.id})`)
 
     // Fetach user role (Use Service Role Key to bypass RLS and Network Protection)
     let userRole: string | undefined = undefined
