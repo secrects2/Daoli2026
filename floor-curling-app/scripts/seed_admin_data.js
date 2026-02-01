@@ -141,7 +141,6 @@ async function seedData() {
             yellow_team_elder_id: elder2,
             winner_color: winnerColor,
             status: 'completed',
-            is_public: true,
             created_at: matchTime.toISOString(),
             completed_at: matchTime.toISOString()
         });

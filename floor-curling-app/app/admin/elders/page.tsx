@@ -138,9 +138,12 @@ export default function AdminEldersPage() {
                                             </span>
                                         </td>
                                         <td className="p-4 text-right">
-                                            <button className="text-blue-600 font-medium hover:underline text-xs">
+                                            <Link
+                                                href={`/admin/elders/${elder.id}`}
+                                                className="text-blue-600 font-medium hover:underline text-xs"
+                                            >
                                                 查看詳情
-                                            </button>
+                                            </Link>
                                         </td>
                                     </tr>
                                 ))}
