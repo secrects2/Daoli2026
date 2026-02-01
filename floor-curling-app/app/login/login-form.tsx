@@ -241,11 +241,16 @@ export default function LoginForm() {
             */}
             <div className="pt-8 mt-8 border-t border-gray-100">
                 <p className="text-center text-[10px] text-gray-300 mb-3 uppercase tracking-wider">Development Mode</p>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-4 gap-2 mb-4">
                     <button onClick={() => handleQuickLogin('admin')} className="py-2 bg-purple-50 text-purple-600 rounded text-[10px] hover:bg-purple-100 font-bold">Admin</button>
                     <button onClick={() => handleQuickLogin('pharmacist')} className="py-2 bg-blue-50 text-blue-600 rounded text-[10px] hover:bg-blue-100 font-bold">Franchise</button>
                     <button onClick={() => handleQuickLogin('family')} className="py-2 bg-green-50 text-green-600 rounded text-[10px] hover:bg-green-100 font-bold">Family</button>
                     <button onClick={() => handleQuickLogin('elder')} className="py-2 bg-orange-50 text-orange-600 rounded text-[10px] hover:bg-orange-100 font-bold">Elder</button>
+                </div>
+                <div className="text-center">
+                    <a href="/logout" className="text-[10px] text-gray-400 underline hover:text-gray-600">
+                        遇到登入問題？點此清除快取 (Clear Cache)
+                    </a>
                 </div>
             </div>
         </div>
