@@ -53,12 +53,13 @@ async function bindFamilyToTaipeiElder() {
     }
 
     // 3. Find a User (Simulate Family)
-    const { data: families } = await supabase
+    // Fetch more profiles and filter in JS to be safe against NULL roles
+    const { data: allProfiles } = await supabase
         .from('profiles')
         .select('id, email, role')
-        .neq('role', 'elder')
-        .neq('role', 'admin') // Ideally also exclude admins
-        .limit(5);
+        .limit(50);
+
+    const families = allProfiles.filter(p => p.id !== elder.id && p.role !== 'elder' && p.role !== 'admin');
 
     if (!families || families.length === 0) {
         console.error('No potential family users found (users who are not elder/admin).');
