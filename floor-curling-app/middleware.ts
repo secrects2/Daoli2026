@@ -96,7 +96,7 @@ export async function middleware(request: NextRequest) {
 
     // 保護 /family 路由
     if (request.nextUrl.pathname.startsWith('/family')) {
-        if (userRole !== 'family') {
+        if (userRole !== 'family' && userRole !== 'admin') {
             console.log('⛔ 無權訪問家屬頁面，角色:', userRole)
             return NextResponse.redirect(new URL('/login', request.url))
         }
