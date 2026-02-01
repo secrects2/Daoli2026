@@ -147,7 +147,7 @@ export default function GenericElderDetailPage() {
             if (!res.ok) throw new Error(result.error)
 
             // Update local state
-            setElder(prev => ({ ...prev, nickname: editData.nickname, notes: editData.notes })) // notes might be missing in schema but let's assume
+            setElder((prev: any) => ({ ...prev, nickname: editData.nickname, notes: editData.notes })) // notes might be missing in schema but let's assume
             setIsEditing(false)
             alert('更新成功')
         } catch (err: any) {
