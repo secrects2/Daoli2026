@@ -140,7 +140,7 @@ export default function ElderMessagesPage() {
                                     </p>
                                 </div>
                                 <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-green-600">
-                                    Let's Chat ➤
+                                    Let&apos;s Chat ➤
                                 </div>
                             </button>
                         ))

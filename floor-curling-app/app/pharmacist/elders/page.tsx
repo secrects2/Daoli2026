@@ -5,6 +5,7 @@ import { createClientComponentClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { useLanguage } from '@/lib/i18n/LanguageContext' // Added
 import LanguageSwitcher from '@/components/LanguageSwitcher' // Added
+import Link from 'next/link'
 
 interface Elder {
     id: string
