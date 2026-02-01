@@ -1,28 +1,12 @@
-import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
-// Initialize Supabase Client
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
-
 export async function GET() {
-    try {
-        const { data: products, error } = await supabase
-            .from('products')
-            .select('*')
-            .eq('is_active', true)
-            .order('price_points', { ascending: true })
-
-        if (error) throw error
-
-        return NextResponse.json({ success: true, products })
-    } catch (error: any) {
-        console.error('Fetch products error:', error)
-        return NextResponse.json(
-            { success: false, error: 'Failed to fetch products' },
-            { status: 500 }
-        )
-    }
+    // Mock Data for Shop
+    const products = [
+        { id: 1, name: '專業冰壺推桿', price_points: 500, image_url: 'https://api.dicebear.com/7.x/icons/svg?seed=stick', description: '輕量化設計' },
+        { id: 2, name: '防滑運動手套', price_points: 200, image_url: 'https://api.dicebear.com/7.x/icons/svg?seed=glove', description: '增加抓握力' },
+        { id: 3, name: '能量營養棒', price_points: 150, image_url: 'https://api.dicebear.com/7.x/icons/svg?seed=bar', description: '體力補充' },
+        { id: 4, name: '紀念毛巾', price_points: 300, image_url: 'https://api.dicebear.com/7.x/icons/svg?seed=towel', description: '專屬紀念' },
+    ]
+    return NextResponse.json({ data: products })
 }

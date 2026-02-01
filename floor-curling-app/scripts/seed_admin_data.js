@@ -1,6 +1,7 @@
 const { createClient } = require('@supabase/supabase-js');
 const dotenv = require('dotenv');
 const path = require('path');
+const crypto = require('crypto');
 
 // Explicitly load .env.local
 dotenv.config({ path: path.resolve(__dirname, '../.env.local') });
@@ -31,39 +32,41 @@ async function seedData() {
     // 1. Ensure Stores (Locations)
     const stores = [];
     for (const loc of LOCATIONS) {
-        // Simple check/insert logic (Store creation handled by script logic simplistically)
-        // In real app, we check 'stores' table. Let's assume we just use ID strings for matches
-        // But better to check or create.
-        // Let's see if 'stores' table exists from previous context. Yes, created in CRUD task.
         const { data: existingStore } = await supabase.from('stores').select('id').eq('name', loc).single();
         let storeId;
 
         if (!existingStore) {
-            const { data: newStore } = await supabase.from('stores').insert({
+            // Fix: Generate UUID explicitly since DB default might be missing
+            const uuid = crypto.randomUUID();
+
+            // Fix: Removed 'location' column, use 'name' and 'status'
+            const { data: newStore, error: insertError } = await supabase.from('stores').insert({
+                id: uuid,
                 name: loc,
-                location: loc + '市區',
                 status: 'active'
             }).select().single();
+
+            if (insertError) {
+                console.warn(`⚠️ Failed to create store ${loc} (skipping):`, insertError.message);
+                continue;
+            }
+            if (!newStore) continue;
             storeId = newStore.id;
         } else {
             storeId = existingStore.id;
         }
         stores.push({ id: storeId, name: loc });
     }
+    console.log(`✅ Loaded ${stores.length} stores.`);
 
     // 2. Create Fake Elders
     const elders = [];
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 20; i++) {
         const lastName = NAMES[Math.floor(Math.random() * NAMES.length)];
         const suffix = EMNAMES[Math.floor(Math.random() * EMNAMES.length)];
         const fullName = `${lastName}${suffix}`;
-
-        // Ensure user exists in Auth (Fake for stats mainly, but cleaner if exists)
-        // To speed up, we might just insert into profiles if no FK constraint blocks it... 
-        // usually profiles.id references auth.users.
-        // So we must use createUser.
-
         const email = `fake_elder_${i}_${Date.now()}@test.com`;
+
         const { data: user, error } = await supabase.auth.admin.createUser({
             email: email,
             password: 'password123',
@@ -73,7 +76,7 @@ async function seedData() {
 
         if (user.user) {
             const uid = user.user.id;
-            // Update profile role
+            // Update profile
             await supabase.from('profiles').upsert({
                 id: uid,
                 full_name: fullName,
@@ -85,61 +88,86 @@ async function seedData() {
             elders.push(uid);
         }
     }
-    console.log(`✅ Created ${elders.length} fake elders.`);
+    console.log(`✅ Created ${elders.length} new fake elders.`);
+
+    // Also fetch existing elders
+    const { data: existingElders } = await supabase.from('profiles').select('id').eq('role', 'elder').limit(50);
+    if (existingElders) {
+        existingElders.forEach(e => {
+            if (!elders.includes(e.id)) elders.push(e.id);
+        });
+    }
 
     // 3. Generate History (Matches & Points)
-    // Last 30 days
-    const matches = [];
-    const pointLogs = [];
+    if (stores.length === 0 || elders.length < 2) {
+        console.error('❌ Not enough stores or elders to generate matches.');
+        return;
+    }
+
     const now = new Date();
+    let matchCount = 0;
 
-    for (let i = 0; i < 300; i++) {
-        const randomElder = elders[Math.floor(Math.random() * elders.length)];
+    for (let i = 0; i < 60; i++) {
+        const elder1 = elders[Math.floor(Math.random() * elders.length)];
+        let elder2 = elders[Math.floor(Math.random() * elders.length)];
+        while (elder2 === elder1) elder2 = elders[Math.floor(Math.random() * elders.length)];
+
         const randomStore = stores[Math.floor(Math.random() * stores.length)];
-
-        // Random time in last 30 days
         const daysAgo = Math.floor(Math.random() * 30);
         const matchTime = new Date(now.getTime() - (daysAgo * 24 * 60 * 60 * 1000));
 
-        // Match Result
-        const win = Math.random() > 0.5;
-        const points = win ? 100 : 10;
+        const isWin = Math.random() > 0.5;
+        const winnerColor = isWin ? 'red' : 'yellow';
+        const points = 100;
 
-        // Insert Match
-        // Assuming table 'matches' or 'user_interactions' (from previous context context seems user_interactions was used or proposed?)
-        // Let's check schemas... previous user_interactions had 'interaction_type', 'data'.
-        // Or 'matches' table?
-        // Let's use 'user_interactions' as defined in setup_interactions.js standard
-        // interaction_type: 'match_result'
-
-        const matchData = {
-            user_id: randomElder,
+        // A. Insert into 'user_interactions'
+        await supabase.from('user_interactions').insert({
+            user_id: elder1,
             interaction_type: 'match_result',
             data: {
-                result: win ? 'win' : 'loss',
-                opponent: 'AI', // or random
+                result: isWin ? 'win' : 'loss',
+                opponent: 'Friendly Match',
                 store_id: randomStore.id,
                 store_name: randomStore.name,
-                points_earned: points
+                points_earned: isWin ? points : 10
             },
             created_at: matchTime.toISOString()
-        };
+        });
 
-        await supabase.from('user_interactions').insert(matchData);
+        // B. Insert into 'matches'
+        const { error: matchError } = await supabase.from('matches').insert({
+            store_id: randomStore.id,
+            red_team_elder_id: elder1,
+            yellow_team_elder_id: elder2,
+            winner_color: winnerColor,
+            status: 'completed',
+            is_public: true,
+            created_at: matchTime.toISOString(),
+            completed_at: matchTime.toISOString()
+        });
 
-        // Point Log
-        if (points > 0) {
-            await supabase.from('point_transactions').insert({
-                wallet_id: (await supabase.from('wallets').select('id').eq('user_id', randomElder).single()).data.id,
-                amount: points,
-                type: 'earned',
-                description: win ? '比賽勝利' : '參賽獎勵',
-                created_at: matchTime.toISOString()
-            });
+        if (matchError) {
+            console.warn('⚠️ Match insert failed:', matchError.message);
+        } else {
+            matchCount++;
+        }
+
+        // C. Point Log
+        if (isWin) {
+            const { data: wallet } = await supabase.from('wallets').select('id').eq('user_id', elder1).single();
+            if (wallet) {
+                await supabase.from('point_transactions').insert({
+                    wallet_id: wallet.id,
+                    amount: points,
+                    type: 'earned',
+                    description: '比賽勝利',
+                    created_at: matchTime.toISOString()
+                });
+            }
         }
     }
 
-    console.log(`✅ Generated 300+ historical records.`);
+    console.log(`✅ Generated ${matchCount} matches in 'matches' table.`);
     console.log('🎉 Seeding Complete!');
 }
 
