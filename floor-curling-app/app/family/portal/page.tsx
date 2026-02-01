@@ -71,9 +71,13 @@ export default function FamilyPortal() {
                             <h1 className="text-2xl font-bold text-blue-600">家屬入口</h1>
                         </div>
                         <div className="flex items-center gap-4">
-                            <div className="text-sm text-gray-600">
-                                <p className="font-medium">{user?.email}</p>
-                                <p className="text-xs text-gray-500">角色: 家屬</p>
+                            <div className="text-sm text-gray-600 text-right">
+                                <p className="font-medium text-gray-900">
+                                    {profile?.full_name || profile?.nickname || user?.user_metadata?.full_name || '家屬'}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                    {profile?.phone || user?.phone || user?.email}
+                                </p>
                             </div>
                             <button
                                 onClick={handleLogout}

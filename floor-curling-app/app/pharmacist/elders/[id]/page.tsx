@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { createBrowserClient } from '@supabase/ssr'
+import { QRCodeGenerator } from '@/components/QRCode'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 
 export default function GenericElderDetailPage() {
@@ -14,6 +15,11 @@ export default function GenericElderDetailPage() {
     const [equipment, setEquipment] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [stats, setStats] = useState({ totalMatches: 0, winRate: 0, points: 0 })
+
+    // UI States
+    const [isEditing, setIsEditing] = useState(false)
+    const [showBindingQR, setShowBindingQR] = useState(false)
+    const [editData, setEditData] = useState({ nickname: '', notes: '' })
 
     const supabase = createBrowserClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -109,9 +115,6 @@ export default function GenericElderDetailPage() {
     if (loading) return <div className="p-8 text-center bg-gray-50 min-h-screen">載入中...</div>
     if (!elder) return null
 
-    const [isEditing, setIsEditing] = useState(false)
-    const [editData, setEditData] = useState({ nickname: '', notes: '' })
-
     // Unbind Handler
     const handleUnbind = async () => {
         if (!confirm('確定要將此長輩從您的店鋪移除嗎？\n此操作無法復原。')) return
@@ -164,6 +167,44 @@ export default function GenericElderDetailPage() {
                         &larr; 返回長輩名單
                     </Link>
                     <div className="flex gap-2">
+                        {/* Binding QR Modal */}
+                        {showBindingQR && (
+                            <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" onClick={() => setShowBindingQR(false)}>
+                                <div className="bg-white rounded-2xl p-8 max-w-sm w-full text-center space-y-6" onClick={e => e.stopPropagation()}>
+                                    <h3 className="text-xl font-bold text-gray-900">家屬綁定 QR Code</h3>
+                                    <div className="flex justify-center">
+                                        <div className="p-4 border-2 border-blue-100 rounded-xl bg-blue-50">
+                                            {/* Import QRCodeGenerator at top if not present, but it's not imported yet. I need to add import. */}
+                                            {/* Assuming QRCodeGenerator is available or I might need to add import in a separate step or just assume dynamic import. 
+                                                Wait, looking at my previous view_file, QRCodeGenerator was NOT imported in this file. 
+                                                I need to add the import first or use a robust way. 
+                                                I will add the import in a separate edit or try to do it all here if I can match the top of file.
+                                                Multi-edit is risky if I don't see the top lines. 
+                                                I'll finish this edit then add import.
+                                            */}
+                                            <QRCodeGenerator value={JSON.stringify({ type: 'bind_elder', elderId: elder.id })} size={200} />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <p className="font-bold text-lg">{elder.nickname || elder.full_name}</p>
+                                        <p className="text-sm text-gray-500 mt-2">請家屬開啟「家屬入口」掃描此條碼</p>
+                                    </div>
+                                    <button
+                                        onClick={() => setShowBindingQR(false)}
+                                        className="w-full py-3 bg-gray-100 font-bold text-gray-700 rounded-xl hover:bg-gray-200"
+                                    >
+                                        關閉
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        <button
+                            onClick={() => setShowBindingQR(true)}
+                            className="text-sm bg-blue-50 hover:bg-blue-100 text-blue-600 px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center gap-1"
+                        >
+                            <span>🔗</span> 綁定家屬
+                        </button>
                         <button
                             onClick={() => {
                                 setEditData({ nickname: elder.nickname || '', notes: elder.notes || '' })
