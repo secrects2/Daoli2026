@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { updateStore, getStore } from '../actions'
 
-export default function EditStorePage({ params }: { params: { id: string } }) {
+export default function EditStorePage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = use(params)
     const router = useRouter()
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
@@ -14,7 +15,7 @@ export default function EditStorePage({ params }: { params: { id: string } }) {
 
     useEffect(() => {
         const fetchStore = async () => {
-            const result = await getStore(params.id)
+            const result = await getStore(id)
             if (result.error) {
                 setError(result.error)
             } else {
@@ -23,14 +24,14 @@ export default function EditStorePage({ params }: { params: { id: string } }) {
             setLoading(false)
         }
         fetchStore()
-    }, [params.id])
+    }, [id])
 
     const handleSubmit = async (formData: FormData) => {
         setSaving(true)
         setError(null)
 
         try {
-            const result = await updateStore(params.id, formData)
+            const result = await updateStore(id, formData)
             if (result.error) throw new Error(result.error)
             router.push('/admin/stores')
             router.refresh()
