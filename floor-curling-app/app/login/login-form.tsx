@@ -57,8 +57,15 @@ export default function LoginForm() {
         setLoading(true)
         setError(null)
         try {
+            // Force sign out potential previous session
+            await supabase.auth.signOut()
+
             const { error: signInError } = await supabase.auth.signInWithPassword(creds[role])
             if (signInError) throw signInError
+
+            // Wait a bit for cookies to settle
+            await new Promise(resolve => setTimeout(resolve, 500))
+
             router.refresh()
             router.push('/')
         } catch (err: any) {
