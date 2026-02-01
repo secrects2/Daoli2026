@@ -2,6 +2,8 @@ import './globals.css'
 import { LanguageProvider } from '@/lib/i18n/LanguageContext'
 import { TabBar } from '@/components/TabBar'
 
+import { PullToRefresh } from '@/components/PullToRefresh'
+
 export const metadata = {
     title: '道里地壺球 - Floor Curling Platform',
     description: 'Professional Floor Curling management platform',
@@ -36,7 +38,9 @@ export default function RootLayout({
             <body>
                 <LanguageProvider>
                     <main>
-                        {children}
+                        <PullToRefresh>
+                            {children}
+                        </PullToRefresh>
                     </main>
                 </LanguageProvider>
             </body>
