@@ -1,9 +1,24 @@
 const { createClient } = require('@supabase/supabase-js');
-require('dotenv').config({ path: '.env.local' });
+const dotenv = require('dotenv');
+const path = require('path');
+
+// Explicitly load .env.local
+dotenv.config({ path: path.resolve(__dirname, '../.env.local') });
+
+if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    console.error('❌ Missing Supabase Environment Variables!');
+    process.exit(1);
+}
 
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
+    process.env.SUPABASE_SERVICE_ROLE_KEY,
+    {
+        auth: {
+            autoRefreshToken: false,
+            persistSession: false
+        }
+    }
 );
 
 const LOCATIONS = ['台北總店', '台中分店', '高雄旗艦店', '新竹加盟店', '台南體驗館'];
