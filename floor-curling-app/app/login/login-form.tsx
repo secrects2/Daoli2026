@@ -59,31 +59,27 @@ export default function LoginForm() {
     }
 
     const handleQuickLogin = async (role: 'admin' | 'pharmacist' | 'family' | 'elder' | 'family_bound') => {
-        const creds = {
-            admin: { email: 'admin@daoli.com', password: 'daoli_admin_2026' },
-            pharmacist: { email: 'pharmacist@daoli.com', password: 'password123' },
-            family: { email: 'family@daoli.com', password: 'password123' },
-            family_bound: { email: 'family_bound@daoli.com', password: 'password123' },
-            elder: { email: 'elder@daoli.com', password: 'password123' }
-        }
-
-        setEmail(creds[role].email)
-        setPassword(creds[role].password)
-
-        // Trigger login immediately
         setLoading(true)
         setError(null)
+
         try {
-            // Force sign out potential previous session
-            await supabase.auth.signOut()
+            // Call Server-Side Login API
+            // This bypasses client-side env/network issues
+            const res = await fetch('/api/auth/quick-login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ role })
+            })
 
-            const { error: signInError } = await supabase.auth.signInWithPassword(creds[role])
-            if (signInError) throw signInError
+            const data = await res.json()
 
-            // Wait a bit for cookies to settle
-            await new Promise(resolve => setTimeout(resolve, 1000))
+            if (!res.ok) throw new Error(data.error || 'Login failed')
 
+            // Success - Refesh page to update middleware/server state
             router.refresh()
+
+            // Wait a moment for cookies propagation
+            await new Promise(resolve => setTimeout(resolve, 500))
 
             if (returnTo) {
                 router.push(returnTo)
@@ -93,14 +89,14 @@ export default function LoginForm() {
             // Redirect based on role
             switch (role) {
                 case 'admin':
-                    router.push('/admin') // Admin root, middleware should allow
+                    router.push('/admin')
                     break
                 case 'pharmacist':
                     router.push('/pharmacist/dashboard')
                     break
                 case 'family':
                 case 'family_bound':
-                    router.push('/family/portal') // or /family/dashboard depending on naming
+                    router.push('/family/portal')
                     break
                 case 'elder':
                     router.push('/elder/dashboard')
@@ -109,6 +105,7 @@ export default function LoginForm() {
                     router.push('/')
             }
         } catch (err: any) {
+            console.error('Login Error:', err)
             setError(err.message)
             setLoading(false)
         }
