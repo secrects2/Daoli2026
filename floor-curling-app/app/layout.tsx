@@ -1,7 +1,5 @@
 import './globals.css'
 import { LanguageProvider } from '@/lib/i18n/LanguageContext'
-import { TabBar } from '@/components/TabBar'
-
 import { PullToRefresh } from '@/components/PullToRefresh'
 
 export const metadata = {
@@ -14,7 +12,7 @@ export const metadata = {
         initialScale: 1,
         maximumScale: 1,
         userScalable: false,
-        viewportFit: 'cover', // Critical for full screen under status bar
+        viewportFit: 'cover',
     },
     appleWebApp: {
         capable: true,
@@ -29,15 +27,15 @@ export default function RootLayout({
     children: React.ReactNode
 }) {
     return (
-        <html lang="zh-TW">
+        <html lang="zh-TW" className="antialiased">
             <head>
                 <link rel="manifest" href="/manifest.json" />
                 <meta name="apple-mobile-web-app-capable" content="yes" />
                 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
             </head>
-            <body>
+            <body className="bg-gradient-to-br from-gray-50 to-gray-100 text-slate-800 min-h-screen selection:bg-blue-100 selection:text-blue-900">
                 <LanguageProvider>
-                    <main>
+                    <main className="relative min-h-screen">
                         <PullToRefresh>
                             {children}
                         </PullToRefresh>
