@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { loginWithRole } from './actions'
@@ -94,6 +94,38 @@ export default function LoginForm() {
         { role: 'family_bound', label: '已綁家屬', color: 'bg-purple-500 hover:bg-purple-600 text-white' },
         { role: 'elder', label: '長輩', color: 'bg-white hover:bg-gray-50 text-gray-700 border border-gray-200' },
     ]
+
+    const [isAutoLoggingIn, setIsAutoLoggingIn] = useState(false)
+
+    useEffect(() => {
+        // 檢測是否為 LINE 內建瀏覽器
+        const ua = navigator.userAgent || navigator.vendor || (window as any).opera
+        const isLine = /Line/i.test(ua)
+
+        // 如果是 LINE 瀏覽器，且沒有錯誤訊息 (避免無限迴圈)，則自動執行 LINE 登入
+        if (isLine && !searchParams.get('error') && !searchParams.get('disable_auto_login')) {
+            setIsAutoLoggingIn(true)
+            handleLineLogin('family')
+        }
+    }, [searchParams])
+
+    if (isAutoLoggingIn) {
+        return (
+            <div className="flex flex-col items-center justify-center py-12 space-y-4 animate-fade-in">
+                <div className="w-12 h-12 border-4 border-[#06C755]/30 border-t-[#06C755] rounded-full animate-spin"></div>
+                <div className="text-center">
+                    <p className="text-gray-900 font-bold text-lg">正在使用 LINE 帳號登入...</p>
+                    <p className="text-gray-500 text-sm mt-1">請稍候，正在為您跳轉</p>
+                </div>
+                <button
+                    onClick={() => setIsAutoLoggingIn(false)}
+                    className="text-sm text-gray-400 hover:text-gray-600 underline mt-4"
+                >
+                    取消自動登入
+                </button>
+            </div>
+        )
+    }
 
     return (
         <div className="space-y-6">
