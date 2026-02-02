@@ -51,7 +51,22 @@ export async function loginWithRole(role: string) {
     const { error } = await supabase.auth.signInWithPassword(creds[role])
 
     if (error) {
-        return { error: error.message }
+        // DEBUG: Check if user exists using Admin Client
+        let debugMsg = ''
+        try {
+            const adminSupabase = createServerClient(
+                process.env.NEXT_PUBLIC_SUPABASE_URL!,
+                process.env.SUPABASE_SERVICE_ROLE_KEY!,
+                { cookies: { get: () => undefined, set: () => { }, remove: () => { } } }
+            )
+            const { data: { users } } = await adminSupabase.auth.admin.listUsers()
+            const found = users.find(u => u.email === creds[role].email)
+            debugMsg = found ? `(User Found: ${found.id.slice(0, 4)}...)` : '(User NOT Found in DB)'
+        } catch (e) {
+            debugMsg = '(Admin Check Failed)'
+        }
+
+        return { error: `${error.message} ${debugMsg}` }
     }
 
     return { success: true }
