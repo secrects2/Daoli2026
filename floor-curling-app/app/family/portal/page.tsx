@@ -104,8 +104,26 @@ export default function FamilyPortal() {
                     )}
                 </div>
 
-                {/* 功能卡片 */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {/* Weekly Summary Card (Ported from Dashboard) */}
+                <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl p-6 shadow-xl text-white relative overflow-hidden mb-8">
+                    <div className="absolute right-0 top-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
+                    <div className="relative z-10">
+                        <p className="text-blue-100 text-sm font-medium mb-2">本週活動摘要</p>
+                        <div className="flex items-baseline gap-2 mb-4">
+                            <h3 className="text-4xl font-bold">{0}</h3>
+                            <span className="opacity-80">場比賽</span>
+                        </div>
+                        <p className="text-blue-100 text-xs leading-relaxed max-w-[80%]">
+                            長輩本週表現活躍！建議您可以傳送訊息給予鼓勵。
+                        </p>
+                        <Link href="/family/messages" className="absolute right-6 bottom-6 bg-white/20 hover:bg-white/30 backdrop-blur-md px-4 py-2 rounded-full text-xs font-bold transition-colors">
+                            發送鼓勵 →
+                        </Link>
+                    </div>
+                </div>
+
+                {/* 功能卡片 Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                     {/* 比賽紀錄 */}
                     <Link href="/family/matches" className="block group">
                         <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow group-hover:border-blue-200 border border-transparent">
@@ -166,7 +184,7 @@ export default function FamilyPortal() {
                         </div>
                     </Link>
 
-                    {/* 裝備商店 (送禮) */}
+                    {/* 裝備商店 (送禮) - S2B2C 核心 */}
                     <Link href="/family/shop" className="block group">
                         <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow group-hover:border-pink-200 border border-transparent">
                             <div className="flex items-center justify-between mb-4">
@@ -174,8 +192,8 @@ export default function FamilyPortal() {
                                     <span className="text-2xl">🎁</span>
                                 </div>
                             </div>
-                            <h3 className="text-lg font-semibold text-gray-900 mb-2">送禮給長輩</h3>
-                            <p className="text-sm text-gray-600">兌換裝備與健康補給</p>
+                            <h3 className="text-lg font-semibold text-gray-900 mb-2">數位市集</h3>
+                            <p className="text-sm text-gray-600">為長輩添購裝備與健康補給</p>
                         </div>
                     </Link>
                 </div>
