@@ -33,7 +33,8 @@ export default function RootLayout({
                 <meta name="apple-mobile-web-app-capable" content="yes" />
                 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
             </head>
-            <body className="bg-gradient-to-br from-gray-50 to-gray-100 text-slate-800 min-h-screen selection:bg-blue-100 selection:text-blue-900">
+            {/* Revert to simple white/gray background */}
+            <body className="bg-gray-50 text-slate-800 min-h-screen selection:bg-blue-100 selection:text-blue-900">
                 <LanguageProvider>
                     <main className="relative min-h-screen">
                         <PullToRefresh>

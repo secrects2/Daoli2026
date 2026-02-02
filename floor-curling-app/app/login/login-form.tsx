@@ -87,6 +87,14 @@ export default function LoginForm() {
         }
     }
 
+    const devButtons = [
+        { role: 'admin', label: 'Admin', color: 'bg-red-500 hover:bg-red-600 text-white' },
+        { role: 'pharmacist', label: 'Pharmacist', color: 'bg-blue-500 hover:bg-blue-600 text-white' },
+        { role: 'family', label: 'Family', color: 'bg-green-500 hover:bg-green-600 text-white' },
+        { role: 'family_bound', label: 'Family Bound', color: 'bg-purple-500 hover:bg-purple-600 text-white' },
+        { role: 'elder', label: 'Elder', color: 'bg-white hover:bg-gray-50 text-gray-700 border border-gray-200' }, // "長輩登入按鈕為白底" applied here for Dev button
+    ]
+
     return (
         <div className="space-y-6">
             {error && (
@@ -141,7 +149,7 @@ export default function LoginForm() {
                     <button
                         type="button"
                         onClick={() => handleLineLogin('elder')}
-                        className="w-full py-4 rounded-2xl border-2 border-[#06C755] text-[#06C755] hover:bg-green-50 font-bold text-lg transition-all transform active:scale-95 flex items-center justify-center gap-3"
+                        className="w-full py-4 rounded-2xl bg-white border border-gray-200 hover:bg-gray-50 text-[#06C755] font-bold text-lg shadow-sm hover:shadow-md transition-all transform active:scale-95 flex items-center justify-center gap-3"
                     >
                         <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M20.5 10c0-4.8-4.5-8.7-10-8.7S.5 5.2.5 10c0 4.3 3.6 7.9 8.5 8.6.3.1.5.2.5.5v2.2c0 .2.1.4.3.4.1 0 .2 0 .3-.1.9-.5 4.1-2.4 5.7-4.1 3-2.6 4.7-5.3 4.7-8.5z" />
@@ -201,19 +209,25 @@ export default function LoginForm() {
                 </div>
             )}
 
-            {/* Dev Tools - Kept but styled beautifully */}
+            {/* Dev Tools - With 5 Distinct Colors */}
             <div className="pt-8 mt-6">
                 <div className="relative flex items-center justify-center mb-4">
-                    <span className="bg-white/50 px-2 py-0.5 rounded text-[10px] uppercase font-bold text-gray-300">Development Mode</span>
+                    <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-gray-100"></div>
+                    </div>
+                    <span className="relative bg-white px-2 py-0.5 rounded text-[10px] uppercase font-bold text-gray-300">Development Mode</span>
                 </div>
                 <div className="grid grid-cols-5 gap-2">
-                    {['admin', 'pharmacist', 'family', 'family_bound', 'elder'].map(role => (
+                    {devButtons.map(btn => (
                         <button
-                            key={role}
-                            onClick={() => handleQuickLogin(role as any)}
-                            className="py-1.5 bg-gray-100 text-gray-500 rounded-lg text-[10px] hover:bg-gray-200 font-bold transition-colors uppercase tracking-tight"
+                            key={btn.role}
+                            onClick={() => handleQuickLogin(btn.role as any)}
+                            className={clsx(
+                                "py-2 rounded-lg text-[10px] font-bold transition-transform active:scale-95 uppercase tracking-tight shadow-sm",
+                                btn.color
+                            )}
                         >
-                            {role.replace('_', ' ')}
+                            {btn.label}
                         </button>
                     ))}
                 </div>

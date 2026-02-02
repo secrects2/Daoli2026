@@ -3,22 +3,19 @@ import LoginForm from './login-form'
 
 export default function LoginPage() {
     return (
-        <div className="min-h-screen relative overflow-hidden flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-black">
-            {/* Dynamic Background */}
-            <div className="absolute inset-0 z-0">
-                {/* Gradient Blobs */}
-                <div className="absolute -top-[20%] -left-[10%] w-[70vw] h-[70vw] bg-purple-600/30 rounded-full blur-[120px] mix-blend-screen animate-pulse-slow"></div>
-                <div className="absolute top-[20%] right-[0%] w-[60vw] h-[60vw] bg-blue-600/30 rounded-full blur-[100px] mix-blend-screen animate-pulse-slow delay-1000"></div>
-                <div className="absolute -bottom-[20%] left-[20%] w-[50vw] h-[50vw] bg-pink-600/30 rounded-full blur-[100px] mix-blend-screen animate-pulse-slow delay-2000"></div>
+        <div className="min-h-screen relative overflow-hidden flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
+
+            {/* Subtle light blobs instead of dark ones */}
+            <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+                <div className="absolute -top-[10%] -right-[10%] w-[50vw] h-[50vw] bg-blue-100/50 rounded-full blur-[100px] mix-blend-multiply"></div>
+                <div className="absolute top-[20%] -left-[10%] w-[50vw] h-[50vw] bg-purple-100/50 rounded-full blur-[100px] mix-blend-multiply delay-1000"></div>
             </div>
 
-            {/* Glass Container */}
-            <div className="relative z-10 w-full max-w-md w-full animate-scale-in">
-                {/* Card */}
-                <div className="backdrop-blur-xl bg-white/70 shadow-glass border border-white/50 rounded-3xl p-8 sm:p-10 relative overflow-hidden">
+            {/* Container - Simplified Glass/White Card */}
+            <div className="relative z-10 w-full max-w-md animate-scale-in">
 
-                    {/* Decorative Shine */}
-                    <div className="absolute top-0 right-0 -mr-16 -mt-16 w-32 h-32 bg-gradient-to-br from-white/40 to-transparent rounded-full blur-xl"></div>
+                {/* Clean White Card */}
+                <div className="bg-white/80 backdrop-blur-xl shadow-xl border border-white/60 rounded-3xl p-8 sm:p-10 relative overflow-hidden">
 
                     {/* Header */}
                     <div className="text-center mb-8 relative z-10">
@@ -27,7 +24,7 @@ export default function LoginPage() {
                                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
                             </svg>
                         </div>
-                        <h2 className="text-3xl font-black tracking-tight text-gray-900 drop-shadow-sm">
+                        <h2 className="text-3xl font-black tracking-tight text-gray-900">
                             道里地壺球
                         </h2>
                         <p className="mt-2 text-sm font-medium text-gray-500 uppercase tracking-widest">
@@ -46,7 +43,7 @@ export default function LoginPage() {
                 </div>
 
                 {/* Footer */}
-                <p className="mt-8 text-center text-xs text-white/40 font-medium tracking-wide">
+                <p className="mt-8 text-center text-xs text-gray-400 font-medium tracking-wide">
                     &copy; 2026 DaoLi Floor Curling. <br /> Designed for Digital Health.
                 </p>
             </div>
