@@ -3,12 +3,15 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createBrowserClient } from '@supabase/ssr'
 import { QRCodeGenerator, generateElderQRContent } from '@/components/QRCode'
 
 export default function ElderDashboard() {
     const router = useRouter()
-    const supabase = createClientComponentClient()
+    const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
     const [user, setUser] = useState<any>(null)
     const [familyMembers, setFamilyMembers] = useState<any[]>([])
     const [cheers, setCheers] = useState<any[]>([])
@@ -19,6 +22,7 @@ export default function ElderDashboard() {
     useEffect(() => {
         const fetchUser = async () => {
             const { data: { user } } = await supabase.auth.getUser()
+
             if (!user) {
                 router.push('/login')
                 return

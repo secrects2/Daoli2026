@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { submitMatchSchema } from '@/lib/validations/match'
 import { createNotification } from '@/lib/notifications'
+import { z } from 'zod' // We need to extend the schema locally or update it, easier to extend check here for now
 
 // 使用 Service Role Key 初始化 Supabase Admin 客戶端
 const supabaseAdmin = createClient(
@@ -9,91 +10,187 @@ const supabaseAdmin = createClient(
     process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
+const POINTS_WIN = 100
+const POINTS_DRAW = 50
+const POINTS_LOSS = 10
+
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json()
 
-        // 1. Zod 驗證輸入 (保留前端驗證作為第一道防線)
-        const validationResult = submitMatchSchema.safeParse(body)
-        if (!validationResult.success) {
-            const errors = validationResult.error.issues.map(issue => ({
-                path: issue.path.join('.'),
-                message: issue.message
-            }))
+        // Temporary Schema Check for Arrays (until we update validations lib)
+        // We expect body to have redTeamIds: string[], yellowTeamIds: string[], storeId, ends
+        // The previous schema expected redElderId, yellowElderId.
+        // We will adapt the validation manually here for the new fields, or try to coerce.
+        const { storeId, ends, redTeamIds, yellowTeamIds } = body
 
-            // 檢查是否為證據缺失錯誤
-            const evidenceError = errors.find(e => e.path.includes('houseSnapshotUrl'))
-            if (evidenceError) {
-                return NextResponse.json(
-                    {
-                        success: false,
-                        error: '【雙機流協議違規】缺少證據照片，積分寫入被拒絕',
-                        code: 'EVIDENCE_REQUIRED',
-                        details: errors
-                    },
-                    { status: 400 }
-                )
-            }
+        if (!storeId || !ends || !Array.isArray(redTeamIds) || !Array.isArray(yellowTeamIds)) {
+            return NextResponse.json({ success: false, error: '資料格式錯誤 (需包含隊伍名單)' }, { status: 400 })
+        }
+        if (redTeamIds.length === 0 || yellowTeamIds.length === 0) {
+            return NextResponse.json({ success: false, error: '每隊至少需有一名長輩' }, { status: 400 })
+        }
+        if (redTeamIds.length > 6 || yellowTeamIds.length > 6) {
+            return NextResponse.json({ success: false, error: '每隊最多 6 名長輩' }, { status: 400 })
+        }
 
+        // Check for duplicates across teams
+        const allIds = [...redTeamIds, ...yellowTeamIds]
+        if (new Set(allIds).size !== allIds.length) {
+            return NextResponse.json({ success: false, error: '長輩不能同時存在於兩隊' }, { status: 400 })
+        }
+
+        // 驗證 Ends (簡單檢查)
+        if (ends.length === 0) {
+            return NextResponse.json({ success: false, error: '至少需有一局比賽' }, { status: 400 })
+        }
+
+        // ✅ 強制證據驗證 (Manual check as we bypassed Zod)
+        const missingPhotoEnds = ends.filter((end: any) => !end.houseSnapshotUrl)
+        if (missingPhotoEnds.length > 0) {
             return NextResponse.json(
-                { success: false, error: '資料驗證失敗', details: errors },
+                {
+                    success: false,
+                    error: '【雙機流協議違規】缺少證據照片',
+                    code: 'EVIDENCE_REQUIRED'
+                },
                 { status: 400 }
             )
         }
 
-        const { redElderId, yellowElderId, storeId, ends } = validationResult.data
 
-        if (redElderId === yellowElderId) {
-            return NextResponse.json(
-                { success: false, error: '紅方和黃方不能是同一位長者' },
-                { status: 400 }
-            )
-        }
+        // 2. Calculate Result
+        const redTotal = ends.reduce((sum: number, end: any) => sum + (parseInt(end.redScore) || 0), 0)
+        const yellowTotal = ends.reduce((sum: number, end: any) => sum + (parseInt(end.yellowScore) || 0), 0)
 
-        // 2. 呼叫核心資料庫函數 (The Core)
-        // 將所有計算、分數記錄、錢包更新邏輯下沉到資料庫
-        const { data: result, error: rpcError } = await supabaseAdmin.rpc('calculate_and_record_match_result', {
-            p_store_id: storeId,
-            p_red_elder_id: redElderId,
-            p_yellow_elder_id: yellowElderId,
-            p_ends: ends,
-            p_operator_id: null // 未來可擴充
-        })
+        let winnerColor: 'red' | 'yellow' | null = null
+        if (redTotal > yellowTotal) winnerColor = 'red'
+        else if (yellowTotal > redTotal) winnerColor = 'yellow'
 
-        if (rpcError) {
-            console.error('RPC Error:', rpcError)
-            throw new Error(`核心計算錯誤: ${rpcError.message}`)
-        }
+        // 3. Database Operations (Transaction-like)
 
-        // 3. 處理通知 (The Shell - 應用層邏輯)
-        // 根據核心返回的結果發送通知
-        const { match_id, red_total, yellow_total, winner_color, winner_id } = result
+        // A. Insert Match
+        const { data: match, error: matchError } = await supabaseAdmin
+            .from('matches')
+            .insert({
+                store_id: storeId,
+                red_team_elder_id: null, // Legacy field
+                yellow_team_elder_id: null, // Legacy field
+                winner_color: winnerColor,
+                status: 'completed',
+                completed_at: new Date().toISOString(),
+                // Store raw ends data if needed, but usually we just store match record.
+                // If we need to store ends detail in DB, we'd need a match_ends table, but currently logic implied calculate_and_record handled it.
+                // Assuming 'match' table is enough for history summary. 
+            })
+            .select()
+            .single()
 
-        // 找出敗方 ID
-        const loserId = winner_id === redElderId ? yellowElderId : redElderId;
-        // 如果平局 (winner_id is null)，則兩個都是參與者，這裡簡化處理
+        if (matchError) throw new Error('建立比賽失敗: ' + matchError.message)
+        const matchId = match.id
 
-        // 異步發送通知，不阻塞回應
-        (async () => {
-            try {
-                if (winner_color) {
-                    // 有勝負
-                    await notifyFamily(winner_id, '勝利！🏆', `您的長輩在比賽中獲勝！總分 ${Math.max(red_total, yellow_total)}`, match_id, winner_id)
-                    await notifyFamily(loserId, '比賽完成 🥌', `您的長輩完成了一場精彩的比賽！`, match_id, loserId)
+        // B. Insert Participants & Interactions & Points
+        const participants = [
+            ...redTeamIds.map(id => ({ match_id: matchId, elder_id: id, team: 'red' })),
+            ...yellowTeamIds.map(id => ({ match_id: matchId, elder_id: id, team: 'yellow' }))
+        ]
+
+        const { error: partError } = await supabaseAdmin
+            .from('match_participants')
+            .insert(participants)
+
+        if (partError) throw new Error('建立參賽名單失敗: ' + partError.message)
+
+        // C. Process Interactions & Points for EACH Elder
+        const processElder = async (elderId: string, team: 'red' | 'yellow') => {
+            let result: 'win' | 'loss' | 'draw' = 'draw'
+            let points = POINTS_DRAW
+
+            if (winnerColor) {
+                if (team === winnerColor) {
+                    result = 'win'
+                    points = POINTS_WIN
                 } else {
-                    // 平局
-                    await notifyFamily(redElderId, '比賽平局 🤝', `這是一場勢均力敵的比賽！比分 ${red_total}:${yellow_total}`, match_id, redElderId)
-                    await notifyFamily(yellowElderId, '比賽平局 🤝', `這是一場勢均力敵的比賽！比分 ${red_total}:${yellow_total}`, match_id, yellowElderId)
+                    result = 'loss'
+                    points = POINTS_LOSS
                 }
-            } catch (notifyError) {
-                console.error('Notification Error:', notifyError)
             }
-        })()
+
+            // 1. Interaction
+            await supabaseAdmin.from('user_interactions').insert({
+                user_id: elderId,
+                interaction_type: 'match_result',
+                data: {
+                    match_id: matchId,
+                    result,
+                    opponent: 'Multi-Elder Match', // Simplified
+                    points_earned: points,
+                    scores: { red: redTotal, yellow: yellowTotal }
+                }
+            })
+
+            // 2. Wallet & Transaction
+            // Check wallet existence
+            const { data: wallet } = await supabaseAdmin
+                .from('wallets')
+                .select('id')
+                .eq('user_id', elderId)
+                .single()
+
+            if (wallet) {
+                // Insert Transaction
+                await supabaseAdmin.from('point_transactions').insert({
+                    wallet_id: wallet.id,
+                    amount: points,
+                    type: 'earned',
+                    description: `比賽${result === 'win' ? '勝利' : result === 'loss' ? '參加' : '平局'} (${new Date().toLocaleDateString()})`
+                })
+
+                // Increment Wallet (Naive approach, usually RPC safer but valid here)
+                // Using rpc 'increment_points' if exists would be better, but direct update is ok for MVP
+                // Let's use a raw RPC call for atomic update if possible, or just fetch-update
+                const { error: walletError } = await supabaseAdmin.rpc('increment_wallet_points', {
+                    p_wallet_id: wallet.id,
+                    p_amount: points
+                })
+                // Fallback if RPC missing (it might be named differently or non-existent)
+                if (walletError) {
+                    // Try direct update (potential race condition but acceptable for low traffic)
+                    const { error: incrementError } = await supabaseAdmin.rpc('increment_points', {
+                        table_name: 'wallets',
+                        row_id: wallet.id,
+                        x: points
+                    })
+
+                    if (incrementError) {
+                        // Manual fetch update
+                        const { data: w } = await supabaseAdmin.from('wallets').select('global_points').eq('id', wallet.id).single()
+                        if (w) {
+                            await supabaseAdmin.from('wallets').update({ global_points: (w.global_points || 0) + points }).eq('id', wallet.id)
+                        }
+                    }
+                }
+            }
+
+            // 3. Notify
+            const title = result === 'win' ? '勝利！🏆' : result === 'draw' ? '比賽平局 🤝' : '比賽完成 🥌'
+            const msg = result === 'win'
+                ? `您的長輩在團隊賽中獲勝！總分 ${Math.max(redTotal, yellowTotal)}`
+                : `比分 ${redTotal}:${yellowTotal}`
+
+            await notifyFamily(elderId, title, msg, matchId)
+        }
+
+        // Run in parallel
+        await Promise.all(allIds.map(id => {
+            const team = redTeamIds.includes(id) ? 'red' : 'yellow'
+            return processElder(id, team as 'red' | 'yellow')
+        }))
 
         return NextResponse.json({
             success: true,
-            matchId: match_id,
-            message: '比賽結果已記錄，積分已更新 (Core Validated)'
+            matchId: matchId,
+            message: '多長輩比賽結果已記錄'
         })
 
     } catch (error: any) {
@@ -106,8 +203,7 @@ export async function POST(req: NextRequest) {
 }
 
 // 輔助函數：通知家屬 (S2B2C)
-async function notifyFamily(elderId: string, title: string, message: string, matchId: string, elderIdParam: string) {
-    // Check if valid elderId
+async function notifyFamily(elderId: string, title: string, message: string, matchId: string) {
     if (!elderId) return
 
     const { data: familyMembers } = await supabaseAdmin

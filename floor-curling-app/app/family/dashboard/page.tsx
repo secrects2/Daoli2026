@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClientComponentClient } from '@/lib/supabase'
 import { useLanguage } from '@/lib/i18n/LanguageContext'
 import Link from 'next/link'
 import { QRCodeScanner } from '@/components/QRCodeScanner'

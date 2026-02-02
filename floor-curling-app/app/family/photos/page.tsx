@@ -1,19 +1,62 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { createBrowserClient } from '@supabase/ssr'
 
 export default function FamilyPhotosPage() {
     const router = useRouter()
-    const [viewingPhoto, setViewingPhoto] = useState<number | null>(null)
+    const [viewingPhoto, setViewingPhoto] = useState<any>(null)
+    const [mediaList, setMediaList] = useState<any[]>([])
+    const [loading, setLoading] = useState(true)
 
-    // Fake photos
-    const photos = [1, 2, 3, 4, 5, 6].map(i => ({
-        id: i,
-        url: `https://picsum.photos/seed/${i + 100}/800/800`,
-        date: new Date(Date.now() - i * 86400000).toLocaleDateString('zh-TW')
-    }))
+    const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+
+    useEffect(() => {
+        const fetchData = async () => {
+            // 1. Get Current User
+            const { data: { user } } = await supabase.auth.getUser()
+            if (!user) {
+                router.push('/login')
+                return
+            }
+
+            // 2. Get Profile to find linked elder
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('linked_elder_id')
+                .eq('id', user.id)
+                .single()
+
+            if (!profile?.linked_elder_id) {
+                setLoading(false)
+                return
+            }
+
+            // 3. Fetch Media
+            const { data: media } = await supabase
+                .from('media_library')
+                .select('*')
+                .eq('elder_id', profile.linked_elder_id)
+                .order('created_at', { ascending: false })
+
+            setMediaList(media || [])
+            setLoading(false)
+        }
+        fetchData()
+    }, [router, supabase])
+
+    // Group by Date
+    const groupedMedia = mediaList.reduce((acc, item) => {
+        const date = new Date(item.created_at).toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric' })
+        if (!acc[date]) acc[date] = []
+        acc[date].push(item)
+        return acc
+    }, {} as Record<string, any[]>)
 
     return (
         <div className="min-h-screen bg-gray-50 pb-20">
@@ -25,38 +68,56 @@ export default function FamilyPhotosPage() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                         </svg>
                     </button>
-                    <h1 className="text-lg font-bold">照片與影片</h1>
+                    <h1 className="text-lg font-bold">比賽精彩時刻</h1>
                 </div>
             </div>
 
-            <div className="max-w-3xl mx-auto p-4">
-                {photos.length === 0 ? (
+            <div className="max-w-3xl mx-auto p-4 space-y-8">
+                {loading ? (
+                    <div className="text-center py-20 text-gray-500">載入中...</div>
+                ) : mediaList.length === 0 ? (
                     <div className="text-center py-20 text-gray-500">
-                        尚無照片
+                        <p className="text-4xl mb-2">📷</p>
+                        尚未有比賽紀錄
                     </div>
                 ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        {photos.map(p => (
-                            <div
-                                key={p.id}
-                                className="aspect-square bg-gray-200 rounded-xl overflow-hidden cursor-pointer hover:opacity-90 transition-opacity relative group"
-                                onClick={() => setViewingPhoto(p.id)}
-                            >
-                                <img src={p.url} className="w-full h-full object-cover" />
-                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
-                                <span className="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">
-                                    {p.date}
-                                </span>
+                    Object.entries(groupedMedia).map(([date, items]) => (
+                        <div key={date}>
+                            <h3 className="sticky top-16 z-0 bg-gray-50/90 backdrop-blur-sm py-2 px-1 text-sm font-bold text-gray-500 mb-2">
+                                {date}
+                            </h3>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                {(items as any[]).map((p: any) => (
+                                    <div
+                                        key={p.id}
+                                        className="aspect-square bg-black rounded-xl overflow-hidden cursor-pointer hover:opacity-90 transition-opacity relative group shadow-sm border border-gray-200"
+                                        onClick={() => p.type === 'photo' ? setViewingPhoto(p) : null}
+                                    >
+                                        {p.type === 'video' ? (
+                                            <video src={p.public_url} className="w-full h-full object-cover" controls />
+                                        ) : (
+                                            <img src={p.public_url} className="w-full h-full object-cover" />
+                                        )}
+
+                                        {p.type === 'video' && (
+                                            <div className="absolute top-2 right-2 bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full pointer-events-none">
+                                                PLAY
+                                            </div>
+                                        )}
+
+                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors pointer-events-none" />
+                                    </div>
+                                ))}
                             </div>
-                        ))}
-                    </div>
+                        </div>
+                    ))
                 )}
             </div>
 
-            {/* Lightbox */}
+            {/* Lightbox for Photos */}
             {viewingPhoto && (
                 <div
-                    className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4"
+                    className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4 backdrop-blur-sm"
                     onClick={() => setViewingPhoto(null)}
                 >
                     <button className="absolute top-4 right-4 text-white p-2">
@@ -65,9 +126,13 @@ export default function FamilyPhotosPage() {
                         </svg>
                     </button>
                     <img
-                        src={photos.find(p => p.id === viewingPhoto)?.url}
+                        src={viewingPhoto.public_url}
                         className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
                     />
+                    <div className="absolute bottom-10 text-white text-center">
+                        <p className="font-bold">{viewingPhoto.title}</p>
+                        <p className="text-sm opacity-80">{new Date(viewingPhoto.created_at).toLocaleDateString()}</p>
+                    </div>
                 </div>
             )}
         </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { createBrowserClient } from '@supabase/ssr'
@@ -15,6 +15,9 @@ export default function GenericElderDetailPage() {
     const [equipment, setEquipment] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [stats, setStats] = useState({ totalMatches: 0, winRate: 0, points: 0 })
+    const [mediaList, setMediaList] = useState<any[]>([])
+    const [uploadingMedia, setUploadingMedia] = useState(false)
+    const fileInputRef = useRef<HTMLInputElement>(null)
 
     // UI States
     const [isEditing, setIsEditing] = useState(false)
@@ -107,6 +110,16 @@ export default function GenericElderDetailPage() {
                 owned: ownedProductIds.has(p.id)
             })))
 
+
+            // 5. Fetch Media Library
+            const { data: media } = await supabase
+                .from('media_library')
+                .select('*')
+                .eq('elder_id', params.id)
+                .order('created_at', { ascending: false })
+
+            setMediaList(media || [])
+
             setLoading(false)
         }
         fetchElderData()
@@ -114,6 +127,65 @@ export default function GenericElderDetailPage() {
 
     if (loading) return <div className="p-8 text-center bg-gray-50 min-h-screen">載入中...</div>
     if (!elder) return null
+
+    // Media Upload Handler
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files || e.target.files.length === 0) return
+        const file = e.target.files[0]
+
+        // 1. Validate
+        if (file.size > 50 * 1024 * 1024) { // 50MB limit
+            alert('檔案太大，請小於 50MB')
+            return
+        }
+
+        setUploadingMedia(true)
+        try {
+            // 2. Upload to Storage
+            // Path: {store_id}/{elder_id}/{date}/{filename}
+            const dateStr = new Date().toISOString().split('T')[0]
+            const storeId = elder.store_id || 'unknown_store'
+            const storagePath = `${storeId}/${elder.id}/${dateStr}/${Date.now()}_${file.name}`
+
+            const { data: uploadData, error: uploadError } = await supabase.storage
+                .from('media')
+                .upload(storagePath, file)
+
+            if (uploadError) throw uploadError
+
+            // 3. Get Public URL
+            const { data: { publicUrl } } = supabase.storage
+                .from('media')
+                .getPublicUrl(storagePath)
+
+            // 4. Insert into DB
+            const isVideo = file.type.startsWith('video')
+            const { data: newMedia, error: dbError } = await supabase
+                .from('media_library')
+                .insert({
+                    elder_id: elder.id,
+                    storage_path: storagePath,
+                    public_url: publicUrl,
+                    title: file.name,
+                    type: isVideo ? 'video' : 'photo',
+                    created_by: (await supabase.auth.getUser()).data.user?.id
+                })
+                .select()
+                .single()
+
+            if (dbError) throw dbError
+
+            // 5. Update UI
+            setMediaList(prev => [newMedia, ...prev])
+            alert('上傳成功！')
+        } catch (err: any) {
+            console.error('Upload failed:', err)
+            alert('上傳失敗: ' + err.message)
+        } finally {
+            setUploadingMedia(false)
+            if (fileInputRef.current) fileInputRef.current.value = ''
+        }
+    }
 
     // Unbind Handler
     const handleUnbind = async () => {
@@ -371,6 +443,69 @@ export default function GenericElderDetailPage() {
                             </div>
                         ))}
                     </div>
+                </div>
+
+                {/* Media Gallery */}
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="font-bold text-gray-900 flex items-center gap-2">
+                            <span>�</span> 此長輩的比賽影片與照片
+                        </h3>
+                        <div>
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                onChange={handleFileUpload}
+                                className="hidden"
+                                accept="image/*,video/*"
+                            />
+                            <button
+                                onClick={() => fileInputRef.current?.click()}
+                                disabled={uploadingMedia}
+                                className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+                            >
+                                {uploadingMedia ? '上傳中...' : (
+                                    <>
+                                        <span>📤</span> 上傳影像
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+
+                    {mediaList.length === 0 ? (
+                        <div className="text-center py-12 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                            <p className="text-gray-500">尚無上傳紀錄</p>
+                            <p className="text-xs text-gray-400 mt-1">點擊右上角按鈕上傳比賽影片或照片</p>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            {mediaList.map((media) => (
+                                <div key={media.id} className="group relative aspect-video bg-black rounded-lg overflow-hidden border border-gray-200">
+                                    {media.type === 'video' ? (
+                                        <video
+                                            src={media.public_url}
+                                            className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                                            controls
+                                        />
+                                    ) : (
+                                        <img src={media.public_url} className="w-full h-full object-cover" />
+                                    )}
+
+                                    {/* Type Badge */}
+                                    <div className="absolute top-2 right-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-full backdrop-blur-sm pointer-events-none">
+                                        {media.type === 'video' ? 'VIDEO' : 'PHOTO'}
+                                    </div>
+
+                                    {/* Date Overlay */}
+                                    <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-2 pointer-events-none">
+                                        <p className="text-white text-xs truncate">{media.title}</p>
+                                        <p className="text-gray-300 text-[10px]">{new Date(media.created_at).toLocaleDateString()}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
             </main>

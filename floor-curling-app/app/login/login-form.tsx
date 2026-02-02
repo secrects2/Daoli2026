@@ -58,11 +58,12 @@ export default function LoginForm() {
         window.location.href = `/api/auth/line/login?role=${role}${returnTo ? `&returnTo=${encodeURIComponent(returnTo)}` : ''}`
     }
 
-    const handleQuickLogin = async (role: 'admin' | 'pharmacist' | 'family' | 'elder') => {
+    const handleQuickLogin = async (role: 'admin' | 'pharmacist' | 'family' | 'elder' | 'family_bound') => {
         const creds = {
             admin: { email: 'admin@daoli.com', password: 'daoli_admin_2026' },
             pharmacist: { email: 'pharmacist@daoli.com', password: 'password123' },
             family: { email: 'family@daoli.com', password: 'password123' },
+            family_bound: { email: 'family_bound@daoli.com', password: 'password123' },
             elder: { email: 'elder@daoli.com', password: 'password123' }
         }
 
@@ -98,6 +99,7 @@ export default function LoginForm() {
                     router.push('/pharmacist/dashboard')
                     break
                 case 'family':
+                case 'family_bound':
                     router.push('/family/portal') // or /family/dashboard depending on naming
                     break
                 case 'elder':
@@ -255,10 +257,11 @@ export default function LoginForm() {
             */}
             <div className="pt-8 mt-8 border-t border-gray-100">
                 <p className="text-center text-[10px] text-gray-300 mb-3 uppercase tracking-wider">Development Mode</p>
-                <div className="grid grid-cols-4 gap-2 mb-4">
+                <div className="grid grid-cols-5 gap-2 mb-4">
                     <button onClick={() => handleQuickLogin('admin')} className="py-2 bg-purple-50 text-purple-600 rounded text-[10px] hover:bg-purple-100 font-bold">Admin</button>
                     <button onClick={() => handleQuickLogin('pharmacist')} className="py-2 bg-blue-50 text-blue-600 rounded text-[10px] hover:bg-blue-100 font-bold">Franchise</button>
                     <button onClick={() => handleQuickLogin('family')} className="py-2 bg-green-50 text-green-600 rounded text-[10px] hover:bg-green-100 font-bold">Family</button>
+                    <button onClick={() => handleQuickLogin('family_bound')} className="py-2 bg-teal-50 text-teal-600 rounded text-[10px] hover:bg-teal-100 font-bold">Family (Bound)</button>
                     <button onClick={() => handleQuickLogin('elder')} className="py-2 bg-orange-50 text-orange-600 rounded text-[10px] hover:bg-orange-100 font-bold">Elder</button>
                 </div>
                 <div className="text-center">

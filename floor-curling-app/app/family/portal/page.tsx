@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createClientComponentClient } from '@/lib/supabase'
+import { createBrowserClient } from '@supabase/ssr'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
@@ -11,7 +11,10 @@ export default function FamilyPortal() {
     const [elderProfile, setElderProfile] = useState<any>(null)
     const [loading, setLoading] = useState(true)
     const router = useRouter()
-    const supabase = createClientComponentClient()
+    const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
 
     useEffect(() => {
         const getUser = async () => {

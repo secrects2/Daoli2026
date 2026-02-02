@@ -23,9 +23,9 @@ export default function NewMatchPage() {
     const router = useRouter()
     const supabase = createClientComponentClient()
 
-    // 状态管理
-    const [redElderId, setRedElderId] = useState('')
-    const [yellowElderId, setYellowElderId] = useState('')
+    // 狀態管理
+    const [redTeamIds, setRedTeamIds] = useState<string[]>([])
+    const [yellowTeamIds, setYellowTeamIds] = useState<string[]>([])
     const [storeId, setStoreId] = useState('')
     const [ends, setEnds] = useState<End[]>([])
     const [loading, setLoading] = useState(false)
@@ -38,11 +38,48 @@ export default function NewMatchPage() {
     // QR 掃描處理
     const handleQRScan = (elderId: string) => {
         if (showQRScanner === 'red') {
-            setRedElderId(elderId)
+            if (redTeamIds.length >= 6) {
+                setMessage({ type: 'error', text: '每隊最多 6 人' })
+                return
+            }
+            if (!redTeamIds.includes(elderId) && !yellowTeamIds.includes(elderId)) {
+                setRedTeamIds([...redTeamIds, elderId])
+            }
         } else if (showQRScanner === 'yellow') {
-            setYellowElderId(elderId)
+            if (yellowTeamIds.length >= 6) {
+                setMessage({ type: 'error', text: '每隊最多 6 人' })
+                return
+            }
+            if (!yellowTeamIds.includes(elderId) && !redTeamIds.includes(elderId)) {
+                setYellowTeamIds([...yellowTeamIds, elderId])
+            }
         }
         setShowQRScanner(null)
+    }
+
+    // 手動添加 ID
+    const addElder = (team: 'red' | 'yellow', id: string) => {
+        if (!id) return
+        if (team === 'red') {
+            if (redTeamIds.length >= 6) return
+            if (!redTeamIds.includes(id) && !yellowTeamIds.includes(id)) {
+                setRedTeamIds([...redTeamIds, id])
+            }
+        } else {
+            if (yellowTeamIds.length >= 6) return
+            if (!yellowTeamIds.includes(id) && !redTeamIds.includes(id)) {
+                setYellowTeamIds([...yellowTeamIds, id])
+            }
+        }
+    }
+
+    // 移除 ID
+    const removeElder = (team: 'red' | 'yellow', id: string) => {
+        if (team === 'red') {
+            setRedTeamIds(redTeamIds.filter(e => e !== id))
+        } else {
+            setYellowTeamIds(yellowTeamIds.filter(e => e !== id))
+        }
     }
 
     // 添加新回合
@@ -95,13 +132,12 @@ export default function NewMatchPage() {
 
         try {
             // 验证
-            if (!redElderId || !yellowElderId || !storeId) {
+            if (redTeamIds.length === 0 || yellowTeamIds.length === 0 || !storeId) {
                 throw new Error(t('matchNew.validation.required')) // Updated
             }
 
-            if (redElderId === yellowElderId) {
-                throw new Error(t('matchNew.validation.sameElder')) // Updated
-            }
+            // 检查重复 (Optional but good UX)
+            // ...
 
             if (ends.length === 0) {
                 throw new Error(t('matchNew.validation.atLeastOneEnd')) // Updated
@@ -153,8 +189,8 @@ export default function NewMatchPage() {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    redElderId,
-                    yellowElderId,
+                    redTeamIds,
+                    yellowTeamIds,
                     storeId,
                     ends: endsWithUrls.map(end => ({
                         endNumber: end.endNumber,
@@ -281,54 +317,80 @@ export default function NewMatchPage() {
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                     <span className="inline-block w-3 h-3 bg-red-500 rounded-full mr-2"></span>
-                                    {t('matchNew.redElderId')} *
+                                    {t('matchNew.redElderId')} (最多6人) *
                                 </label>
-                                <div className="flex gap-2">
-                                    <input
-                                        type="text"
-                                        value={redElderId}
-                                        onChange={(e) => setRedElderId(e.target.value)}
-                                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
-                                        placeholder="ID 或掃描 QR Code"
-                                        required
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowQRScanner('red')}
-                                        className="px-3 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
-                                        title="掃描 QR Code"
-                                    >
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-                                        </svg>
-                                    </button>
+                                <div className="space-y-2">
+                                    {redTeamIds.map(id => (
+                                        <div key={id} className="flex items-center justify-between text-sm bg-gray-50 px-3 py-2 rounded-lg border border-gray-200">
+                                            <span>{id}</span>
+                                            <button type="button" onClick={() => removeElder('red', id)} className="text-red-500 hover:text-red-700">✕</button>
+                                        </div>
+                                    ))}
+                                    {redTeamIds.length < 6 && (
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter') {
+                                                        e.preventDefault()
+                                                        addElder('red', e.currentTarget.value)
+                                                        e.currentTarget.value = ''
+                                                    }
+                                                }}
+                                                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 text-sm"
+                                                placeholder="輸入ID按Enter 或 掃描"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowQRScanner('red')}
+                                                className="px-3 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
+                                            >
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                     <span className="inline-block w-3 h-3 bg-yellow-500 rounded-full mr-2"></span>
-                                    {t('matchNew.yellowElderId')} *
+                                    {t('matchNew.yellowElderId')} (最多6人) *
                                 </label>
-                                <div className="flex gap-2">
-                                    <input
-                                        type="text"
-                                        value={yellowElderId}
-                                        onChange={(e) => setYellowElderId(e.target.value)}
-                                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
-                                        placeholder="ID 或掃描 QR Code"
-                                        required
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowQRScanner('yellow')}
-                                        className="px-3 py-2 bg-yellow-100 text-yellow-600 rounded-lg hover:bg-yellow-200 transition-colors"
-                                        title="掃描 QR Code"
-                                    >
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-                                        </svg>
-                                    </button>
+                                <div className="space-y-2">
+                                    {yellowTeamIds.map(id => (
+                                        <div key={id} className="flex items-center justify-between text-sm bg-gray-50 px-3 py-2 rounded-lg border border-gray-200">
+                                            <span>{id}</span>
+                                            <button type="button" onClick={() => removeElder('yellow', id)} className="text-red-500 hover:text-red-700">✕</button>
+                                        </div>
+                                    ))}
+                                    {yellowTeamIds.length < 6 && (
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter') {
+                                                        e.preventDefault()
+                                                        addElder('yellow', e.currentTarget.value)
+                                                        e.currentTarget.value = ''
+                                                    }
+                                                }}
+                                                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 text-sm"
+                                                placeholder="輸入ID按Enter 或 掃描"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowQRScanner('yellow')}
+                                                className="px-3 py-2 bg-yellow-100 text-yellow-600 rounded-lg hover:bg-yellow-200 transition-colors"
+                                            >
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
