@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { loginWithRole } from './actions'
 
 type LoginMode = 'family' | 'pharmacist'
 
@@ -49,12 +50,6 @@ export default function LoginForm() {
     }
 
     const handleLineLogin = (role: 'family' | 'elder') => {
-        const redirectTo = returnTo
-            ? `${window.location.origin}/api/auth/callback?returnTo=${encodeURIComponent(returnTo)}`
-            : undefined
-        // Note: The Line Login API setup might need adjustment to handle dynamic callbacks or state param
-        // For now, simpler to just let them login and rely on default redirect unless we pass state
-        // Let's assume standard flow for simple LINE integration first.
         window.location.href = `/api/auth/line/login?role=${role}${returnTo ? `&returnTo=${encodeURIComponent(returnTo)}` : ''}`
     }
 
@@ -63,17 +58,10 @@ export default function LoginForm() {
         setError(null)
 
         try {
-            // Call Server-Side Login API
-            // This bypasses client-side env/network issues
-            const res = await fetch('/api/auth/quick-login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ role })
-            })
+            // Use Server Action
+            const result = await loginWithRole(role)
 
-            const data = await res.json()
-
-            if (!res.ok) throw new Error(data.error || 'Login failed')
+            if (result.error) throw new Error(result.error)
 
             // Success - Refesh page to update middleware/server state
             router.refresh()
@@ -249,9 +237,7 @@ export default function LoginForm() {
                 </div>
             )}
 
-            {/* Quick Login for Dev/Test (Always visible for convenience, or hide in prod) 
-                Keeping it visible as user seems to rely on it for testing "Quick Login"
-            */}
+            {/* Quick Login for Dev/Test (Visible) */}
             <div className="pt-8 mt-8 border-t border-gray-100">
                 <p className="text-center text-[10px] text-gray-300 mb-3 uppercase tracking-wider">Development Mode</p>
                 <div className="grid grid-cols-5 gap-2 mb-4">
