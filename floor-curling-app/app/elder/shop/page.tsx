@@ -27,9 +27,9 @@ export default function ElderShop() {
             }
             setUser(user)
 
-            // Fetch Points
-            const { data: profile } = await supabase.from('profiles').select('points').eq('id', user.id).single()
-            if (profile) setPoints(profile.points || 0)
+            // Fetch Wallet (Points)
+            const { data: wallet } = await supabase.from('wallets').select('local_points').eq('user_id', user.id).single()
+            if (wallet) setPoints(wallet.local_points || 0)
 
             // Fetch Products
             const { data: products } = await supabase.from('products').select('*').order('price', { ascending: true })
@@ -106,8 +106,8 @@ export default function ElderShop() {
                                         onClick={() => handleBuy(product)}
                                         disabled={!!purchasing || points < product.price}
                                         className={`px-4 py-2 rounded-full font-bold text-sm transition-all ${points >= product.price
-                                                ? 'bg-blue-600 text-white shadow-md active:scale-95'
-                                                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                            ? 'bg-blue-600 text-white shadow-md active:scale-95'
+                                            : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                             }`}
                                     >
                                         {purchasing === product.id ? '處理中...' : '購買'}

@@ -133,7 +133,7 @@ export async function POST(req: NextRequest) {
             // Check wallet existence
             const { data: wallet } = await supabaseAdmin
                 .from('wallets')
-                .select('id')
+                .select('id, global_points, local_points')
                 .eq('user_id', elderId)
                 .single()
 
@@ -143,33 +143,15 @@ export async function POST(req: NextRequest) {
                     wallet_id: wallet.id,
                     amount: points,
                     type: 'earned',
-                    description: `比賽${result === 'win' ? '勝利' : result === 'loss' ? '參加' : '平局'} (${new Date().toLocaleDateString()})`
+                    description: `比賽${result === 'win' ? '勝利' : result === 'loss' ? '參加' : '平局'} (${new Date().toLocaleDateString()}) - 獲得賽事分與兌換分`
                 })
 
-                // Increment Wallet (Naive approach, usually RPC safer but valid here)
-                // Using rpc 'increment_points' if exists would be better, but direct update is ok for MVP
-                // Let's use a raw RPC call for atomic update if possible, or just fetch-update
-                const { error: walletError } = await supabaseAdmin.rpc('increment_wallet_points', {
-                    p_wallet_id: wallet.id,
-                    p_amount: points
-                })
-                // Fallback if RPC missing (it might be named differently or non-existent)
-                if (walletError) {
-                    // Try direct update (potential race condition but acceptable for low traffic)
-                    const { error: incrementError } = await supabaseAdmin.rpc('increment_points', {
-                        table_name: 'wallets',
-                        row_id: wallet.id,
-                        x: points
-                    })
-
-                    if (incrementError) {
-                        // Manual fetch update
-                        const { data: w } = await supabaseAdmin.from('wallets').select('global_points').eq('id', wallet.id).single()
-                        if (w) {
-                            await supabaseAdmin.from('wallets').update({ global_points: (w.global_points || 0) + points }).eq('id', wallet.id)
-                        }
-                    }
-                }
+                // Update Wallet (Both Global & Local)
+                // Global = Honor, Local = Currency
+                await supabaseAdmin.from('wallets').update({
+                    global_points: (wallet.global_points || 0) + points,
+                    local_points: (wallet.local_points || 0) + points
+                }).eq('id', wallet.id)
             }
 
             // 3. Notify

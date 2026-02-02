@@ -29,30 +29,42 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Product not found' }, { status: 404 })
         }
 
-        // 2. Check Target User Points (Elder's points)
-        const { data: profile, error: profileError } = await supabase
-            .from('profiles')
-            .select('points, full_name')
-            .eq('id', targetUserId)
+        // 2. Check Target User Wallet (Elder's Local Points)
+        const { data: wallet, error: walletError } = await supabase
+            .from('wallets')
+            .select('id, local_points')
+            .eq('user_id', targetUserId)
             .single()
 
-        if (profileError || !profile) {
-            return NextResponse.json({ error: 'User profile not found' }, { status: 404 })
+        if (walletError || !wallet) {
+            // Auto-create wallet if missing (Unlikely for elders seeded correctly, but good for robustness)
+            // For now, just error
+            return NextResponse.json({ error: '找不到錢包 (Wallet not found)' }, { status: 404 })
         }
 
-        if ((profile.points || 0) < product.price) {
-            return NextResponse.json({ error: `積分不足！還差 ${product.price - (profile.points || 0)} 分` }, { status: 400 })
+        const currentPoints = wallet.local_points || 0
+
+        if (currentPoints < product.price) {
+            return NextResponse.json({ error: `積分不足！還差 ${product.price - currentPoints} 分` }, { status: 400 })
         }
 
-        // 3. Deduct Points
+        // 3. Deduct Points (Local Only)
         const { error: deductError } = await supabase
-            .from('profiles')
-            .update({ points: (profile.points || 0) - product.price })
-            .eq('id', targetUserId)
+            .from('wallets')
+            .update({ local_points: currentPoints - product.price })
+            .eq('id', wallet.id)
 
         if (deductError) {
             return NextResponse.json({ error: '扣款失敗' }, { status: 500 })
         }
+
+        // Record Transaction
+        await supabase.from('point_transactions').insert({
+            wallet_id: wallet.id,
+            amount: -product.price,
+            type: 'spent',
+            description: `購買: ${product.name}`
+        })
 
         // 4. Add to Inventory
         const { error: inventoryError } = await supabase
@@ -65,14 +77,14 @@ export async function POST(request: Request) {
 
         if (inventoryError) {
             // Rollback: Refund points
-            await supabase.from('profiles').update({ points: profile.points }).eq('id', targetUserId)
+            await supabase.from('wallets').update({ local_points: currentPoints }).eq('id', wallet.id)
             return NextResponse.json({ error: '交易失敗 (Inventory Error)' }, { status: 500 })
         }
 
         return NextResponse.json({
             success: true,
             message: `成功購買 ${product.name}`,
-            remainingPoints: (profile.points || 0) - product.price
+            remainingPoints: currentPoints - product.price
         })
 
     } catch (error: any) {

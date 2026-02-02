@@ -31,16 +31,23 @@ export default function FamilyShop() {
             const { data: familyProfile } = await supabase.from('profiles').select('linked_elder_id').eq('id', user.id).single()
 
             if (familyProfile?.linked_elder_id) {
-                // 2. Get Elder Profile (Name & Points)
+                // 2. Get Elder Profile (Name) & Wallet (Points)
                 const { data: elderProfile } = await supabase
                     .from('profiles')
-                    .select('id, full_name, points')
+                    .select('id, full_name')
                     .eq('id', familyProfile.linked_elder_id)
                     .single()
 
                 if (elderProfile) {
                     setElder(elderProfile)
-                    setPoints(elderProfile.points || 0)
+
+                    const { data: wallet } = await supabase
+                        .from('wallets')
+                        .select('local_points')
+                        .eq('user_id', elderProfile.id)
+                        .single()
+
+                    if (wallet) setPoints(wallet.local_points || 0)
                 }
             }
 
@@ -128,8 +135,8 @@ export default function FamilyShop() {
                             <div className="p-5">
                                 <div className="flex justify-between items-start mb-2">
                                     <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${product.category === 'health'
-                                            ? 'bg-green-100 text-green-700'
-                                            : 'bg-blue-100 text-blue-700'
+                                        ? 'bg-green-100 text-green-700'
+                                        : 'bg-blue-100 text-blue-700'
                                         }`}>
                                         {product.category === 'health' ? '❤️ 健康補給' : '🛡️ 戰力裝備'}
                                     </span>
@@ -142,8 +149,8 @@ export default function FamilyShop() {
                                     onClick={() => handleBuy(product)}
                                     disabled={!!purchasing || points < product.price}
                                     className={`w-full py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors ${points >= product.price
-                                            ? 'bg-blue-600 text-white hover:bg-blue-700'
-                                            : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                        ? 'bg-blue-600 text-white hover:bg-blue-700'
+                                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                         }`}
                                 >
                                     {purchasing === product.id ? (

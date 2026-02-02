@@ -193,7 +193,9 @@ export default function FamilyPortal() {
                                 </div>
                             </div>
                             <h3 className="text-lg font-semibold text-gray-900 mb-2">數位市集</h3>
-                            <p className="text-sm text-gray-600">為長輩添購裝備與健康補給</p>
+                            <p className="text-sm text-gray-600">
+                                為長輩添購裝備，目前擁有 <span className="font-bold text-amber-500">{wallet?.local_points || 0}</span> 購物金
+                            </p>
                         </div>
                     </Link>
                 </div>
