@@ -11,8 +11,21 @@ export async function GET() {
             { cookies: { get: () => undefined, set: () => { }, remove: () => { } } }
         )
 
-        // 1. Find Elder
-        const { data: { users: allUsers } } = await supabase.auth.admin.listUsers()
+        // 1. Find Elder with Pagination
+        let allUsers: any[] = []
+        let page = 1
+        let hasMore = true
+
+        while (hasMore) {
+            const { data: { users }, error } = await supabase.auth.admin.listUsers({ page: page, perPage: 1000 })
+            if (error) throw error
+            if (users.length === 0) hasMore = false
+            else {
+                allUsers = [...allUsers, ...users]
+                page++
+            }
+        }
+
         const elder = allUsers.find(u => u.email === 'elder@daoli.com')
         const family = allUsers.find(u => u.email === 'family_bound@daoli.com')
 
