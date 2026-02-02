@@ -150,6 +150,21 @@ export default function FamilyPortal() {
                             <p className="text-sm text-gray-600">查看榮譽與兌換積分</p>
                         </div>
                     </Link>
+
+                    {/* 聊天室 */}
+                    <Link href="/family/messages" className="block group">
+                        <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow group-hover:border-purple-200 border border-transparent">
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="p-3 bg-purple-100 rounded-lg group-hover:bg-purple-200 transition-colors">
+                                    <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <h3 className="text-lg font-semibold text-gray-900 mb-2">聊天室</h3>
+                            <p className="text-sm text-gray-600">與長輩保持聯繫</p>
+                        </div>
+                    </Link>
                 </div>
 
                 {/* 如果未關聯長輩，顯示提示 */}
