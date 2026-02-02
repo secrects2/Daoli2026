@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { loginWithRole } from './actions'
+import clsx from 'clsx'
 
 type LoginMode = 'family' | 'pharmacist'
 
@@ -29,7 +30,6 @@ export default function LoginForm() {
         setError(null)
 
         try {
-            // Force SignOut first to clear any stale roles/sessions (e.g. switching from Family to Pharmacist)
             await supabase.auth.signOut()
 
             const { error } = await supabase.auth.signInWithPassword({
@@ -61,15 +61,10 @@ export default function LoginForm() {
         setError(null)
 
         try {
-            // Use Server Action
             const result = await loginWithRole(role)
-
             if (result.error) throw new Error(result.error)
 
-            // Success - Refesh page to update middleware/server state
             router.refresh()
-
-            // Wait a moment for cookies propagation
             await new Promise(resolve => setTimeout(resolve, 500))
 
             if (returnTo) {
@@ -77,23 +72,13 @@ export default function LoginForm() {
                 return
             }
 
-            // Redirect based on role
             switch (role) {
-                case 'admin':
-                    router.push('/admin')
-                    break
-                case 'pharmacist':
-                    router.push('/pharmacist/dashboard')
-                    break
+                case 'admin': router.push('/admin'); break;
+                case 'pharmacist': router.push('/pharmacist/dashboard'); break;
                 case 'family':
-                case 'family_bound':
-                    router.push('/family/portal')
-                    break
-                case 'elder':
-                    router.push('/elder/dashboard')
-                    break
-                default:
-                    router.push('/')
+                case 'family_bound': router.push('/family/portal'); break;
+                case 'elder': router.push('/elder/dashboard'); break;
+                default: router.push('/');
             }
         } catch (err: any) {
             console.error('Login Error:', err)
@@ -105,158 +90,137 @@ export default function LoginForm() {
     return (
         <div className="space-y-6">
             {error && (
-                <div className="rounded-md bg-red-50 p-4 animate-in fade-in slide-in-from-top-2">
-                    <div className="flex">
-                        <div className="ml-3">
-                            <h3 className="text-sm font-medium text-red-800">登入失敗</h3>
-                            <div className="mt-2 text-sm text-red-700">
-                                <p>{error}</p>
-                            </div>
-                        </div>
-                    </div>
+                <div className="rounded-xl bg-red-50 p-4 border border-red-100 animate-fade-in text-center">
+                    <p className="text-sm font-bold text-red-600">{error}</p>
                 </div>
             )}
+
+            {/* Mode Toggle Tabs */}
+            <div className="flex p-1 bg-gray-100/80 rounded-2xl relative mb-6">
+                <button
+                    onClick={() => setLoginMode('family')}
+                    className={clsx(
+                        "flex-1 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 relative z-10",
+                        loginMode === 'family' ? "bg-white text-gray-900 shadow-sm transform scale-100" : "text-gray-500 hover:text-gray-700"
+                    )}
+                >
+                    家屬登入
+                </button>
+                <button
+                    onClick={() => setLoginMode('pharmacist')}
+                    className={clsx(
+                        "flex-1 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 relative z-10",
+                        loginMode === 'pharmacist' ? "bg-white text-gray-900 shadow-sm transform scale-100" : "text-gray-500 hover:text-gray-700"
+                    )}
+                >
+                    加盟店登入
+                </button>
+            </div>
 
             {/* Family Login Mode */}
             {loginMode === 'family' && (
-                <div className="space-y-6 animate-in fade-in slide-in-from-left-4 duration-300">
-                    <div className="text-center space-y-2">
-                        <h3 className="font-semibold text-lg text-gray-900">家屬登入</h3>
-                        <p className="text-sm text-gray-500">
-                            請使用 LINE 帳號登入<br />
-                            與長輩保持連結，即時接收通知
-                        </p>
+                <div className="space-y-5 animate-slide-in-right">
+                    <button
+                        type="button"
+                        onClick={() => handleLineLogin('family')}
+                        className="w-full py-4 rounded-2xl bg-[#06C755] hover:bg-[#05b84d] text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all transform active:scale-95 flex items-center justify-center gap-3 relative overflow-hidden group"
+                    >
+                        <svg className="h-6 w-6 relative z-10" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M20.5 10c0-4.8-4.5-8.7-10-8.7S.5 5.2.5 10c0 4.3 3.6 7.9 8.5 8.6.3.1.5.2.5.5v2.2c0 .2.1.4.3.4.1 0 .2 0 .3-.1.9-.5 4.1-2.4 5.7-4.1 3-2.6 4.7-5.3 4.7-8.5z" />
+                        </svg>
+                        <span className="relative z-10">家屬登入 (LINE)</span>
+                        <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+                    </button>
+
+                    <div className="relative flex items-center py-2">
+                        <div className="flex-grow border-t border-gray-200"></div>
+                        <span className="flex-shrink-0 mx-4 text-gray-400 text-xs font-medium tracking-wider">或是</span>
+                        <div className="flex-grow border-t border-gray-200"></div>
                     </div>
 
-                    <div className="space-y-4">
-                        <button
-                            type="button"
-                            onClick={() => handleLineLogin('family')}
-                            className="ios-btn bg-[#00C300] hover:bg-[#00B300] focus-visible:outline-[#00C300] flex items-center justify-center gap-3 text-[15px] shadow-sm transform transition active:scale-95 w-full py-4 text-lg font-bold"
-                        >
-                            <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M20.5 10c0-4.8-4.5-8.7-10-8.7S.5 5.2.5 10c0 4.3 3.6 7.9 8.5 8.6.3.1.5.2.5.5v2.2c0 .2.1.4.3.4.1 0 .2 0 .3-.1.9-.5 4.1-2.4 5.7-4.1 3-2.6 4.7-5.3 4.7-8.5z" />
-                            </svg>
-                            家屬登入 (使用 LINE)
-                        </button>
+                    <button
+                        type="button"
+                        onClick={() => handleLineLogin('elder')}
+                        className="w-full py-4 rounded-2xl border-2 border-[#06C755] text-[#06C755] hover:bg-green-50 font-bold text-lg transition-all transform active:scale-95 flex items-center justify-center gap-3"
+                    >
+                        <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M20.5 10c0-4.8-4.5-8.7-10-8.7S.5 5.2.5 10c0 4.3 3.6 7.9 8.5 8.6.3.1.5.2.5.5v2.2c0 .2.1.4.3.4.1 0 .2 0 .3-.1.9-.5 4.1-2.4 5.7-4.1 3-2.6 4.7-5.3 4.7-8.5z" />
+                        </svg>
+                        長輩登入 (LINE)
+                    </button>
 
-                        <div className="relative flex items-center py-2">
-                            <div className="flex-grow border-t border-gray-200"></div>
-                            <span className="flex-shrink-0 mx-4 text-gray-400 text-xs">或是</span>
-                            <div className="flex-grow border-t border-gray-200"></div>
-                        </div>
-
-                        <button
-                            type="button"
-                            onClick={() => handleLineLogin('elder')}
-                            className="ios-btn bg-white border-2 border-[#00C300] !text-[#00C300] hover:bg-green-50 focus-visible:outline-[#00C300] flex items-center justify-center gap-3 text-[15px] shadow-sm transform transition active:scale-95 w-full py-4 text-lg font-bold"
-                        >
-                            <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M20.5 10c0-4.8-4.5-8.7-10-8.7S.5 5.2.5 10c0 4.3 3.6 7.9 8.5 8.6.3.1.5.2.5.5v2.2c0 .2.1.4.3.4.1 0 .2 0 .3-.1.9-.5 4.1-2.4 5.7-4.1 3-2.6 4.7-5.3 4.7-8.5z" />
-                            </svg>
-                            長輩登入 (使用 LINE)
-                        </button>
-                    </div>
-
-                    <div className="pt-4 text-center">
-                        <button
-                            onClick={() => setLoginMode('pharmacist')}
-                            className="w-full py-3 border border-blue-600 text-blue-600 rounded-xl font-bold hover:bg-blue-50 transition-colors"
-                        >
-                            我是加盟店 / 管理員
-                        </button>
-                    </div>
-                </div>
-            )}
-
-            {/* Pharmacist / Staff Login Mode */}
-            {loginMode === 'pharmacist' && (
-                <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
-                    <div className="text-center space-y-2 mb-6">
-                        <h3 className="font-semibold text-lg text-gray-900">加盟店登入</h3>
-                        <p className="text-sm text-gray-500">
-                            加盟店與管理員登入
-                        </p>
-                    </div>
-
-                    <form className="space-y-4" onSubmit={handleLogin}>
-                        <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                                電子郵件
-                            </label>
-                            <div className="mt-1">
-                                <input
-                                    id="email"
-                                    name="email"
-                                    type="email"
-                                    autoComplete="email"
-                                    required
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    className="ios-input"
-                                    placeholder="yourname@daoli.com"
-                                />
-                            </div>
-                        </div>
-
-                        <div>
-                            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                                密碼
-                            </label>
-                            <div className="mt-1">
-                                <input
-                                    id="password"
-                                    name="password"
-                                    type="password"
-                                    autoComplete="current-password"
-                                    required
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    className="ios-input"
-                                    placeholder="••••••••"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="pt-2">
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="ios-btn bg-gray-900 hover:bg-gray-800 shadow-sm"
-                            >
-                                {loading ? '登入中...' : '加盟店登入'}
-                            </button>
-                        </div>
-                    </form>
-
-                    <div className="pt-4 text-center">
-                        <button
-                            onClick={() => setLoginMode('family')}
-                            className="w-full py-3 border border-gray-300 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition-colors"
-                        >
-                            返回家屬登入
-                        </button>
-                    </div>
-                </div>
-            )}
-
-            {/* Quick Login for Dev/Test (Visible) */}
-            <div className="pt-8 mt-8 border-t border-gray-100">
-                <p className="text-center text-[10px] text-gray-300 mb-3 uppercase tracking-wider">Development Mode</p>
-                <div className="grid grid-cols-5 gap-2 mb-4">
-                    <button onClick={() => handleQuickLogin('admin')} className="py-2 bg-purple-50 text-purple-600 rounded text-[10px] hover:bg-purple-100 font-bold">Admin</button>
-                    <button onClick={() => handleQuickLogin('pharmacist')} className="py-2 bg-blue-50 text-blue-600 rounded text-[10px] hover:bg-blue-100 font-bold">Franchise</button>
-                    <button onClick={() => handleQuickLogin('family')} className="py-2 bg-green-50 text-green-600 rounded text-[10px] hover:bg-green-100 font-bold">Family</button>
-                    <button onClick={() => handleQuickLogin('family_bound')} className="py-2 bg-teal-50 text-teal-600 rounded text-[10px] hover:bg-teal-100 font-bold">Family (Bound)</button>
-                    <button onClick={() => handleQuickLogin('elder')} className="py-2 bg-orange-50 text-orange-600 rounded text-[10px] hover:bg-orange-100 font-bold">Elder</button>
-                </div>
-                <div className="text-center space-y-2">
-                    <a href="/logout" className="text-[10px] text-gray-400 underline hover:text-gray-600 block">
-                        遇到登入問題？點此清除快取 (Clear Cache)
-                    </a>
-                    <p className="text-[10px] text-gray-300 font-mono">
-                        DB: ...{process.env.NEXT_PUBLIC_SUPABASE_URL?.slice(-20)}
+                    <p className="text-center text-xs text-gray-400 mt-4 leading-relaxed">
+                        綁定長輩帳號後，您將可以即時查看長輩的<br />比賽成績與健康數據。
                     </p>
+                </div>
+            )}
+
+            {/* Pharmacist Login Mode */}
+            {loginMode === 'pharmacist' && (
+                <div className="space-y-4 animate-slide-in-right">
+                    <form className="space-y-4" onSubmit={handleLogin}>
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-gray-500 ml-1 uppercase">Email</label>
+                            <input
+                                name="email"
+                                type="email"
+                                required
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all font-medium"
+                                placeholder="店長信箱"
+                            />
+                        </div>
+
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-gray-500 ml-1 uppercase">Password</label>
+                            <input
+                                name="password"
+                                type="password"
+                                required
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all font-medium"
+                                placeholder="••••••••"
+                            />
+                        </div>
+
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="w-full py-4 rounded-xl bg-gradient-to-r from-gray-900 to-gray-800 text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all transform active:scale-95 disabled:opacity-50 disabled:scale-100 mt-2"
+                        >
+                            {loading ? (
+                                <span className="flex items-center justify-center gap-2">
+                                    <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                    登入中...
+                                </span>
+                            ) : '登入管理後台'}
+                        </button>
+                    </form>
+                </div>
+            )}
+
+            {/* Dev Tools - Kept but styled beautifully */}
+            <div className="pt-8 mt-6">
+                <div className="relative flex items-center justify-center mb-4">
+                    <span className="bg-white/50 px-2 py-0.5 rounded text-[10px] uppercase font-bold text-gray-300">Development Mode</span>
+                </div>
+                <div className="grid grid-cols-5 gap-2">
+                    {['admin', 'pharmacist', 'family', 'family_bound', 'elder'].map(role => (
+                        <button
+                            key={role}
+                            onClick={() => handleQuickLogin(role as any)}
+                            className="py-1.5 bg-gray-100 text-gray-500 rounded-lg text-[10px] hover:bg-gray-200 font-bold transition-colors uppercase tracking-tight"
+                        >
+                            {role.replace('_', ' ')}
+                        </button>
+                    ))}
+                </div>
+                <div className="text-center mt-3">
+                    <a href="/logout" className="text-[10px] text-gray-400 hover:text-blue-500 transition-colors">
+                        Clear Cache & Reset
+                    </a>
                 </div>
             </div>
         </div>
