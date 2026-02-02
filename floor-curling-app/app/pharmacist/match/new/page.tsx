@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClientComponentClient } from '@/lib/supabase'
 import { uploadFile } from '@/app/actions/match'
@@ -27,10 +27,15 @@ export default function NewMatchPage() {
     const supabase = createClientComponentClient()
 
     // 狀態管理
-    const [matchMode, setMatchMode] = useState<MatchMode>('3v3') // Default to 3v3
+    const [matchMode, setMatchMode] = useState<MatchMode>('3v3')
     const [redTeamIds, setRedTeamIds] = useState<string[]>([])
     const [yellowTeamIds, setYellowTeamIds] = useState<string[]>([])
-    const [storeId, setStoreId] = useState('') // Default store ID?
+
+    // Manual Input State
+    const [redInput, setRedInput] = useState('')
+    const [yellowInput, setYellowInput] = useState('')
+
+    const [storeId, setStoreId] = useState('')
     const [ends, setEnds] = useState<End[]>([])
     const [loading, setLoading] = useState(false)
     const [uploadProgress, setUploadProgress] = useState<string>('')
@@ -39,7 +44,6 @@ export default function NewMatchPage() {
     // QR 掃描狀態
     const [showQRScanner, setShowQRScanner] = useState<'red' | 'yellow' | null>(null)
 
-    // Helper: Get max players based on mode
     const getMaxPlayers = () => {
         switch (matchMode) {
             case '1v1': return 1;
@@ -74,23 +78,25 @@ export default function NewMatchPage() {
     }
 
     // 手動添加 ID
-    const addElder = (team: 'red' | 'yellow', id: string) => {
+    const addElder = (team: 'red' | 'yellow') => {
+        const id = team === 'red' ? redInput.trim() : yellowInput.trim()
         if (!id) return
+
         if (team === 'red') {
-            if (redTeamIds.length >= MAX_PLAYERS) {
-                setMessage({ type: 'error', text: `此模式每隊最多 ${MAX_PLAYERS} 人` })
-                return
-            }
+            if (redTeamIds.length >= MAX_PLAYERS) return
             if (!redTeamIds.includes(id) && !yellowTeamIds.includes(id)) {
                 setRedTeamIds([...redTeamIds, id])
+                setRedInput('')
+            } else {
+                setMessage({ type: 'error', text: '此 ID 已存在' })
             }
         } else {
-            if (yellowTeamIds.length >= MAX_PLAYERS) {
-                setMessage({ type: 'error', text: `此模式每隊最多 ${MAX_PLAYERS} 人` })
-                return
-            }
+            if (yellowTeamIds.length >= MAX_PLAYERS) return
             if (!yellowTeamIds.includes(id) && !redTeamIds.includes(id)) {
                 setYellowTeamIds([...yellowTeamIds, id])
+                setYellowInput('')
+            } else {
+                setMessage({ type: 'error', text: '此 ID 已存在' })
             }
         }
     }
@@ -117,7 +123,6 @@ export default function NewMatchPage() {
             yellowScore: 0
         }])
 
-        // Auto scroll to bottom
         setTimeout(() => {
             window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
         }, 100)
@@ -254,7 +259,6 @@ export default function NewMatchPage() {
     const redTotal = ends.reduce((sum, end) => sum + end.redScore, 0)
     const yellowTotal = ends.reduce((sum, end) => sum + end.yellowScore, 0)
 
-    // Match Modes Data
     const matchModes = [
         { id: '1v1', label: '1 vs 1', icon: '👤' },
         { id: '3v3', label: '3 vs 3', icon: '👥' },
@@ -285,7 +289,6 @@ export default function NewMatchPage() {
 
                 {/* Scoreboard */}
                 <div className="relative bg-black rounded-3xl p-6 shadow-2xl overflow-hidden border border-gray-800">
-                    {/* Glossy Overlay */}
                     <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-white/10 to-transparent pointer-events-none"></div>
 
                     <div className="relative z-10 grid grid-cols-2 gap-8 text-center text-white">
@@ -303,7 +306,6 @@ export default function NewMatchPage() {
                         </div>
                     </div>
 
-                    {/* Status Light */}
                     <div className="absolute top-4 right-4 flex items-center gap-2">
                         <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
                         <span className="text-xs font-mono text-gray-500">LIVE</span>
@@ -313,9 +315,7 @@ export default function NewMatchPage() {
 
                 <form onSubmit={handleSubmit} className="space-y-8">
 
-                    {/* Info Card */}
                     <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
-                        {/* Store ID */}
                         <div className="mb-6">
                             <label className="block text-sm font-bold text-gray-900 mb-2">Store ID</label>
                             <input
@@ -328,7 +328,6 @@ export default function NewMatchPage() {
                             />
                         </div>
 
-                        {/* Match Mode Selector */}
                         <div className="mb-8">
                             <label className="block text-sm font-bold text-gray-900 mb-2">Match Mode</label>
                             <div className="grid grid-cols-3 gap-3 p-1 bg-gray-50 rounded-2xl border border-gray-200">
@@ -336,11 +335,7 @@ export default function NewMatchPage() {
                                     <button
                                         key={mode.id}
                                         type="button"
-                                        onClick={() => {
-                                            setMatchMode(mode.id as MatchMode);
-                                            // Optional: Clear teams if mode changes to stricter limit? 
-                                            // For now, let's keep them but UI will show limit.
-                                        }}
+                                        onClick={() => setMatchMode(mode.id as MatchMode)}
                                         className={clsx(
                                             "py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2",
                                             matchMode === mode.id
@@ -369,36 +364,53 @@ export default function NewMatchPage() {
                                     )}>{redTeamIds.length}/{MAX_PLAYERS}</span>
                                 </div>
 
-                                <div className="space-y-2 mb-3 relative z-10">
-                                    {redTeamIds.map(id => (
-                                        <div key={id} className="flex justify-between items-center bg-white p-3 rounded-xl border border-red-100 shadow-sm text-sm">
-                                            <span className="font-mono text-gray-600">{id.slice(0, 8)}...</span>
-                                            <button type="button" onClick={() => removeElder('red', id)} className="text-red-400 hover:text-red-600">
-                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                                            </button>
-                                        </div>
+                                {/* Visual Slots */}
+                                <div className="grid grid-cols-1 gap-2 mb-4 relative z-10">
+                                    {Array.from({ length: MAX_PLAYERS }).map((_, i) => (
+                                        redTeamIds[i] ? (
+                                            <div key={i} className="flex justify-between items-center bg-white p-3 rounded-xl border border-red-100 shadow-sm text-sm animate-fade-in-up">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-6 h-6 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-bold text-xs">{i + 1}</div>
+                                                    <span className="font-mono text-gray-600">{redTeamIds[i].slice(0, 8)}...</span>
+                                                </div>
+                                                <button type="button" onClick={() => removeElder('red', redTeamIds[i])} className="text-red-400 hover:text-red-600">
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <div key={i} className="flex items-center gap-3 p-3 rounded-xl border border-dashed border-red-200 bg-white/50 text-sm text-red-300">
+                                                <div className="w-6 h-6 rounded-full bg-red-50 text-red-200 flex items-center justify-center font-bold text-xs">{i + 1}</div>
+                                                <span>Waiting for player...</span>
+                                            </div>
+                                        )
                                     ))}
-                                    {redTeamIds.length === 0 && (
-                                        <div className="text-center py-4 text-red-300 text-xs italic">
-                                            Add {MAX_PLAYERS} player{MAX_PLAYERS > 1 ? 's' : ''} to start
-                                        </div>
-                                    )}
                                 </div>
 
-                                <div className="flex gap-2 relative z-10">
+                                <div className="flex gap-2 relative z-10 mt-auto">
                                     <input
                                         type="text"
+                                        value={redInput}
+                                        onChange={(e) => setRedInput(e.target.value)}
                                         onKeyDown={(e) => {
                                             if (e.key === 'Enter') {
                                                 e.preventDefault()
-                                                addElder('red', e.currentTarget.value)
-                                                e.currentTarget.value = ''
+                                                addElder('red')
                                             }
                                         }}
                                         className="w-full px-4 py-3 rounded-xl bg-white border border-red-100 focus:ring-2 focus:ring-red-500 outline-none text-sm"
-                                        placeholder="輸入 ID..."
+                                        placeholder="Scan or Type ID..."
                                         disabled={redTeamIds.length >= MAX_PLAYERS}
                                     />
+                                    {/* Manual Add Button */}
+                                    <button
+                                        type="button"
+                                        onClick={() => addElder('red')}
+                                        disabled={!redInput || redTeamIds.length >= MAX_PLAYERS}
+                                        className="shrink-0 w-12 rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 flex items-center justify-center font-bold transition-colors disabled:opacity-50"
+                                    >
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                                    </button>
+                                    {/* QR Button */}
                                     <button
                                         type="button"
                                         onClick={() => setShowQRScanner('red')}
@@ -422,35 +434,54 @@ export default function NewMatchPage() {
                                         yellowTeamIds.length >= MAX_PLAYERS ? "text-yellow-600 bg-yellow-100 border-yellow-200" : "text-yellow-600 border-yellow-200"
                                     )}>{yellowTeamIds.length}/{MAX_PLAYERS}</span>
                                 </div>
-                                <div className="space-y-2 mb-3 relative z-10">
-                                    {yellowTeamIds.map(id => (
-                                        <div key={id} className="flex justify-between items-center bg-white p-3 rounded-xl border border-yellow-100 shadow-sm text-sm">
-                                            <span className="font-mono text-gray-600">{id.slice(0, 8)}...</span>
-                                            <button type="button" onClick={() => removeElder('yellow', id)} className="text-yellow-500 hover:text-yellow-700">
-                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                                            </button>
-                                        </div>
+
+                                {/* Visual Slots */}
+                                <div className="grid grid-cols-1 gap-2 mb-4 relative z-10">
+                                    {Array.from({ length: MAX_PLAYERS }).map((_, i) => (
+                                        yellowTeamIds[i] ? (
+                                            <div key={i} className="flex justify-between items-center bg-white p-3 rounded-xl border border-yellow-100 shadow-sm text-sm animate-fade-in-up">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-6 h-6 rounded-full bg-yellow-100 text-yellow-600 flex items-center justify-center font-bold text-xs">{i + 1}</div>
+                                                    <span className="font-mono text-gray-600">{yellowTeamIds[i].slice(0, 8)}...</span>
+                                                </div>
+                                                <button type="button" onClick={() => removeElder('yellow', yellowTeamIds[i])} className="text-yellow-500 hover:text-yellow-700">
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <div key={i} className="flex items-center gap-3 p-3 rounded-xl border border-dashed border-yellow-200 bg-white/50 text-sm text-yellow-500/50">
+                                                <div className="w-6 h-6 rounded-full bg-yellow-100 text-yellow-600/50 flex items-center justify-center font-bold text-xs">{i + 1}</div>
+                                                <span>Waiting for player...</span>
+                                            </div>
+                                        )
                                     ))}
-                                    {yellowTeamIds.length === 0 && (
-                                        <div className="text-center py-4 text-red-300 text-xs italic">
-                                            Add {MAX_PLAYERS} player{MAX_PLAYERS > 1 ? 's' : ''} to start
-                                        </div>
-                                    )}
                                 </div>
-                                <div className="flex gap-2 relative z-10">
+
+                                <div className="flex gap-2 relative z-10 mt-auto">
                                     <input
                                         type="text"
+                                        value={yellowInput}
+                                        onChange={(e) => setYellowInput(e.target.value)}
                                         onKeyDown={(e) => {
                                             if (e.key === 'Enter') {
                                                 e.preventDefault()
-                                                addElder('yellow', e.currentTarget.value)
-                                                e.currentTarget.value = ''
+                                                addElder('yellow')
                                             }
                                         }}
                                         className="w-full px-4 py-3 rounded-xl bg-white border border-yellow-100 focus:ring-2 focus:ring-yellow-400 outline-none text-sm"
-                                        placeholder="輸入 ID..."
+                                        placeholder="Scan or Type ID..."
                                         disabled={yellowTeamIds.length >= MAX_PLAYERS}
                                     />
+                                    {/* Manual Add Button */}
+                                    <button
+                                        type="button"
+                                        onClick={() => addElder('yellow')}
+                                        disabled={!yellowInput || yellowTeamIds.length >= MAX_PLAYERS}
+                                        className="shrink-0 w-12 rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 flex items-center justify-center font-bold transition-colors disabled:opacity-50"
+                                    >
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
+                                    </button>
+                                    {/* QR Button */}
                                     <button
                                         type="button"
                                         onClick={() => setShowQRScanner('yellow')}
@@ -464,7 +495,7 @@ export default function NewMatchPage() {
                         </div>
                     </div>
 
-                    {/* Ends List (Unchanged Logic, just visual) */}
+                    {/* Ends List ... */}
                     <div className="space-y-6">
                         <div className="flex items-center justify-between">
                             <h3 className="text-xl font-bold text-gray-900">Game Ends</h3>
@@ -487,12 +518,10 @@ export default function NewMatchPage() {
                         ) : (
                             ends.map((end, index) => (
                                 <div key={index} className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 relative group overflow-hidden">
-                                    {/* End Number Badge */}
                                     <div className="absolute top-0 left-0 bg-gray-100 px-4 py-2 rounded-br-2xl text-xs font-bold text-gray-500 uppercase tracking-wider">
                                         End {end.endNumber}
                                     </div>
 
-                                    {/* Remove Button */}
                                     <button
                                         type="button"
                                         onClick={() => removeEnd(index)}
@@ -502,7 +531,6 @@ export default function NewMatchPage() {
                                     </button>
 
                                     <div className="mt-8 grid grid-cols-2 gap-8 mb-8">
-                                        {/* Red Score */}
                                         <div className="text-center">
                                             <label className="block text-xs font-bold text-red-400 uppercase tracking-wider mb-2">Red Score</label>
                                             <div className="flex items-center justify-center gap-3">
@@ -516,7 +544,6 @@ export default function NewMatchPage() {
                                                 <button type="button" onClick={() => updateEndScore(index, 'red', end.redScore + 1)} className="w-10 h-10 rounded-full bg-gray-100 text-gray-600 font-bold hover:bg-red-100 hover:text-red-600 transition-colors">+</button>
                                             </div>
                                         </div>
-                                        {/* Yellow Score */}
                                         <div className="text-center">
                                             <label className="block text-xs font-bold text-yellow-500 uppercase tracking-wider mb-2">Yellow Score</label>
                                             <div className="flex items-center justify-center gap-3">
@@ -532,9 +559,7 @@ export default function NewMatchPage() {
                                         </div>
                                     </div>
 
-                                    {/* Upload Zones */}
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {/* Cam B */}
                                         <div className="relative group/upload">
                                             <input
                                                 type="file"
@@ -566,7 +591,6 @@ export default function NewMatchPage() {
                                             </div>
                                         </div>
 
-                                        {/* Cam A */}
                                         <div className="relative group/upload">
                                             <input
                                                 type="file"
@@ -603,7 +627,6 @@ export default function NewMatchPage() {
                         )}
                     </div>
 
-                    {/* Submit Bar via Fixed Footer or inline */}
                     <div className="fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-lg border-t border-gray-200 p-4 pb-8 z-40">
                         <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
                             {message && (
@@ -643,7 +666,6 @@ export default function NewMatchPage() {
                     </div>
                 </form>
 
-                {/* Upload Progress Overlay */}
                 {loading && uploadProgress && (
                     <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center">
                         <div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl animate-scale-in">
@@ -655,7 +677,6 @@ export default function NewMatchPage() {
                 )}
             </main>
 
-            {/* QR 掃描模態框 */}
             <QRScanModal
                 isOpen={showQRScanner !== null}
                 onClose={() => setShowQRScanner(null)}
