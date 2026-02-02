@@ -264,10 +264,13 @@ export default function LoginForm() {
                     <button onClick={() => handleQuickLogin('family_bound')} className="py-2 bg-teal-50 text-teal-600 rounded text-[10px] hover:bg-teal-100 font-bold">Family (Bound)</button>
                     <button onClick={() => handleQuickLogin('elder')} className="py-2 bg-orange-50 text-orange-600 rounded text-[10px] hover:bg-orange-100 font-bold">Elder</button>
                 </div>
-                <div className="text-center">
-                    <a href="/logout" className="text-[10px] text-gray-400 underline hover:text-gray-600">
+                <div className="text-center space-y-2">
+                    <a href="/logout" className="text-[10px] text-gray-400 underline hover:text-gray-600 block">
                         遇到登入問題？點此清除快取 (Clear Cache)
                     </a>
+                    <p className="text-[10px] text-gray-300 font-mono">
+                        DB: ...{process.env.NEXT_PUBLIC_SUPABASE_URL?.slice(-20)}
+                    </p>
                 </div>
             </div>
         </div>
