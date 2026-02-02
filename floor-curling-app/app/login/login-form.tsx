@@ -29,6 +29,9 @@ export default function LoginForm() {
         setError(null)
 
         try {
+            // Force SignOut first to clear any stale roles/sessions (e.g. switching from Family to Pharmacist)
+            await supabase.auth.signOut()
+
             const { error } = await supabase.auth.signInWithPassword({
                 email,
                 password,
