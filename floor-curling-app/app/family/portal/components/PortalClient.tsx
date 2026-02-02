@@ -20,183 +20,159 @@ export default function PortalClient({ user, profile, elderProfile, wallet }: Po
     )
 
     const handleLogout = async () => {
-        await supabase.auth.signOut()
-        router.push('/login')
-        router.refresh()
+        if (confirm('確定要登出嗎？')) {
+            await supabase.auth.signOut()
+            router.push('/login')
+            router.refresh()
+        }
     }
 
     return (
-        <div className="min-h-screen bg-gray-100">
-            {/* 導航欄 */}
-            <nav className="bg-white shadow-sm">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between h-16">
-                        <div className="flex items-center">
-                            <h1 className="text-2xl font-bold text-blue-600">家屬入口</h1>
+        <div className="min-h-screen pb-20 space-y-6">
+            {/* Glass Header */}
+            <div className="sticky top-0 z-20 backdrop-blur-xl bg-white/70 border-b border-white/50 px-5 pt-12 pb-4 shadow-glass transition-all duration-300">
+                <div className="flex justify-between items-center">
+                    <div>
+                        <h1 className="text-3xl font-black text-gray-900 tracking-tight">家屬入口</h1>
+                        <p className="text-sm font-medium text-gray-500">
+                            {profile?.full_name || user?.user_metadata?.full_name || '家屬會員'}，您好
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={handleLogout}
+                            className="w-10 h-10 rounded-full bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-100 transition-colors"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                        </button>
+                        <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden ring-2 ring-white shadow-sm">
+                            {user?.user_metadata?.avatar_url ? (
+                                <img src={user.user_metadata.avatar_url} className="w-full h-full object-cover" />
+                            ) : (
+                                <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300" />
+                            )}
                         </div>
-                        <div className="flex items-center gap-3">
-                            <div className="text-right">
-                                <p className="font-medium text-gray-900 truncate max-w-[120px]">
-                                    {profile?.full_name || profile?.nickname || user?.user_metadata?.full_name || '家屬'}
-                                </p>
-                                <div className="flex items-center justify-end gap-1">
-                                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-                                        {profile?.role === 'family' ? '家屬會員' : '會員'}
-                                    </span>
-                                    <button
-                                        onClick={() => alert(`會員 ID: ${user?.id}\n帳號: ${user?.email}`)}
-                                        className="text-gray-400 hover:text-blue-600"
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
-                                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                                        </svg>
-                                    </button>
+                    </div>
+                </div>
+            </div>
+
+            <main className="px-5 space-y-6 animate-fade-in-up">
+
+                {elderProfile ? (
+                    /* Linked Elder Card - Premium Gradient */
+                    <div className="relative bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl p-8 shadow-lg shadow-indigo-500/25 overflow-hidden text-white">
+                        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                            <div className="flex items-center gap-4">
+                                <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-md shadow-inner flex items-center justify-center border border-white/10 overflow-hidden">
+                                    {elderProfile.avatar_url ? (
+                                        <img src={elderProfile.avatar_url} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <span className="text-3xl">👴</span>
+                                    )}
+                                </div>
+                                <div>
+                                    <p className="text-indigo-100 text-sm font-medium mb-1">已連結長輩</p>
+                                    <h2 className="text-2xl font-bold tracking-tight">{elderProfile.full_name || elderProfile.nickname}</h2>
                                 </div>
                             </div>
-                            <button
-                                onClick={handleLogout}
-                                className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
-                                title="登出"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
-                                </svg>
+
+                            <div className="flex flex-col gap-2">
+                                <div className="flex items-baseline gap-2 bg-black/10 rounded-xl px-4 py-2 backdrop-blur-sm self-start md:self-auto">
+                                    <span className="text-xs text-white/70 font-medium uppercase tracking-wider">本週比賽</span>
+                                    <span className="text-xl font-bold">0 場</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-indigo-100 text-xs font-medium">
+                                    <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                                    狀態良好
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Background Decor */}
+                        <div className="absolute top-0 right-0 -mr-12 -mt-12 w-48 h-48 bg-white/10 rounded-full blur-2xl"></div>
+                        <div className="absolute bottom-0 left-0 -ml-12 -mb-12 w-32 h-32 bg-purple-400/20 rounded-full blur-xl"></div>
+                    </div>
+                ) : (
+                    /* Not Linked Alert */
+                    <div className="bg-orange-50 border border-orange-100 rounded-3xl p-6 flex flex-col items-center text-center gap-4 animate-pulse-slow">
+                        <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center text-3xl">
+                            🔗
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-bold text-gray-900">尚未綁定長輩</h3>
+                            <p className="text-gray-500 text-sm mt-1 mb-4">
+                                請掃描長輩手機上的 QR Code 進行綁定，<br />以便隨時關心長輩動態。
+                            </p>
+                            <button onClick={() => alert('請開啟相機掃描長輩 QR Code')} className="bg-orange-500 text-white px-6 py-2 rounded-full font-bold shadow-lg shadow-orange-200 active:scale-95 transition-all">
+                                掃描 QR Code
                             </button>
                         </div>
                     </div>
-                </div>
-            </nav>
+                )}
 
-            {/* 主內容 */}
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                <div className="mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900">歡迎！</h2>
-                    {elderProfile ? (
-                        <p className="mt-1 text-sm text-gray-600 flex items-center gap-1">
-                            已連結長輩: <span className="font-bold">{elderProfile.full_name || elderProfile.nickname}</span>
-                        </p>
-                    ) : (
-                        <div className="mt-3 bg-yellow-50 border border-yellow-200 rounded-lg p-3 flex items-center gap-3">
-                            <svg className="w-5 h-5 text-yellow-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                            </svg>
-                            <span className="text-sm text-yellow-800">您還未綁定長輩帳戶</span>
-                        </div>
-                    )}
-                </div>
+                {/* Dashboard Grid */}
+                <div>
+                    <h3 className="ml-1 mb-3 text-xs font-bold text-gray-400 uppercase tracking-widest">功能選單</h3>
+                    <div className="grid grid-cols-2 gap-4">
 
-                {/* Weekly Summary Card (Updated Layout) */}
-                <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl p-6 shadow-xl text-white relative overflow-hidden mb-8">
-                    <div className="absolute right-0 top-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
-                    <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
-                        <div>
-                            <p className="text-blue-100 text-sm font-medium mb-2">本週活動摘要</p>
-                            <div className="flex items-baseline gap-2 mb-3">
-                                <h3 className="text-4xl font-bold">{0}</h3>
-                                <span className="opacity-80">場比賽</span>
+                        {/* Matches */}
+                        <Link href="/family/matches" className="group bg-white rounded-3xl p-6 shadow-sm border border-gray-100 hover:shadow-md hover:border-blue-200 transition-all flex flex-col justify-between h-40">
+                            <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform duration-300">
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
                             </div>
-                            <p className="text-blue-100 text-xs leading-relaxed max-w-md">
-                                長輩本週表現活躍！建議您可以傳送訊息給予鼓勵。
-                            </p>
-                        </div>
-                        <Link href="/family/messages" className="self-start md:self-end bg-white/20 hover:bg-white/30 backdrop-blur-md px-5 py-2.5 rounded-full text-xs font-bold transition-colors flex items-center gap-2">
-                            <span>💬</span> 發送鼓勵
+                            <div>
+                                <h4 className="text-lg font-bold text-gray-900">比賽紀錄</h4>
+                                <p className="text-xs text-gray-500 mt-1">查看詳細數據</p>
+                            </div>
+                        </Link>
+
+                        {/* Photos */}
+                        <Link href="/family/photos" className="group bg-white rounded-3xl p-6 shadow-sm border border-gray-100 hover:shadow-md hover:border-green-200 transition-all flex flex-col justify-between h-40">
+                            <div className="w-12 h-12 bg-green-50 rounded-2xl flex items-center justify-center text-green-600 group-hover:scale-110 transition-transform duration-300">
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                            </div>
+                            <div>
+                                <h4 className="text-lg font-bold text-gray-900">精彩相簿</h4>
+                                <p className="text-xs text-gray-500 mt-1">活動照片影片</p>
+                            </div>
+                        </Link>
+
+                        {/* Shop - Featured */}
+                        <Link href="/family/shop" className="col-span-2 group relative overflow-hidden bg-gradient-to-r from-pink-500 to-rose-500 rounded-3xl p-6 shadow-lg shadow-pink-500/20 text-white hover:shadow-pink-500/30 transition-all active:scale-[0.98]">
+                            <div className="relative z-10 flex items-center justify-between">
+                                <div>
+                                    <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold mb-3">
+                                        <span>🛍️</span>
+                                        <span>長輩積分: {wallet?.local_points || 0}</span>
+                                    </div>
+                                    <h4 className="text-2xl font-black">送禮給長輩</h4>
+                                    <p className="text-pink-100 text-sm mt-1 max-w-[200px]">
+                                        為 {elderProfile?.nickname || '長輩'} 添購裝備，讓他在場上更神氣！
+                                    </p>
+                                </div>
+                                <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center text-4xl shadow-inner backdrop-blur-md">
+                                    🎁
+                                </div>
+                            </div>
+                            {/* Decor */}
+                            <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+                        </Link>
+
+                        {/* Chat */}
+                        <Link href="/family/messages" className="col-span-2 group bg-white rounded-3xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:border-purple-200 transition-all flex items-center gap-4">
+                            <div className="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600 group-hover:scale-110 transition-transform duration-300">
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+                            </div>
+                            <div>
+                                <h4 className="text-lg font-bold text-gray-900">聊天室與通知</h4>
+                                <p className="text-xs text-gray-500">查看最新消息</p>
+                            </div>
+                            <div className="ml-auto w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                            </div>
                         </Link>
                     </div>
                 </div>
-
-                {/* 功能卡片 Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                    {/* 比賽紀錄 */}
-                    <Link href="/family/matches" className="block group">
-                        <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow group-hover:border-blue-200 border border-transparent">
-                            <div className="flex items-center justify-between mb-4">
-                                <div className="p-3 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors">
-                                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                                    </svg>
-                                </div>
-                            </div>
-                            <h3 className="text-lg font-semibold text-gray-900 mb-2">比賽紀錄</h3>
-                            <p className="text-sm text-gray-600">查看長輩的比賽歷程</p>
-                        </div>
-                    </Link>
-
-                    {/* 照片與影片 */}
-                    <Link href="/family/photos" className="block group">
-                        <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow group-hover:border-green-200 border border-transparent">
-                            <div className="flex items-center justify-between mb-4">
-                                <div className="p-3 bg-green-100 rounded-lg group-hover:bg-green-200 transition-colors">
-                                    <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                </div>
-                            </div>
-                            <h3 className="text-lg font-semibold text-gray-900 mb-2">照片與影片</h3>
-                            <p className="text-sm text-gray-600">查看精彩瞬間</p>
-                        </div>
-                    </Link>
-
-                    {/* 積分查詢 */}
-                    <Link href="/family/points" className="block group">
-                        <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow group-hover:border-yellow-200 border border-transparent">
-                            <div className="flex items-center justify-between mb-4">
-                                <div className="p-3 bg-yellow-100 rounded-lg group-hover:bg-yellow-200 transition-colors">
-                                    <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                            </div>
-                            <h3 className="text-lg font-semibold text-gray-900 mb-2">積分查詢</h3>
-                            <p className="text-sm text-gray-600">查看榮譽與兌換積分</p>
-                        </div>
-                    </Link>
-
-                    {/* 聊天室 */}
-                    <Link href="/family/messages" className="block group">
-                        <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow group-hover:border-purple-200 border border-transparent">
-                            <div className="flex items-center justify-between mb-4">
-                                <div className="p-3 bg-purple-100 rounded-lg group-hover:bg-purple-200 transition-colors">
-                                    <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                                    </svg>
-                                </div>
-                            </div>
-                            <h3 className="text-lg font-semibold text-gray-900 mb-2">聊天室</h3>
-                            <p className="text-sm text-gray-600">與長輩保持聯繫</p>
-                        </div>
-                    </Link>
-
-                    {/* 裝備商店 (送禮) - S2B2C 核心 */}
-                    <Link href="/family/shop" className="block group">
-                        <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow group-hover:border-pink-200 border border-transparent">
-                            <div className="flex items-center justify-between mb-4">
-                                <div className="p-3 bg-pink-100 rounded-lg group-hover:bg-pink-200 transition-colors">
-                                    <span className="text-2xl">🎁</span>
-                                </div>
-                            </div>
-                            <h3 className="text-lg font-semibold text-gray-900 mb-2">數位市集</h3>
-                            <p className="text-sm text-gray-600">
-                                為長輩添購裝備，目前擁有 <span className="font-bold text-amber-500">{wallet?.local_points || 0}</span> 購物金
-                            </p>
-                        </div>
-                    </Link>
-                </div>
-
-                {/* 如果未關聯長輩，顯示提示 */}
-                {!elderProfile && (
-                    <div className="mt-8 bg-yellow-50 border border-yellow-200 rounded-xl p-6">
-                        <div className="flex items-start gap-4">
-                            <svg className="w-6 h-6 text-yellow-600 mt-1" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                            </svg>
-                            <div>
-                                <h4 className="text-lg font-semibold text-gray-900 mb-2">需要綁定長輩帳戶</h4>
-                                <p className="text-gray-700">請聯繫藥師協助綁定長輩帳戶，以便查看長輩的比賽紀錄與照片。</p>
-                            </div>
-                        </div>
-                    </div>
-                )}
             </main>
         </div>
     )
