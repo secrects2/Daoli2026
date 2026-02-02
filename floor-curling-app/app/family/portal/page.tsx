@@ -31,11 +31,11 @@ export default function FamilyPortal() {
                 setProfile(profile)
 
                 // 如果有关联的长者，获取长者信息
-                if (profile?.linked_family_id) {
+                if (profile?.linked_elder_id) {
                     const { data: elder } = await supabase
                         .from('profiles')
                         .select('*')
-                        .eq('id', profile.linked_family_id)
+                        .eq('id', profile.linked_elder_id)
                         .single()
 
                     setElderProfile(elder)
