@@ -7,6 +7,7 @@ import { uploadFile } from '@/app/actions/match'
 import { useLanguage } from '@/lib/i18n/LanguageContext'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
 import { QRScanModal } from '@/components/QRScanModal'
+import clsx from 'clsx'
 
 type End = {
     endNumber: number
@@ -18,12 +19,15 @@ type End = {
     vibeVideoUrl?: string
 }
 
+type MatchMode = '1v1' | '3v3' | '6v6'
+
 export default function NewMatchPage() {
     const { t } = useLanguage()
     const router = useRouter()
     const supabase = createClientComponentClient()
 
     // 狀態管理
+    const [matchMode, setMatchMode] = useState<MatchMode>('3v3') // Default to 3v3
     const [redTeamIds, setRedTeamIds] = useState<string[]>([])
     const [yellowTeamIds, setYellowTeamIds] = useState<string[]>([])
     const [storeId, setStoreId] = useState('') // Default store ID?
@@ -35,19 +39,31 @@ export default function NewMatchPage() {
     // QR 掃描狀態
     const [showQRScanner, setShowQRScanner] = useState<'red' | 'yellow' | null>(null)
 
+    // Helper: Get max players based on mode
+    const getMaxPlayers = () => {
+        switch (matchMode) {
+            case '1v1': return 1;
+            case '3v3': return 3;
+            case '6v6': return 6;
+            default: return 6;
+        }
+    }
+
+    const MAX_PLAYERS = getMaxPlayers()
+
     // QR 掃描處理
     const handleQRScan = (elderId: string) => {
         if (showQRScanner === 'red') {
-            if (redTeamIds.length >= 6) {
-                setMessage({ type: 'error', text: '每隊最多 6 人' })
+            if (redTeamIds.length >= MAX_PLAYERS) {
+                setMessage({ type: 'error', text: `此模式每隊最多 ${MAX_PLAYERS} 人` })
                 return
             }
             if (!redTeamIds.includes(elderId) && !yellowTeamIds.includes(elderId)) {
                 setRedTeamIds([...redTeamIds, elderId])
             }
         } else if (showQRScanner === 'yellow') {
-            if (yellowTeamIds.length >= 6) {
-                setMessage({ type: 'error', text: '每隊最多 6 人' })
+            if (yellowTeamIds.length >= MAX_PLAYERS) {
+                setMessage({ type: 'error', text: `此模式每隊最多 ${MAX_PLAYERS} 人` })
                 return
             }
             if (!yellowTeamIds.includes(elderId) && !redTeamIds.includes(elderId)) {
@@ -61,12 +77,18 @@ export default function NewMatchPage() {
     const addElder = (team: 'red' | 'yellow', id: string) => {
         if (!id) return
         if (team === 'red') {
-            if (redTeamIds.length >= 6) return
+            if (redTeamIds.length >= MAX_PLAYERS) {
+                setMessage({ type: 'error', text: `此模式每隊最多 ${MAX_PLAYERS} 人` })
+                return
+            }
             if (!redTeamIds.includes(id) && !yellowTeamIds.includes(id)) {
                 setRedTeamIds([...redTeamIds, id])
             }
         } else {
-            if (yellowTeamIds.length >= 6) return
+            if (yellowTeamIds.length >= MAX_PLAYERS) {
+                setMessage({ type: 'error', text: `此模式每隊最多 ${MAX_PLAYERS} 人` })
+                return
+            }
             if (!yellowTeamIds.includes(id) && !redTeamIds.includes(id)) {
                 setYellowTeamIds([...yellowTeamIds, id])
             }
@@ -232,6 +254,13 @@ export default function NewMatchPage() {
     const redTotal = ends.reduce((sum, end) => sum + end.redScore, 0)
     const yellowTotal = ends.reduce((sum, end) => sum + end.yellowScore, 0)
 
+    // Match Modes Data
+    const matchModes = [
+        { id: '1v1', label: '1 vs 1', icon: '👤' },
+        { id: '3v3', label: '3 vs 3', icon: '👥' },
+        { id: '6v6', label: '6 vs 6', icon: '👨‍👩‍👧‍👦' },
+    ]
+
     return (
         <div className="min-h-screen bg-gray-50 pb-32">
             {/* Sticky Glass Header */}
@@ -286,6 +315,7 @@ export default function NewMatchPage() {
 
                     {/* Info Card */}
                     <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
+                        {/* Store ID */}
                         <div className="mb-6">
                             <label className="block text-sm font-bold text-gray-900 mb-2">Store ID</label>
                             <input
@@ -298,17 +328,48 @@ export default function NewMatchPage() {
                             />
                         </div>
 
+                        {/* Match Mode Selector */}
+                        <div className="mb-8">
+                            <label className="block text-sm font-bold text-gray-900 mb-2">Match Mode</label>
+                            <div className="grid grid-cols-3 gap-3 p-1 bg-gray-50 rounded-2xl border border-gray-200">
+                                {matchModes.map(mode => (
+                                    <button
+                                        key={mode.id}
+                                        type="button"
+                                        onClick={() => {
+                                            setMatchMode(mode.id as MatchMode);
+                                            // Optional: Clear teams if mode changes to stricter limit? 
+                                            // For now, let's keep them but UI will show limit.
+                                        }}
+                                        className={clsx(
+                                            "py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2",
+                                            matchMode === mode.id
+                                                ? "bg-white text-gray-900 shadow-sm ring-1 ring-black/5"
+                                                : "text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+                                        )}
+                                    >
+                                        <span className="text-lg">{mode.icon}</span>
+                                        {mode.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {/* Red Team */}
-                            <div className="p-4 rounded-3xl bg-red-50/50 border border-red-100">
-                                <div className="flex justify-between items-center mb-4">
+                            <div className="p-4 rounded-3xl bg-red-50/50 border border-red-100 relative overflow-hidden">
+                                <div className="flex justify-between items-center mb-4 relative z-10">
                                     <h3 className="font-bold text-red-900 flex items-center gap-2">
                                         <div className="w-3 h-3 rounded-full bg-red-500"></div>
                                         {t('matchNew.redElderId')}
                                     </h3>
-                                    <span className="text-xs font-medium text-red-400 border border-red-200 px-2 py-0.5 rounded-full">{redTeamIds.length}/6</span>
+                                    <span className={clsx(
+                                        "text-xs font-medium border px-2 py-0.5 rounded-full",
+                                        redTeamIds.length >= MAX_PLAYERS ? "text-red-600 bg-red-100 border-red-200" : "text-red-400 border-red-200"
+                                    )}>{redTeamIds.length}/{MAX_PLAYERS}</span>
                                 </div>
-                                <div className="space-y-2 mb-3">
+
+                                <div className="space-y-2 mb-3 relative z-10">
                                     {redTeamIds.map(id => (
                                         <div key={id} className="flex justify-between items-center bg-white p-3 rounded-xl border border-red-100 shadow-sm text-sm">
                                             <span className="font-mono text-gray-600">{id.slice(0, 8)}...</span>
@@ -317,8 +378,14 @@ export default function NewMatchPage() {
                                             </button>
                                         </div>
                                     ))}
+                                    {redTeamIds.length === 0 && (
+                                        <div className="text-center py-4 text-red-300 text-xs italic">
+                                            Add {MAX_PLAYERS} player{MAX_PLAYERS > 1 ? 's' : ''} to start
+                                        </div>
+                                    )}
                                 </div>
-                                <div className="flex gap-2">
+
+                                <div className="flex gap-2 relative z-10">
                                     <input
                                         type="text"
                                         onKeyDown={(e) => {
@@ -330,13 +397,13 @@ export default function NewMatchPage() {
                                         }}
                                         className="w-full px-4 py-3 rounded-xl bg-white border border-red-100 focus:ring-2 focus:ring-red-500 outline-none text-sm"
                                         placeholder="輸入 ID..."
-                                        disabled={redTeamIds.length >= 6}
+                                        disabled={redTeamIds.length >= MAX_PLAYERS}
                                     />
                                     <button
                                         type="button"
                                         onClick={() => setShowQRScanner('red')}
-                                        disabled={redTeamIds.length >= 6}
-                                        className="shrink-0 w-12 rounded-xl bg-red-500 text-white flex items-center justify-center shadow-lg shadow-red-200 active:scale-95 transition-transform"
+                                        disabled={redTeamIds.length >= MAX_PLAYERS}
+                                        className="shrink-0 w-12 rounded-xl bg-red-500 text-white flex items-center justify-center shadow-lg shadow-red-200 active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
                                     </button>
@@ -344,15 +411,18 @@ export default function NewMatchPage() {
                             </div>
 
                             {/* Yellow Team */}
-                            <div className="p-4 rounded-3xl bg-yellow-50/50 border border-yellow-100">
-                                <div className="flex justify-between items-center mb-4">
+                            <div className="p-4 rounded-3xl bg-yellow-50/50 border border-yellow-100 relative overflow-hidden">
+                                <div className="flex justify-between items-center mb-4 relative z-10">
                                     <h3 className="font-bold text-yellow-900 flex items-center gap-2">
                                         <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
                                         {t('matchNew.yellowElderId')}
                                     </h3>
-                                    <span className="text-xs font-medium text-yellow-600 border border-yellow-200 px-2 py-0.5 rounded-full">{yellowTeamIds.length}/6</span>
+                                    <span className={clsx(
+                                        "text-xs font-medium border px-2 py-0.5 rounded-full",
+                                        yellowTeamIds.length >= MAX_PLAYERS ? "text-yellow-600 bg-yellow-100 border-yellow-200" : "text-yellow-600 border-yellow-200"
+                                    )}>{yellowTeamIds.length}/{MAX_PLAYERS}</span>
                                 </div>
-                                <div className="space-y-2 mb-3">
+                                <div className="space-y-2 mb-3 relative z-10">
                                     {yellowTeamIds.map(id => (
                                         <div key={id} className="flex justify-between items-center bg-white p-3 rounded-xl border border-yellow-100 shadow-sm text-sm">
                                             <span className="font-mono text-gray-600">{id.slice(0, 8)}...</span>
@@ -361,8 +431,13 @@ export default function NewMatchPage() {
                                             </button>
                                         </div>
                                     ))}
+                                    {yellowTeamIds.length === 0 && (
+                                        <div className="text-center py-4 text-red-300 text-xs italic">
+                                            Add {MAX_PLAYERS} player{MAX_PLAYERS > 1 ? 's' : ''} to start
+                                        </div>
+                                    )}
                                 </div>
-                                <div className="flex gap-2">
+                                <div className="flex gap-2 relative z-10">
                                     <input
                                         type="text"
                                         onKeyDown={(e) => {
@@ -374,13 +449,13 @@ export default function NewMatchPage() {
                                         }}
                                         className="w-full px-4 py-3 rounded-xl bg-white border border-yellow-100 focus:ring-2 focus:ring-yellow-400 outline-none text-sm"
                                         placeholder="輸入 ID..."
-                                        disabled={yellowTeamIds.length >= 6}
+                                        disabled={yellowTeamIds.length >= MAX_PLAYERS}
                                     />
                                     <button
                                         type="button"
                                         onClick={() => setShowQRScanner('yellow')}
-                                        disabled={yellowTeamIds.length >= 6}
-                                        className="shrink-0 w-12 rounded-xl bg-yellow-400 text-white flex items-center justify-center shadow-lg shadow-yellow-200 active:scale-95 transition-transform"
+                                        disabled={yellowTeamIds.length >= MAX_PLAYERS}
+                                        className="shrink-0 w-12 rounded-xl bg-yellow-400 text-white flex items-center justify-center shadow-lg shadow-yellow-200 active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
                                     </button>
@@ -389,7 +464,7 @@ export default function NewMatchPage() {
                         </div>
                     </div>
 
-                    {/* Ends List */}
+                    {/* Ends List (Unchanged Logic, just visual) */}
                     <div className="space-y-6">
                         <div className="flex items-center justify-between">
                             <h3 className="text-xl font-bold text-gray-900">Game Ends</h3>
