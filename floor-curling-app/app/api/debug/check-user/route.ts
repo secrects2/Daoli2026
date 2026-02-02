@@ -12,19 +12,15 @@ export async function GET(request: Request) {
         process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
 
-    // 1. Get User ID from Auth
-    // Admin API listUsers is expensive/restricted usually, but `rpc` or select from auth schema is hard.
-    // Instead we query `profiles` which we sync.
-    // Wait, profiles might be keyed by ID. We can't search profiles by email if email is not in profile.
-    // But usually auth.users has email.
+    // 1. Get User ID from Auth with Pagination
+    const { data: { users }, error } = await supabase.auth.admin.listUsers({ perPage: 1000 })
 
-    // Actually, Supabase Admin API can list users by email
-    const { data: { users }, error } = await supabase.auth.admin.listUsers()
+    if (error) return NextResponse.json({ error: error.message })
 
     const targetUser = users.find(u => u.email === email)
 
     if (!targetUser) {
-        return NextResponse.json({ error: 'User not found in Auth' })
+        return NextResponse.json({ error: 'User not found in Auth', scanned: users.length })
     }
 
     // 2. Get Profile
