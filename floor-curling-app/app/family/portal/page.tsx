@@ -165,6 +165,19 @@ export default function FamilyPortal() {
                             <p className="text-sm text-gray-600">與長輩保持聯繫</p>
                         </div>
                     </Link>
+
+                    {/* 裝備商店 (送禮) */}
+                    <Link href="/family/shop" className="block group">
+                        <div className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow group-hover:border-pink-200 border border-transparent">
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="p-3 bg-pink-100 rounded-lg group-hover:bg-pink-200 transition-colors">
+                                    <span className="text-2xl">🎁</span>
+                                </div>
+                            </div>
+                            <h3 className="text-lg font-semibold text-gray-900 mb-2">送禮給長輩</h3>
+                            <p className="text-sm text-gray-600">兌換裝備與健康補給</p>
+                        </div>
+                    </Link>
                 </div>
 
                 {/* 如果未關聯長輩，顯示提示 */}

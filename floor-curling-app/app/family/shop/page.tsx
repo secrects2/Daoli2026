@@ -1,103 +1,168 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
 
-export default function ShopPage() {
-    const [points, setPoints] = useState(0)
-    const [loading, setLoading] = useState(true)
+export default function FamilyShop() {
+    const router = useRouter()
+    const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
 
-    // Fake Shop Data
-    const products = [
-        { id: 1, name: '專業冰壺推桿', price: 500, image: '🏑', desc: '輕量化設計，適合長輩使用' },
-        { id: 2, name: '防滑運動手套', price: 200, image: '🧤', desc: '增加抓握力，安全更有保障' },
-        { id: 3, name: '能量營養棒 (盒)', price: 150, image: '🍫', desc: '比賽後的最佳體力補充' },
-        { id: 4, name: '道里紀念毛巾', price: 300, image: '🧣', desc: '吸汗透氣，舒適運動體驗' },
-        { id: 5, name: '關節護膝', price: 800, image: '🦵', desc: '保護膝蓋，減少運動傷害' },
-        { id: 6, name: '線上課程：戰術分析', price: 1000, image: '🎓', desc: '大師級教練親自解說' },
-    ]
+    const [user, setUser] = useState<any>(null)
+    const [elder, setElder] = useState<any>(null)
+    const [points, setPoints] = useState(0)
+    const [products, setProducts] = useState<any[]>([])
+    const [loading, setLoading] = useState(true)
+    const [purchasing, setPurchasing] = useState<string | null>(null)
 
     useEffect(() => {
-        // Fetch fake wallet points
-        const fetchPoints = async () => {
-            const supabase = createBrowserClient(
-                process.env.NEXT_PUBLIC_SUPABASE_URL!,
-                process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-            )
+        const init = async () => {
             const { data: { user } } = await supabase.auth.getUser()
-            if (user) {
-                // Try to get linked elder's wallet
-                const { data: profile } = await supabase.from('profiles').select('linked_elder_id').eq('id', user.id).single()
-                if (profile?.linked_elder_id) {
-                    const { data: wallet } = await supabase.from('wallets').select('global_points').eq('user_id', profile.linked_elder_id).single()
-                    if (wallet) setPoints(wallet.global_points)
+            if (!user) {
+                router.push('/login')
+                return
+            }
+            setUser(user)
+
+            // 1. Get Family Profile to find Elder ID
+            const { data: familyProfile } = await supabase.from('profiles').select('linked_elder_id').eq('id', user.id).single()
+
+            if (familyProfile?.linked_elder_id) {
+                // 2. Get Elder Profile (Name & Points)
+                const { data: elderProfile } = await supabase
+                    .from('profiles')
+                    .select('id, full_name, points')
+                    .eq('id', familyProfile.linked_elder_id)
+                    .single()
+
+                if (elderProfile) {
+                    setElder(elderProfile)
+                    setPoints(elderProfile.points || 0)
                 }
             }
+
+            // Fetch Products
+            const { data: products } = await supabase.from('products').select('*').order('price', { ascending: true })
+            if (products) setProducts(products)
+
             setLoading(false)
         }
-        fetchPoints()
-    }, [])
+        init()
+    }, [supabase, router])
 
-    const handleBuy = (product: any) => {
-        if (points < product.price) {
-            alert('積分不足！請多鼓勵長輩參加比賽賺取積分。')
-            return
+    const handleBuy = async (product: any) => {
+        if (!elder) return alert('請先綁定長輩帳號')
+
+        if (!confirm(`確定要為 ${elder.full_name} 購買「${product.name}」嗎？\n(將扣除長輩積分 ${product.price})`)) return
+
+        setPurchasing(product.id)
+        try {
+            const res = await fetch('/api/shop/purchase', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    productId: product.id,
+                    buyerId: user.id,
+                    targetUserId: elder.id // Buying FOR Elder
+                })
+            })
+
+            const data = await res.json()
+            if (!res.ok) throw new Error(data.error)
+
+            alert(`購買成功！長輩 ${elder.full_name} 會很高興的！`)
+            setPoints(data.remainingPoints)
+            router.refresh()
+        } catch (error: any) {
+            alert(error.message)
+        } finally {
+            setPurchasing(null)
         }
-        if (confirm(`確定要花費 ${product.price} 積分兌換「${product.name}」嗎？`)) {
-            alert('兌換成功！商品將寄送至長輩所屬據點。')
-            setPoints(prev => prev - product.price)
-        }
+    }
+
+    if (loading) return <div className="min-h-screen flex items-center justify-center">載入中...</div>
+
+    if (!elder) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+                <p className="text-xl text-gray-600 mb-4">您尚未綁定長輩，無法使用商店功能。</p>
+                <button onClick={() => router.back()} className="text-blue-600 underline">返回</button>
+            </div>
+        )
     }
 
     return (
         <div className="min-h-screen bg-gray-50 pb-20">
             {/* Header */}
-            <div className="sticky top-0 z-10 bg-white/90 backdrop-blur-md border-b border-gray-200">
-                <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <Link href="/family/dashboard" className="text-blue-600 font-medium">← 返回</Link>
-                        <h1 className="text-lg font-bold">數位市集</h1>
+            <div className="sticky top-0 z-10 bg-white shadow-sm pt-4 pb-4 px-4">
+                <div className="max-w-7xl mx-auto flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <button onClick={() => router.back()} className="text-gray-600 hover:bg-gray-100 p-2 rounded-full">
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                        </button>
+                        <div>
+                            <h1 className="text-xl font-bold text-gray-900">送禮給 {elder.full_name}</h1>
+                            <p className="text-xs text-gray-500">協助長輩兌換裝備與戰力</p>
+                        </div>
                     </div>
-                    <div className="bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1">
-                        🪙 {loading ? '...' : points.toLocaleString()}
+                    <div className="bg-yellow-50 border border-yellow-200 px-3 py-1.5 rounded-full flex items-center gap-2">
+                        <span className="text-lg">💰</span>
+                        <div>
+                            <p className="text-[10px] text-yellow-600 leading-none">長輩積分</p>
+                            <p className="font-bold text-yellow-800 leading-none">{points}</p>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div className="max-w-3xl mx-auto p-4 space-y-6">
-                {/* Banner */}
-                <div className="bg-gradient-to-r from-pink-500 to-rose-500 rounded-2xl p-6 text-white shadow-md">
-                    <h2 className="text-2xl font-bold mb-2">長輩專屬裝備</h2>
-                    <p className="opacity-90">用積分兌換優質商品，讓運動更安全、更有趣！</p>
-                </div>
-
-                {/* Grid */}
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {products.map(p => (
-                        <div key={p.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
-                            <div className="aspect-[4/3] bg-gray-100 flex items-center justify-center text-4xl">
-                                {p.image}
+            <main className="max-w-7xl mx-auto px-4 py-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {products.map(product => (
+                        <div key={product.id} className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-all border border-transparent hover:border-blue-200">
+                            <div className="aspect-video bg-gray-100 p-6 flex items-center justify-center">
+                                <img src={product.image_url} alt={product.name} className="w-full h-full object-contain mix-blend-multiply" />
                             </div>
-                            <div className="p-4 flex-1 flex flex-col">
-                                <h3 className="font-bold text-gray-900 mb-1">{p.name}</h3>
-                                <p className="text-xs text-gray-500 mb-3 flex-1">{p.desc}</p>
-                                <div className="flex items-center justify-between mt-auto">
-                                    <span className="font-bold text-amber-600">
-                                        {p.price} 積分
+                            <div className="p-5">
+                                <div className="flex justify-between items-start mb-2">
+                                    <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${product.category === 'health'
+                                            ? 'bg-green-100 text-green-700'
+                                            : 'bg-blue-100 text-blue-700'
+                                        }`}>
+                                        {product.category === 'health' ? '❤️ 健康補給' : '🛡️ 戰力裝備'}
                                     </span>
-                                    <button
-                                        onClick={() => handleBuy(p)}
-                                        className="bg-blue-600 text-white text-xs px-3 py-1.5 rounded-full hover:bg-blue-700 active:scale-95 transition-transform"
-                                    >
-                                        兌換
-                                    </button>
+                                    <span className="font-bold text-orange-600 text-lg">{product.price} 分</span>
                                 </div>
+                                <h3 className="font-bold text-gray-900 text-lg mb-1">{product.name}</h3>
+                                <p className="text-sm text-gray-500 mb-4 h-10 line-clamp-2">{product.description}</p>
+
+                                <button
+                                    onClick={() => handleBuy(product)}
+                                    disabled={!!purchasing || points < product.price}
+                                    className={`w-full py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors ${points >= product.price
+                                            ? 'bg-blue-600 text-white hover:bg-blue-700'
+                                            : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                        }`}
+                                >
+                                    {purchasing === product.id ? (
+                                        <>
+                                            <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                                            處理中...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span>🎁</span>
+                                            {points >= product.price ? '贈送禮物' : '積分不足'}
+                                        </>
+                                    )}
+                                </button>
                             </div>
                         </div>
                     ))}
                 </div>
-            </div>
+            </main>
         </div>
     )
 }

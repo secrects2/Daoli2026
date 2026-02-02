@@ -149,11 +149,16 @@ export default function ElderDashboard() {
 
             {/* My Equipment */}
             {
-                inventory.length > 0 && (
+                inventory.length > 0 ? (
                     <div className="bg-white rounded-2xl p-4 shadow-sm">
-                        <h3 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
-                            <span>🎒</span> 我的裝備
-                        </h3>
+                        <div className="flex justify-between items-center mb-3">
+                            <h3 className="font-bold text-gray-900 flex items-center gap-2">
+                                <span>🎒</span> 我的裝備
+                            </h3>
+                            <Link href="/elder/shop" className="text-sm text-blue-600 font-bold bg-blue-50 px-3 py-1 rounded-full">
+                                + 添購裝備
+                            </Link>
+                        </div>
                         <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
                             {inventory.map((item: any) => (
                                 <div key={item.id} className="flex-shrink-0 w-24 flex flex-col items-center gap-2 p-3 bg-gray-50 rounded-xl border border-gray-100">
@@ -168,6 +173,14 @@ export default function ElderDashboard() {
                                 </div>
                             ))}
                         </div>
+                    </div>
+                ) : (
+                    <div className="bg-white rounded-2xl p-6 shadow-sm text-center">
+                        <h3 className="font-bold text-gray-900 mb-2">🎒 我的裝備</h3>
+                        <p className="text-gray-500 text-sm mb-4">您還沒有任何裝備喔！</p>
+                        <Link href="/elder/shop" className="inline-block bg-blue-600 text-white px-6 py-2 rounded-full font-bold shadow-lg shadow-blue-200 active:scale-95 transition-transform">
+                            前往商店兌換
+                        </Link>
                     </div>
                 )
             }
