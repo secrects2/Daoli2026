@@ -126,23 +126,25 @@ export default function ElderDashboard() {
             </div>
 
             {/* Weekly Activity Stat Card */}
-            <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl p-6 shadow-lg text-white relative overflow-hidden">
-                <div className="relative z-10 flex justify-between items-center">
-                    <div>
-                        <p className="text-blue-100 text-sm font-medium mb-1">本週健康存摺</p>
-                        <h3 className="text-3xl font-bold flex items-baseline gap-2">
-                            {stats?.weeklyMatches || 0}
-                            <span className="text-lg font-normal opacity-80">場比賽</span>
-                        </h3>
-                        <p className="text-blue-100 text-xs mt-2">
-                            累積榮譽積分: {stats?.totalPoints || 0}
-                        </p>
-                    </div>
-                    <div className="bg-white/20 p-3 rounded-full backdrop-blur-sm">
-                        <span className="text-3xl">🏃‍♂️</span>
+            <Link href="/elder/stats">
+                <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl p-6 shadow-lg text-white relative overflow-hidden transition-transform active:scale-95">
+                    <div className="relative z-10 flex justify-between items-center">
+                        <div>
+                            <p className="text-blue-100 text-sm font-medium mb-1">本週健康存摺</p>
+                            <h3 className="text-3xl font-bold flex items-baseline gap-2">
+                                {stats?.weeklyMatches || 0}
+                                <span className="text-lg font-normal opacity-80">場比賽</span>
+                            </h3>
+                            <p className="text-blue-100 text-xs mt-2">
+                                累積榮譽積分: {stats?.totalPoints || 0}
+                            </p>
+                        </div>
+                        <div className="bg-white/20 p-3 rounded-full backdrop-blur-sm">
+                            <span className="text-3xl">🏃‍♂️</span>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </Link>
 
 
             {/* My Equipment */}
