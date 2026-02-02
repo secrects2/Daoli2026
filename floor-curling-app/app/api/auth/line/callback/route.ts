@@ -217,7 +217,7 @@ export async function GET(request: Request) {
         let targetUrl = '/onboarding' // Default for new users (role is null)
 
         if (finalProfile?.role === 'family') {
-            targetUrl = '/family/dashboard'
+            targetUrl = '/family/portal'
         } else if (finalProfile?.role === 'pharmacist') {
             targetUrl = '/pharmacist/dashboard'
         } else if (finalProfile?.role === 'elder') {

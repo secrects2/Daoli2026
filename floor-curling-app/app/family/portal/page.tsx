@@ -9,6 +9,7 @@ export default function FamilyPortal() {
     const [user, setUser] = useState<any>(null)
     const [profile, setProfile] = useState<any>(null)
     const [elderProfile, setElderProfile] = useState<any>(null)
+    const [wallet, setWallet] = useState<any>(null)
     const [loading, setLoading] = useState(true)
     const router = useRouter()
     const supabase = createBrowserClient(

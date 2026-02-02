@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
     const code = requestUrl.searchParams.get('code')
 
     // Default redirect target
-    let next = '/family/dashboard'
+    let next = '/family/portal'
 
     if (code) {
         const cookieStore = await cookies() // Awaiting cookies() is good practice in Next.js 15
