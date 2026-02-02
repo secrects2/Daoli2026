@@ -88,11 +88,11 @@ export default function LoginForm() {
     }
 
     const devButtons = [
-        { role: 'admin', label: 'Admin', color: 'bg-red-500 hover:bg-red-600 text-white' },
-        { role: 'pharmacist', label: 'Pharmacist', color: 'bg-blue-500 hover:bg-blue-600 text-white' },
-        { role: 'family', label: 'Family', color: 'bg-green-500 hover:bg-green-600 text-white' },
-        { role: 'family_bound', label: 'Family Bound', color: 'bg-purple-500 hover:bg-purple-600 text-white' },
-        { role: 'elder', label: 'Elder', color: 'bg-white hover:bg-gray-50 text-gray-700 border border-gray-200' }, // "長輩登入按鈕為白底" applied here for Dev button
+        { role: 'admin', label: '後台', color: 'bg-red-500 hover:bg-red-600 text-white' },
+        { role: 'pharmacist', label: '店長', color: 'bg-blue-500 hover:bg-blue-600 text-white' },
+        { role: 'family', label: '家屬', color: 'bg-green-500 hover:bg-green-600 text-white' },
+        { role: 'family_bound', label: '已綁家屬', color: 'bg-purple-500 hover:bg-purple-600 text-white' },
+        { role: 'elder', label: '長輩', color: 'bg-white hover:bg-gray-50 text-gray-700 border border-gray-200' },
     ]
 
     return (
