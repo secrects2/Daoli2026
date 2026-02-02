@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
-import { parseElderQRCode } from '@/components/QRCode'
+import { parseElderQRCode } from '@/lib/qr-utils'
 import { createClient } from '@supabase/supabase-js'
 
 export async function POST(request: Request) {

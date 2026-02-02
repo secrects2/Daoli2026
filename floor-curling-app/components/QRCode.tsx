@@ -54,22 +54,5 @@ export async function generateQRCodeDataUrl(value: string, size = 300): Promise<
     })
 }
 
-/**
- * 解析 QR Code 內容
- * 格式: daoli://elder/{elderId}
- */
-export function parseElderQRCode(content: string): { elderId: string } | null {
-    const match = content.match(/^daoli:\/\/elder\/([a-f0-9-]+)$/i)
-    if (match) {
-        return { elderId: match[1] }
-    }
-    return null
-}
-
-/**
- * 生成長輩 QR Code 內容
- * 格式: daoli://elder/{elderId}
- */
-export function generateElderQRContent(elderId: string): string {
-    return `daoli://elder/${elderId}`
-}
+// Re-export utility functions for frontend convenience
+export { parseElderQRCode, generateElderQRContent } from '@/lib/qr-utils'
