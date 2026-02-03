@@ -1,9 +1,8 @@
-'use client'
-
 import { useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { QRScanModal } from '@/components/QRScanModal'
 
 interface PortalClientProps {
     user: any
@@ -19,11 +18,44 @@ export default function PortalClient({ user, profile, elderProfile, wallet }: Po
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )
 
+    // Scanner State
+    const [showScanner, setShowScanner] = useState(false)
+    const [isBinding, setIsBinding] = useState(false)
+
     const handleLogout = async () => {
         if (confirm('確定要登出嗎？')) {
             await supabase.auth.signOut()
             router.push('/login')
             router.refresh()
+        }
+    }
+
+    const handleScan = async (elderId: string) => {
+        setIsBinding(true)
+        try {
+            // Reconstruct QR content for API compatibility
+            const qrContent = JSON.stringify({ elderId })
+
+            const response = await fetch('/api/family/bind', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ qrContent })
+            })
+
+            const result = await response.json()
+
+            if (!response.ok) {
+                throw new Error(result.error || '綁定失敗')
+            }
+
+            alert('綁定成功！')
+            router.refresh()
+        } catch (error: any) {
+            alert(error.message)
+        } finally {
+            setIsBinding(false)
         }
     }
 
@@ -103,8 +135,12 @@ export default function PortalClient({ user, profile, elderProfile, wallet }: Po
                             <p className="text-gray-500 text-sm mt-1 mb-4">
                                 請掃描長輩手機上的 QR Code 進行綁定，<br />以便隨時關心長輩動態。
                             </p>
-                            <button onClick={() => alert('請開啟相機掃描長輩 QR Code')} className="bg-orange-500 text-white px-6 py-2 rounded-full font-bold shadow-lg shadow-orange-200 active:scale-95 transition-all">
-                                掃描 QR Code
+                            <button
+                                onClick={() => setShowScanner(true)}
+                                disabled={isBinding}
+                                className="bg-orange-500 text-white px-6 py-2 rounded-full font-bold shadow-lg shadow-orange-200 active:scale-95 transition-all disabled:opacity-50"
+                            >
+                                {isBinding ? '綁定中...' : '掃描 QR Code'}
                             </button>
                         </div>
                     </div>
@@ -174,6 +210,14 @@ export default function PortalClient({ user, profile, elderProfile, wallet }: Po
                     </div>
                 </div>
             </main>
+
+            {/* QR Scanner Modal */}
+            <QRScanModal
+                isOpen={showScanner}
+                onClose={() => setShowScanner(false)}
+                onScan={handleScan}
+                title="掃描長輩 QR Code 進行綁定"
+            />
         </div>
     )
 }
