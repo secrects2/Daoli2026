@@ -40,7 +40,7 @@ export default async function AdminStoresPage() {
     try {
         const { data, error } = await supabase
             .from('stores')
-            .select('*, profiles:profiles(count)')
+            .select('*')
             .order('created_at', { ascending: false })
 
         if (error) throw error
@@ -61,10 +61,6 @@ export default async function AdminStoresPage() {
                         <h1 className="text-2xl font-bold text-gray-900">加盟店管理 (Franchise Control)</h1>
                         <p className="text-gray-500">管理各分店的營運狀態與權限</p>
                     </div>
-                    <div>
-                        <h1 className="text-2xl font-bold text-gray-900">加盟店管理 (Franchise Control)</h1>
-                        <p className="text-gray-500">管理各分店的營運狀態與權限</p>
-                    </div>
                     <div className="flex gap-3">
                         <Link href="/admin/stores/new" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors">
                             + 新增加盟店
@@ -74,6 +70,18 @@ export default async function AdminStoresPage() {
                         </Link>
                     </div>
                 </div>
+
+                {errorMsg && !isTableMissing && (
+                    <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-4">
+                        <div className="flex">
+                            <div className="ml-3">
+                                <p className="text-sm text-red-700">
+                                    <strong>載入失敗：</strong> {errorMsg}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {isTableMissing ? (
                     <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
