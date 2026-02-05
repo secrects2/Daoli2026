@@ -45,13 +45,18 @@ ON CONFLICT DO NOTHING;
 -- =============================================
 
 -- 更新現有店長的 store_id（如果有的話）
+-- 更新特定演示店長 account (如果存在)
+-- (Email column missing in profiles, skipping email-based update)
+
+-- 更新其他未分配店長的店長 (Fallback)
 UPDATE profiles 
 SET store_id = 'TPE-XINYI' 
-WHERE id = (
-    SELECT id FROM profiles 
-    WHERE role = 'pharmacist' AND store_id IS NULL 
-    LIMIT 1
-);
+WHERE role = 'pharmacist' AND store_id IS NULL;
+
+-- 關鍵修正：將所有長輩分配到 TPE-XINYI 店鋪，確保店長能看到他們
+UPDATE profiles 
+SET store_id = 'TPE-XINYI' 
+WHERE role = 'elder';
 
 -- 確保所有長輩都有錢包
 INSERT INTO wallets (user_id, global_points, local_points)
@@ -169,7 +174,80 @@ FROM profiles p, generate_series(1, 3) AS gs
 WHERE p.role = 'elder';
 
 -- =============================================
--- 7. 更新統計數據
+-- 7. 庫存數據 (Inventory) - Elder Shop
+-- =============================================
+
+INSERT INTO inventory (user_id, product_id, status, data)
+SELECT 
+    p.id,
+    pr.id,
+    CASE WHEN RANDOM() > 0.8 THEN 'equipped' ELSE 'active' END,
+    '{}'
+FROM profiles p
+CROSS JOIN products pr
+WHERE p.role = 'elder' 
+AND pr.price_points < 1000 -- 只擁有便宜的商品
+AND RANDOM() > 0.7 -- 30% 機率擁有
+LIMIT 20
+ON CONFLICT DO NOTHING;
+
+-- =============================================
+-- 8. 通知數據 (Notifications) - Family Portal
+-- =============================================
+
+INSERT INTO notifications (user_id, title, message, type, read, created_at)
+SELECT 
+    p.id,
+    CASE 
+        WHEN RANDOM() > 0.6 THEN '比賽結果通知'
+        WHEN RANDOM() > 0.3 THEN '積分變動通知'
+        ELSE '系統公告' 
+    END,
+    CASE 
+        WHEN RANDOM() > 0.6 THEN '您的長輩剛剛完成了一場精彩的比賽！'
+        WHEN RANDOM() > 0.3 THEN '您的長輩獲得了 50 點獎勵積分。'
+        ELSE '地壺球大賽將於下週舉行，歡迎報名。' 
+    END,
+    CASE 
+        WHEN RANDOM() > 0.6 THEN 'match_result'
+        WHEN RANDOM() > 0.3 THEN 'points_update'
+        ELSE 'system' 
+    END::notification_type,
+    (RANDOM() > 0.5), -- 隨機已讀/未讀
+    NOW() - (FLOOR(RANDOM() * 7)::INT || ' days')::INTERVAL
+FROM profiles p
+CROSS JOIN generate_series(1, 3)
+WHERE p.role = 'family'
+ON CONFLICT DO NOTHING;
+
+-- =============================================
+-- 9. 家屬綁定 (Family-Elder Links) - Family Portal
+-- =============================================
+
+-- 嘗試將孤兒家屬與孤兒長輩綁定
+DO $$
+DECLARE
+    v_family RECORD;
+    v_elder RECORD;
+BEGIN
+    FOR v_family IN SELECT id FROM profiles WHERE role = 'family' AND linked_elder_id IS NULL LOOP
+        -- 找一個還沒被這個家屬綁定的長輩
+        SELECT id INTO v_elder FROM profiles WHERE role = 'elder' ORDER BY RANDOM() LIMIT 1;
+        
+        IF v_elder IS NOT NULL THEN
+            -- 更新 profiles (legacy)
+            UPDATE profiles SET linked_elder_id = v_elder.id WHERE id = v_family.id;
+            
+            -- 更新 links table (new)
+            INSERT INTO family_elder_links (family_id, elder_id, is_primary)
+            VALUES (v_family.id, v_elder.id, true)
+            ON CONFLICT DO NOTHING;
+        END IF;
+    END LOOP;
+END $$;
+
+-- =============================================
+-- 10. 更新統計數據
 -- =============================================
 
 -- 確保所有長輩 profile 有完整資料
@@ -184,7 +262,11 @@ UPDATE profiles
 SET 
     full_name = COALESCE(full_name, '店長 ' || SUBSTR(id::TEXT, 1, 4)),
     store_id = COALESCE(store_id, 'TPE-XINYI')
-WHERE role = 'pharmacist' AND (full_name IS NULL OR full_name = '');
+WHERE role = (
+    SELECT role FROM profiles 
+    WHERE role = 'pharmacist' AND store_id IS NULL 
+    LIMIT 1
+);
 
 -- =============================================
 -- 完成提示
@@ -195,15 +277,18 @@ DECLARE
     v_elder_count INT;
     v_match_count INT;
     v_product_count INT;
+    v_notification_count INT;
 BEGIN
     SELECT COUNT(*) INTO v_store_count FROM stores;
     SELECT COUNT(*) INTO v_elder_count FROM profiles WHERE role = 'elder';
     SELECT COUNT(*) INTO v_match_count FROM matches;
     SELECT COUNT(*) INTO v_product_count FROM products WHERE is_active = true;
+    SELECT COUNT(*) INTO v_notification_count FROM notifications;
     
     RAISE NOTICE '=== 演示數據種子完成 ===';
     RAISE NOTICE '門店數量: %', v_store_count;
     RAISE NOTICE '長輩數量: %', v_elder_count;
     RAISE NOTICE '比賽數量: %', v_match_count;
     RAISE NOTICE '商品數量: %', v_product_count;
+    RAISE NOTICE '通知數量: %', v_notification_count;
 END $$;

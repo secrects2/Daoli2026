@@ -38,9 +38,14 @@ export default function EldersPage() {
     const [loading, setLoading] = useState(true)
     const [searchTerm, setSearchTerm] = useState('')
     const [userStoreId, setUserStoreId] = useState<string | null>(null)
+    const [error, setError] = useState<string | null>(null)
 
     useEffect(() => {
-        fetchUserStore()
+        fetchUserStore().catch(err => {
+            console.error('fetchUserStore failed:', err)
+            setError(err.message || 'Unknown error')
+            setLoading(false)
+        })
     }, [])
 
     // ✅ 獲取當前用戶的 store_id
@@ -59,6 +64,9 @@ export default function EldersPage() {
             } else {
                 fetchElders(null)
             }
+        } else {
+            console.error('No user found in fetchUserStore')
+            setLoading(false) // Stop loading if no user
         }
     }
 
@@ -153,12 +161,31 @@ export default function EldersPage() {
         })
     }
 
+    // Display error if any
+    if (error) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-100">
+                <div className="text-center bg-white p-8 rounded-xl shadow-lg max-w-md">
+                    <div className="text-red-500 text-5xl mb-4">⚠️</div>
+                    <h2 className="text-xl font-bold text-gray-900 mb-2">載入失敗</h2>
+                    <p className="text-gray-600 mb-4">{error}</p>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    >
+                        重新載入
+                    </button>
+                </div>
+            </div>
+        )
+    }
+
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-100">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className="mt-4 text-gray-600">{t('common.loading')}</p> {/* Updated */}
+                    <p className="mt-4 text-gray-600">{t('common.loading')}</p>
                 </div>
             </div>
         )
