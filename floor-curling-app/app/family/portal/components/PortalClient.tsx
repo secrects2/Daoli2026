@@ -6,14 +6,28 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { QRScanModal } from '@/components/QRScanModal'
 
+interface ElderData {
+    id: string
+    elder_id: string
+    is_primary: boolean
+    nickname: string | null
+    elder: {
+        id: string
+        full_name: string
+        nickname: string
+        avatar_url: string
+        store_id: string
+    }
+}
+
 interface PortalClientProps {
     user: any
     profile: any
-    elderProfile: any
+    elders: ElderData[]
     wallet: any
 }
 
-export default function PortalClient({ user, profile, elderProfile, wallet }: PortalClientProps) {
+export default function PortalClient({ user, profile, elders, wallet }: PortalClientProps) {
     const router = useRouter()
     const supabase = createBrowserClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -23,6 +37,11 @@ export default function PortalClient({ user, profile, elderProfile, wallet }: Po
     // Scanner State
     const [showScanner, setShowScanner] = useState(false)
     const [isBinding, setIsBinding] = useState(false)
+    const [selectedElderIndex, setSelectedElderIndex] = useState(0)
+
+    // Get current elder
+    const currentElder = elders[selectedElderIndex]?.elder
+    const hasElders = elders.length > 0
 
     const handleLogout = async () => {
         if (confirm('確定要登出嗎？')) {
@@ -34,16 +53,15 @@ export default function PortalClient({ user, profile, elderProfile, wallet }: Po
 
     const handleScan = async (elderId: string) => {
         setIsBinding(true)
+        setShowScanner(false)
         try {
-            // Reconstruct QR content for API compatibility
-            const qrContent = JSON.stringify({ elderId })
-
-            const response = await fetch('/api/family/bind', {
+            // Use new multi-elder API
+            const response = await fetch('/api/family/elders', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ qrContent })
+                body: JSON.stringify({ elderId })
             })
 
             const result = await response.json()
@@ -61,6 +79,26 @@ export default function PortalClient({ user, profile, elderProfile, wallet }: Po
         }
     }
 
+    const handleUnbind = async (elderId: string) => {
+        if (!confirm('確定要解除與此長輩的綁定嗎？')) return
+
+        try {
+            const response = await fetch(`/api/family/elders?elderId=${elderId}`, {
+                method: 'DELETE'
+            })
+
+            if (!response.ok) {
+                const result = await response.json()
+                throw new Error(result.error || '解除綁定失敗')
+            }
+
+            alert('已解除綁定')
+            router.refresh()
+        } catch (error: any) {
+            alert(error.message)
+        }
+    }
+
     return (
         <div className="min-h-screen pb-20 space-y-6">
             {/* Glass Header */}
@@ -75,13 +113,14 @@ export default function PortalClient({ user, profile, elderProfile, wallet }: Po
                     <div className="flex items-center gap-3">
                         <button
                             onClick={handleLogout}
+                            title="登出"
                             className="w-10 h-10 rounded-full bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-100 transition-colors"
                         >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
                         </button>
                         <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden ring-2 ring-white shadow-sm">
                             {user?.user_metadata?.avatar_url ? (
-                                <img src={user.user_metadata.avatar_url} className="w-full h-full object-cover" />
+                                <img src={user.user_metadata.avatar_url} alt="用戶頭像" className="w-full h-full object-cover" />
                             ) : (
                                 <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300" />
                             )}
@@ -92,40 +131,91 @@ export default function PortalClient({ user, profile, elderProfile, wallet }: Po
 
             <main className="px-5 space-y-6 animate-fade-in-up">
 
-                {elderProfile ? (
-                    /* Linked Elder Card - Premium Gradient */
-                    <div className="relative bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl p-8 shadow-lg shadow-indigo-500/25 overflow-hidden text-white">
-                        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                            <div className="flex items-center gap-4">
-                                <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-md shadow-inner flex items-center justify-center border border-white/10 overflow-hidden">
-                                    {elderProfile.avatar_url ? (
-                                        <img src={elderProfile.avatar_url} className="w-full h-full object-cover" />
-                                    ) : (
-                                        <span className="text-3xl">👴</span>
-                                    )}
+                {hasElders ? (
+                    <>
+                        {/* Elder Selector (if multiple) */}
+                        {elders.length > 1 && (
+                            <div className="flex gap-2 overflow-x-auto pb-2 -mx-5 px-5">
+                                {elders.map((e, idx) => (
+                                    <button
+                                        key={e.id}
+                                        onClick={() => setSelectedElderIndex(idx)}
+                                        className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-bold transition-all ${idx === selectedElderIndex
+                                                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200'
+                                                : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+                                            }`}
+                                    >
+                                        {e.nickname || e.elder?.nickname || e.elder?.full_name || `長輩 ${idx + 1}`}
+                                        {e.is_primary && <span className="ml-1 text-xs opacity-70">★</span>}
+                                    </button>
+                                ))}
+                                <button
+                                    onClick={() => setShowScanner(true)}
+                                    className="flex-shrink-0 px-4 py-2 rounded-full text-sm font-bold bg-green-50 text-green-600 border border-green-200 hover:bg-green-100 transition-all"
+                                >
+                                    + 新增長輩
+                                </button>
+                            </div>
+                        )}
+
+                        {/* Linked Elder Card - Premium Gradient */}
+                        <div className="relative bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl p-8 shadow-lg shadow-indigo-500/25 overflow-hidden text-white">
+                            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-md shadow-inner flex items-center justify-center border border-white/10 overflow-hidden">
+                                        {currentElder?.avatar_url ? (
+                                            <img src={currentElder.avatar_url} alt={currentElder.full_name || '長輩頭像'} className="w-full h-full object-cover" />
+                                        ) : (
+                                            <span className="text-3xl">👴</span>
+                                        )}
+                                    </div>
+                                    <div>
+                                        <p className="text-indigo-100 text-sm font-medium mb-1">
+                                            已連結長輩 {elders.length > 1 ? `(${selectedElderIndex + 1}/${elders.length})` : ''}
+                                        </p>
+                                        <h2 className="text-2xl font-bold tracking-tight">{currentElder?.full_name || currentElder?.nickname}</h2>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p className="text-indigo-100 text-sm font-medium mb-1">已連結長輩</p>
-                                    <h2 className="text-2xl font-bold tracking-tight">{elderProfile.full_name || elderProfile.nickname}</h2>
+
+                                <div className="flex flex-col gap-2">
+                                    <div className="flex items-baseline gap-2 bg-black/10 rounded-xl px-4 py-2 backdrop-blur-sm self-start md:self-auto">
+                                        <span className="text-xs text-white/70 font-medium uppercase tracking-wider">本週比賽</span>
+                                        <span className="text-xl font-bold">0 場</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-indigo-100 text-xs font-medium">
+                                        <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                                        狀態良好
+                                    </div>
                                 </div>
                             </div>
 
-                            <div className="flex flex-col gap-2">
-                                <div className="flex items-baseline gap-2 bg-black/10 rounded-xl px-4 py-2 backdrop-blur-sm self-start md:self-auto">
-                                    <span className="text-xs text-white/70 font-medium uppercase tracking-wider">本週比賽</span>
-                                    <span className="text-xl font-bold">0 場</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-indigo-100 text-xs font-medium">
-                                    <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
-                                    狀態良好
-                                </div>
-                            </div>
+                            {/* Unbind Button */}
+                            <button
+                                onClick={() => handleUnbind(currentElder?.id)}
+                                className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white/80 hover:text-white transition-colors"
+                                title="解除綁定"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+
+                            {/* Background Decor */}
+                            <div className="absolute top-0 right-0 -mr-12 -mt-12 w-48 h-48 bg-white/10 rounded-full blur-2xl"></div>
+                            <div className="absolute bottom-0 left-0 -ml-12 -mb-12 w-32 h-32 bg-purple-400/20 rounded-full blur-xl"></div>
                         </div>
 
-                        {/* Background Decor */}
-                        <div className="absolute top-0 right-0 -mr-12 -mt-12 w-48 h-48 bg-white/10 rounded-full blur-2xl"></div>
-                        <div className="absolute bottom-0 left-0 -ml-12 -mb-12 w-32 h-32 bg-purple-400/20 rounded-full blur-xl"></div>
-                    </div>
+                        {/* Add More Button (if only 1 elder) */}
+                        {elders.length === 1 && (
+                            <button
+                                onClick={() => setShowScanner(true)}
+                                disabled={isBinding}
+                                className="w-full py-3 bg-white border-2 border-dashed border-gray-200 rounded-2xl text-gray-500 font-bold hover:border-indigo-300 hover:text-indigo-600 transition-all"
+                            >
+                                {isBinding ? '綁定中...' : '+ 新增另一位長輩'}
+                            </button>
+                        )}
+                    </>
                 ) : (
                     /* Not Linked Alert */
                     <div className="bg-orange-50 border border-orange-100 rounded-3xl p-6 flex flex-col items-center text-center gap-4 animate-pulse-slow">
@@ -185,7 +275,7 @@ export default function PortalClient({ user, profile, elderProfile, wallet }: Po
                                     </div>
                                     <h4 className="text-2xl font-black">送禮給長輩</h4>
                                     <p className="text-pink-100 text-sm mt-1 max-w-[200px]">
-                                        為 {elderProfile?.nickname || '長輩'} 添購裝備，讓他在場上更神氣！
+                                        為 {currentElder?.nickname || currentElder?.full_name || '長輩'} 添購裝備，讓他在場上更神氣！
                                     </p>
                                 </div>
                                 <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center text-4xl shadow-inner backdrop-blur-md">

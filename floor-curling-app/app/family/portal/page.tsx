@@ -3,6 +3,20 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import PortalClient from './components/PortalClient'
 
+interface ElderData {
+    id: string
+    elder_id: string
+    is_primary: boolean
+    nickname: string | null
+    elder: {
+        id: string
+        full_name: string
+        nickname: string
+        avatar_url: string
+        store_id: string
+    }
+}
+
 export default async function FamilyPortal() {
     const cookieStore = await cookies()
 
@@ -20,9 +34,7 @@ export default async function FamilyPortal() {
                             cookieStore.set(name, value, options)
                         )
                     } catch {
-                        // The `setAll` method was called from a Server Component.
-                        // This can be ignored if you have middleware refreshing
-                        // user sessions.
+                        // Ignore
                     }
                 },
             },
@@ -35,7 +47,6 @@ export default async function FamilyPortal() {
         redirect('/login')
     }
 
-    // Parallel Fetching for Profile and potential Elder/Wallet data
     // 1. Fetch Profile
     const { data: profile } = await supabase
         .from('profiles')
@@ -43,37 +54,68 @@ export default async function FamilyPortal() {
         .eq('id', user.id)
         .single()
 
-    let elderProfile = null
-    let wallet = null
+    // 2. Try to fetch elders from new multi-elder table
+    let elders: ElderData[] = []
+    const { data: elderLinks, error: linksError } = await supabase
+        .from('family_elder_links')
+        .select(`
+            id,
+            elder_id,
+            is_primary,
+            nickname,
+            elder:profiles!elder_id (
+                id,
+                full_name,
+                nickname,
+                avatar_url,
+                store_id
+            )
+        `)
+        .eq('family_id', user.id)
+        .order('is_primary', { ascending: false })
 
-    // 2. Fetch Elder Data if linked
-    if (profile?.linked_elder_id) {
+    if (!linksError && elderLinks && elderLinks.length > 0) {
+        elders = elderLinks as any
+    } else if (profile?.linked_elder_id) {
+        // Fallback to legacy linked_elder_id
         const { data: elder } = await supabase
             .from('profiles')
-            .select('*')
+            .select('id, full_name, nickname, avatar_url, store_id')
             .eq('id', profile.linked_elder_id)
             .single()
 
         if (elder) {
-            elderProfile = elder
-
-            // 3. Fetch Elder Wallet for Points (Only needed if elder exists)
-            const { data: w } = await supabase
-                .from('wallets')
-                .select('local_points')
-                .eq('user_id', elder.id)
-                .single()
-
-            if (w) wallet = w
+            elders = [{
+                id: 'legacy',
+                elder_id: elder.id,
+                is_primary: true,
+                nickname: null,
+                elder: elder as any
+            }]
         }
+    }
+
+    // 3. Get primary elder for wallet
+    const primaryElder = elders.find(e => e.is_primary) || elders[0]
+    let wallet = null
+
+    if (primaryElder?.elder?.id) {
+        const { data: w } = await supabase
+            .from('wallets')
+            .select('local_points')
+            .eq('user_id', primaryElder.elder.id)
+            .single()
+
+        if (w) wallet = w
     }
 
     return (
         <PortalClient
             user={user}
             profile={profile}
-            elderProfile={elderProfile}
+            elders={elders}
             wallet={wallet}
         />
     )
 }
+
