@@ -26,6 +26,13 @@ ON CONFLICT (family_id, elder_id) DO NOTHING;
 -- 4. RLS 政策
 ALTER TABLE family_elder_links ENABLE ROW LEVEL SECURITY;
 
+-- 先刪除現有政策（如存在），以支持重複執行
+DROP POLICY IF EXISTS "family_can_view_own_links" ON family_elder_links;
+DROP POLICY IF EXISTS "family_can_create_links" ON family_elder_links;
+DROP POLICY IF EXISTS "family_can_delete_own_links" ON family_elder_links;
+DROP POLICY IF EXISTS "elder_can_view_links" ON family_elder_links;
+DROP POLICY IF EXISTS "staff_can_view_all" ON family_elder_links;
+
 -- 家屬可以查看自己的綁定
 CREATE POLICY "family_can_view_own_links" ON family_elder_links
     FOR SELECT USING (auth.uid() = family_id);

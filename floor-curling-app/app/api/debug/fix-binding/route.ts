@@ -1,53 +1,53 @@
-import { createServerClient } from '@supabase/ssr'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { verifyAdmin, unauthorizedResponse } from '@/lib/auth-utils'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
-export const dynamic = 'force-dynamic'
+/**
+ * Debug API - 修復家屬綁定
+ * 
+ * ⚠️ 安全控制：僅管理員可用
+ */
+export async function POST(request: NextRequest) {
+    const auth = await verifyAdmin()
+    if (!auth.isAdmin) {
+        return unauthorizedResponse('僅限管理員使用')
+    }
 
-export async function GET() {
     try {
-        const supabase = createServerClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY!,
-            { cookies: { get: () => undefined, set: () => { }, remove: () => { } } }
-        )
+        const body = await request.json()
+        const { familyId, elderId } = body
 
-        // 1. Find Elder with Pagination
-        let allUsers: any[] = []
-        let page = 1
-        let hasMore = true
-
-        while (hasMore) {
-            const { data: { users }, error } = await supabase.auth.admin.listUsers({ page: page, perPage: 1000 })
-            if (error) throw error
-            if (users.length === 0) hasMore = false
-            else {
-                allUsers = [...allUsers, ...users]
-                page++
-            }
+        if (!familyId || !elderId) {
+            return NextResponse.json({ error: '缺少 familyId 或 elderId' }, { status: 400 })
         }
 
-        const elder = allUsers.find(u => u.email === 'elder@daoli.com')
-        const family = allUsers.find(u => u.email === 'family_bound@daoli.com')
+        const supabaseAdmin = getSupabaseAdmin()
 
-        if (!elder) return NextResponse.json({ error: 'Elder user not found. Run /api/debug/seed-elder first.' }, { status: 404 })
-        if (!family) return NextResponse.json({ error: 'Family user not found.' }, { status: 404 })
-
-        // 2. Update Binding
-        const { error } = await supabase
+        // 更新 profiles 表中的 linked_elder_id
+        const { data, error } = await supabaseAdmin
             .from('profiles')
-            .update({ linked_elder_id: elder.id })
-            .eq('id', family.id)
+            .update({ linked_elder_id: elderId })
+            .eq('id', familyId)
+            .select()
+            .single()
 
         if (error) throw error
 
-        return NextResponse.json({
-            status: 'Success',
-            message: 'Binding updated',
-            elderId: elder.id,
-            familyId: family.id,
-            oldLinkedId: 'Replaced with ' + elder.id
-        })
+        // 也在 family_elder_links 表中創建記錄
+        await supabaseAdmin
+            .from('family_elder_links')
+            .upsert({
+                family_id: familyId,
+                elder_id: elderId,
+                is_primary: true
+            }, { onConflict: 'family_id,elder_id' })
 
+        return NextResponse.json({
+            success: true,
+            message: '綁定已修復',
+            profile: data,
+            updatedBy: auth.userId
+        })
     } catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 })
     }

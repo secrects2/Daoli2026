@@ -1,67 +1,68 @@
-import { createServerClient } from '@supabase/ssr'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { verifyAdmin, unauthorizedResponse } from '@/lib/auth-utils'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
-export const dynamic = 'force-dynamic'
+/**
+ * Debug API - Seed 長輩測試數據
+ * 
+ * ⚠️ 安全控制：僅管理員可用
+ */
+export async function POST(request: NextRequest) {
+    const auth = await verifyAdmin()
+    if (!auth.isAdmin) {
+        return unauthorizedResponse('僅限管理員使用')
+    }
 
-export async function GET() {
     try {
-        const supabase = createServerClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY!,
-            { cookies: { get: () => undefined, set: () => { }, remove: () => { } } }
-        )
+        const supabaseAdmin = getSupabaseAdmin()
 
-        const email = 'elder@daoli.com'
-        const password = 'password123'
-
-        // 1. Check if user exists
-        const { data: { users } } = await supabase.auth.admin.listUsers()
-        const existing = users.find(u => u.email === email)
-
-        if (existing) {
-            // Force update password
-            await supabase.auth.admin.updateUserById(existing.id, { password: password })
-            return NextResponse.json({
-                status: 'User already exists',
-                message: 'Password updated to password123',
-                userId: existing.id
-            })
+        // 創建測試長輩
+        const testElder = {
+            email: `elder_test_${Date.now()}@example.com`,
+            password: 'test123456'
         }
 
-        // 2. Create User
-        const { data, error } = await supabase.auth.admin.createUser({
-            email,
-            password,
-            email_confirm: true,
-            user_metadata: { full_name: '王大明爺爺' }
+        const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
+            email: testElder.email,
+            password: testElder.password,
+            email_confirm: true
         })
 
-        if (error) throw error
+        if (authError) throw authError
 
-        // 3. Ensure Profile (Try to link to Taipei Store if possible)
-        const userId = data.user.id
+        // 創建 profile
+        const { error: profileError } = await supabaseAdmin
+            .from('profiles')
+            .insert({
+                id: authUser.user.id,
+                email: testElder.email,
+                role: 'elder',
+                full_name: '測試長輩',
+                nickname: '阿公'
+            })
 
-        // Try to find Taipei store, or just leave null
-        const { data: store } = await supabase.from('stores').select('id').eq('name', '台北總店').single()
+        if (profileError) throw profileError
 
-        await supabase.from('profiles').upsert({
-            id: userId,
-            email,
-            role: 'elder',
-            full_name: '王大明爺爺',
-            store_id: store?.id || null
-        })
+        // 創建錢包
+        await supabaseAdmin
+            .from('wallets')
+            .insert({
+                user_id: authUser.user.id,
+                global_points: 100,
+                local_points: 100
+            })
 
         return NextResponse.json({
-            status: 'Success',
-            message: 'User created successfully',
-            userId
+            success: true,
+            message: '測試長輩已創建',
+            elder: {
+                id: authUser.user.id,
+                email: testElder.email,
+                password: testElder.password
+            },
+            createdBy: auth.userId
         })
-
     } catch (error: any) {
-        return NextResponse.json({
-            status: 'Error',
-            message: error.message
-        }, { status: 500 })
+        return NextResponse.json({ error: error.message }, { status: 500 })
     }
 }

@@ -1,38 +1,48 @@
-import { createClient } from '@supabase/supabase-js'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { verifyAdmin, unauthorizedResponse } from '@/lib/auth-utils'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
-export async function GET(request: Request) {
-    const { searchParams } = new URL(request.url)
-    const email = searchParams.get('email')
-    const role = searchParams.get('role')
-
-    if (!email || !role) return NextResponse.json({ error: 'Email and Role required' })
-
-    const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
-
-    // 1. Find User
-    const { data: { users }, error: listError } = await supabase.auth.admin.listUsers()
-    const targetUser = users.find(u => u.email === email)
-
-    if (!targetUser) {
-        return NextResponse.json({ error: 'User not found' })
+/**
+ * Debug API - 設定用戶角色
+ * 
+ * ⚠️ 安全控制：僅管理員可用
+ */
+export async function POST(request: NextRequest) {
+    const auth = await verifyAdmin()
+    if (!auth.isAdmin) {
+        return unauthorizedResponse('僅限管理員使用')
     }
 
-    // 2. Update Role
-    const { data, error } = await supabase
-        .from('profiles')
-        .update({ role: role })
-        .eq('id', targetUser.id)
-        .select()
+    try {
+        const body = await request.json()
+        const { userId, role } = body
 
-    return NextResponse.json({
-        success: true,
-        user: { email: targetUser.email, id: targetUser.id },
-        new_role: role,
-        data,
-        error
-    })
+        if (!userId || !role) {
+            return NextResponse.json({ error: '缺少必要參數' }, { status: 400 })
+        }
+
+        const validRoles = ['admin', 'pharmacist', 'elder', 'family']
+        if (!validRoles.includes(role)) {
+            return NextResponse.json({ error: '無效的角色' }, { status: 400 })
+        }
+
+        const supabaseAdmin = getSupabaseAdmin()
+        const { data, error } = await supabaseAdmin
+            .from('profiles')
+            .update({ role })
+            .eq('id', userId)
+            .select()
+            .single()
+
+        if (error) throw error
+
+        return NextResponse.json({
+            success: true,
+            message: `用戶角色已更新為 ${role}`,
+            user: data,
+            updatedBy: auth.userId
+        })
+    } catch (error: any) {
+        return NextResponse.json({ error: error.message }, { status: 500 })
+    }
 }

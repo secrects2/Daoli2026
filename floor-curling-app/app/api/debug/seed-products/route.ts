@@ -1,79 +1,40 @@
-import { createServerClient } from '@supabase/ssr'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { verifyAdmin, unauthorizedResponse } from '@/lib/auth-utils'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
-export const dynamic = 'force-dynamic'
+/**
+ * Debug API - Seed 商品測試數據
+ * 
+ * ⚠️ 安全控制：僅管理員可用
+ */
+export async function POST(request: NextRequest) {
+    const auth = await verifyAdmin()
+    if (!auth.isAdmin) {
+        return unauthorizedResponse('僅限管理員使用')
+    }
 
-export async function GET() {
     try {
-        const supabase = createServerClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY!,
-            { cookies: { get: () => undefined, set: () => { }, remove: () => { } } }
-        )
+        const supabaseAdmin = getSupabaseAdmin()
 
         const products = [
-            {
-                name: '關節活力膠囊 (Joint Vitality)',
-                description: '針對投擲時膝蓋卡卡設計，提升關節靈活度，讓您蹲得更低、瞄得更準！',
-                price: 300,
-                category: 'health',
-                image_url: 'https://api.dicebear.com/7.x/shapes/svg?seed=joint&backgroundColor=e6f2ff'
-            },
-            {
-                name: '肌力蛋白飲 (Muscle Power)',
-                description: '增強推球力道，避免球路中途停下。補充優質蛋白，維持肌肉量。',
-                price: 250,
-                category: 'health',
-                image_url: 'https://api.dicebear.com/7.x/shapes/svg?seed=protein&backgroundColor=ffebe6'
-            },
-            {
-                name: '黃金手感冰壺 (Pro Stone)',
-                description: '專屬個人的幸運冰壺，擁有更穩定的重心與獨特配色，提升投擲準確度。',
-                price: 800,
-                category: 'equipment',
-                image_url: 'https://api.dicebear.com/7.x/shapes/svg?seed=stone&backgroundColor=fffbeb'
-            },
-            {
-                name: '冠軍戰隊球衣 (Champion Jersey)',
-                description: '象徵榮譽的戰隊制服，穿上它，氣勢先贏一半！',
-                price: 500,
-                category: 'equipment',
-                image_url: 'https://api.dicebear.com/7.x/shapes/svg?seed=jersey&backgroundColor=f0fdf4'
-            },
-            {
-                name: '穩定護腕 (Stabilizer Wristband)',
-                description: '保護手腕，減少運動傷害，增加出手穩定性。',
-                price: 150,
-                category: 'equipment',
-                image_url: 'https://api.dicebear.com/7.x/shapes/svg?seed=wrist&backgroundColor=f3e8ff'
-            }
+            { name: '養生茶包', description: '精選有機養生茶', points_cost: 50, category: 'health', stock: 100, image_url: '/products/tea.png' },
+            { name: '健康手冊', description: '長者健康指南', points_cost: 30, category: 'books', stock: 50, image_url: '/products/book.png' },
+            { name: '運動毛巾', description: '吸汗快乾運動毛巾', points_cost: 80, category: 'sports', stock: 30, image_url: '/products/towel.png' },
         ]
 
-        const results = []
+        const { data, error } = await supabaseAdmin
+            .from('products')
+            .insert(products)
+            .select()
 
-        for (const p of products) {
-            // Check if exists
-            const { data: existing } = await supabase
-                .from('products')
-                .select('id')
-                .eq('name', p.name)
-                .single()
-
-            if (!existing) {
-                const { data, error } = await supabase.from('products').insert(p).select()
-                if (error) console.error(error)
-                else results.push(data[0])
-            } else {
-                results.push({ ...p, status: 'Already Exists' })
-            }
-        }
+        if (error) throw error
 
         return NextResponse.json({
-            status: 'Success',
-            message: 'Products seeded',
-            products: results
+            success: true,
+            message: `已創建 ${data?.length || 0} 個測試商品`,
+            products: data,
+            createdBy: auth.userId
         })
-
     } catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 })
     }

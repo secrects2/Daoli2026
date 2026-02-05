@@ -1,41 +1,49 @@
-import { createClient } from '@supabase/supabase-js'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { verifyAdmin, unauthorizedResponse } from '@/lib/auth-utils'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
-export async function GET(request: Request) {
-    const { searchParams } = new URL(request.url)
-    const email = searchParams.get('email')
-
-    if (!email) return NextResponse.json({ error: 'Email required' })
-
-    const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
-
-    // 1. Get User ID from Auth with Pagination
-    const { data: { users }, error } = await supabase.auth.admin.listUsers({ perPage: 1000 })
-
-    if (error) return NextResponse.json({ error: error.message })
-
-    const targetUser = users.find(u => u.email === email)
-
-    if (!targetUser) {
-        return NextResponse.json({ error: 'User not found in Auth', scanned: users.length })
+/**
+ * Debug API - 檢查用戶
+ * 
+ * ⚠️ 安全控制：僅管理員可用
+ */
+export async function GET(request: NextRequest) {
+    const auth = await verifyAdmin()
+    if (!auth.isAdmin) {
+        return unauthorizedResponse('僅限管理員使用')
     }
 
-    // 2. Get Profile
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', targetUser.id)
-        .single()
+    const { searchParams } = new URL(request.url)
+    const userId = searchParams.get('id')
+    const email = searchParams.get('email')
 
-    return NextResponse.json({
-        auth: {
-            id: targetUser.id,
-            email: targetUser.email,
-            last_sign_in: targetUser.last_sign_in_at
-        },
-        profile
-    })
+    if (!userId && !email) {
+        return NextResponse.json({ error: '需提供 id 或 email 參數' }, { status: 400 })
+    }
+
+    try {
+        const supabaseAdmin = getSupabaseAdmin()
+
+        let query = supabaseAdmin
+            .from('profiles')
+            .select('*, wallets(*)')
+
+        if (userId) {
+            query = query.eq('id', userId)
+        } else if (email) {
+            query = query.eq('email', email)
+        }
+
+        const { data, error } = await query.single()
+
+        if (error) throw error
+
+        return NextResponse.json({
+            success: true,
+            user: data,
+            accessedBy: auth.userId
+        })
+    } catch (error: any) {
+        return NextResponse.json({ error: error.message }, { status: 500 })
+    }
 }
