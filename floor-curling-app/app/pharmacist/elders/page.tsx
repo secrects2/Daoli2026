@@ -108,12 +108,13 @@ export default function EldersPage() {
     const fetchElders = async (storeId: string | null) => {
         setLoading(true)
         try {
-            // ✅ 只獲取所屬店鋪的長者
+            // ✅ 只獲取所屬店鋪的長者 (限制 50 筆避免超時)
             let query = supabase
                 .from('profiles')
                 .select('*')
                 .eq('role', 'elder')
                 .order('created_at', { ascending: false })
+                .limit(50) // 防止大量數據導致超時
 
             if (storeId) {
                 query = query.eq('store_id', storeId)
@@ -125,9 +126,9 @@ export default function EldersPage() {
 
             setElders(eldersData || [])
 
-            // 獲取錢包數據
+            // 獲取錢包數據 (限制為前 50 個)
             if (eldersData && eldersData.length > 0) {
-                const elderIds = eldersData.map(e => e.id)
+                const elderIds = eldersData.slice(0, 50).map(e => e.id)
 
                 const { data: walletsData, error: walletsError } = await supabase
                     .from('wallets')
@@ -142,38 +143,13 @@ export default function EldersPage() {
                     setWallets(walletsByUser)
                 }
 
-                // 獲取比賽統計
-                const { data: matchesData, error: matchesError } = await supabase
-                    .from('matches')
-                    .select('id, red_team_elder_id, yellow_team_elder_id, winner_color, status')
-                    .or(`red_team_elder_id.in.(${elderIds.join(',')}),yellow_team_elder_id.in.(${elderIds.join(',')})`)
-
-                if (!matchesError && matchesData) {
-                    const statsByElder: Record<string, MatchStats> = {}
-
-                    elderIds.forEach(elderId => {
-                        const elderMatches = matchesData.filter(
-                            m => m.red_team_elder_id === elderId || m.yellow_team_elder_id === elderId
-                        )
-                        const completedMatches = elderMatches.filter(m => m.status === 'completed')
-                        const wins = completedMatches.filter(m => {
-                            if (m.red_team_elder_id === elderId && m.winner_color === 'red') return true
-                            if (m.yellow_team_elder_id === elderId && m.winner_color === 'yellow') return true
-                            return false
-                        }).length
-
-                        statsByElder[elderId] = {
-                            total_matches: elderMatches.length,
-                            wins: wins,
-                            losses: completedMatches.length - wins
-                        }
-                    })
-
-                    setMatchStats(statsByElder)
-                }
+                // 暫時跳過比賽統計以避免超時
+                // TODO: 優化比賽統計查詢
+                setMatchStats({})
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error('獲取長者數據失敗:', error)
+            setError(`獲取長輩列表失敗: ${error.message}`)
         } finally {
             setLoading(false)
         }
