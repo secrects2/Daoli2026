@@ -39,13 +39,48 @@ export default function EldersPage() {
     const [searchTerm, setSearchTerm] = useState('')
     const [userStoreId, setUserStoreId] = useState<string | null>(null)
     const [error, setError] = useState<string | null>(null)
+    const [loadingStep, setLoadingStep] = useState<string>('初始化...')
 
     useEffect(() => {
-        fetchUserStore().catch(err => {
-            console.error('fetchUserStore failed:', err)
-            setError(err.message || 'Unknown error')
-            setLoading(false)
-        })
+        const doFetch = async () => {
+            try {
+                setLoadingStep('正在驗證登入狀態...')
+                const { data: { user } } = await supabase.auth.getUser()
+
+                if (!user) {
+                    setError('未登入或登入已過期')
+                    setLoading(false)
+                    return
+                }
+
+                setLoadingStep('正在獲取店鋪資訊...')
+                const { data: profile, error: profileError } = await supabase
+                    .from('profiles')
+                    .select('store_id')
+                    .eq('id', user.id)
+                    .single()
+
+                if (profileError) {
+                    console.error('Profile fetch error:', profileError)
+                    setError(`無法獲取用戶資料: ${profileError.message}`)
+                    setLoading(false)
+                    return
+                }
+
+                const storeId = profile?.store_id || null
+                setUserStoreId(storeId)
+
+                setLoadingStep('正在獲取長輩列表...')
+                await fetchElders(storeId)
+
+            } catch (err: any) {
+                console.error('doFetch error:', err)
+                setError(err.message || '未知錯誤')
+                setLoading(false)
+            }
+        }
+
+        doFetch()
     }, [])
 
     // ✅ 獲取當前用戶的 store_id
@@ -185,7 +220,7 @@ export default function EldersPage() {
             <div className="min-h-screen flex items-center justify-center bg-gray-100">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className="mt-4 text-gray-600">{t('common.loading')}</p>
+                    <p className="mt-4 text-gray-600">{loadingStep}</p>
                 </div>
             </div>
         )
