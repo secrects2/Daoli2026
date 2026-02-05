@@ -13,6 +13,8 @@ interface Elder {
     store_id: string | null
     created_at: string
     email?: string
+    full_name?: string
+    nickname?: string
 }
 
 interface Wallet {
@@ -291,8 +293,8 @@ export default function EldersPage() {
                                                 </span>
                                             </div>
                                             <div>
-                                                <p className="text-sm font-medium text-gray-900 truncate max-w-[150px]" title={elder.id}>
-                                                    {elder.id.slice(0, 8)}...
+                                                <p className="text-sm font-medium text-gray-900 truncate max-w-[150px]" title={elder.full_name || elder.nickname || elder.id}>
+                                                    {elder.full_name || elder.nickname || `長輩 ${elder.id.slice(0, 4)}`}
                                                 </p>
                                                 <p className="text-xs text-gray-500">
                                                     {t('elders.registeredAt')} {formatDate(elder.created_at)} {/* Updated */}
@@ -358,7 +360,7 @@ export default function EldersPage() {
                                             href={`/pharmacist/elders/${elder.id}`}
                                             className="text-blue-600 font-bold hover:underline text-sm block w-full"
                                         >
-                                            {t('elders.viewDetails') || '查看詳細資料'}
+                                            詳情
                                         </Link>
                                     </div>
                                 </div>
