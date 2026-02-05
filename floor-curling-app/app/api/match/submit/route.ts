@@ -184,33 +184,49 @@ export async function POST(req: NextRequest) {
     }
 }
 
-// 輔助函數：通知家屬 (S2B2C)
+// 輔助函數：通知家屬 (S2B2C) - 支持多長輩綁定
 async function notifyFamily(elderId: string, title: string, message: string, matchId: string) {
     if (!elderId) return
 
-    const { data: familyMembers } = await supabaseAdmin
+    // 1. 從新的 family_elder_links 表查詢
+    const { data: familyLinks } = await supabaseAdmin
+        .from('family_elder_links')
+        .select('family_id')
+        .eq('elder_id', elderId)
+
+    // 2. 從舊的 linked_elder_id 查詢 (向後兼容)
+    const { data: legacyFamilyMembers } = await supabaseAdmin
         .from('profiles')
         .select('id')
         .eq('linked_elder_id', elderId)
         .eq('role', 'family')
 
-    if (familyMembers && familyMembers.length > 0) {
-        const { data: elderProfile } = await supabaseAdmin
-            .from('profiles')
-            .select('nickname, full_name')
-            .eq('id', elderId)
-            .single()
+    // 合併去重
+    const familyIds = new Set<string>()
+    if (familyLinks) {
+        familyLinks.forEach(link => familyIds.add(link.family_id))
+    }
+    if (legacyFamilyMembers) {
+        legacyFamilyMembers.forEach(member => familyIds.add(member.id))
+    }
 
-        const elderName = elderProfile?.nickname || elderProfile?.full_name || '長輩'
+    if (familyIds.size === 0) return
 
-        for (const family of familyMembers) {
-            await createNotification({
-                userId: family.id,
-                title,
-                message: message.replace('您的長輩', elderName),
-                type: 'match_result',
-                metadata: { elderId, elderName, matchId }
-            })
-        }
+    const { data: elderProfile } = await supabaseAdmin
+        .from('profiles')
+        .select('nickname, full_name')
+        .eq('id', elderId)
+        .single()
+
+    const elderName = elderProfile?.nickname || elderProfile?.full_name || '長輩'
+
+    for (const familyId of familyIds) {
+        await createNotification({
+            userId: familyId,
+            title,
+            message: message.replace('您的長輩', elderName),
+            type: 'match_result',
+            metadata: { elderId, elderName, matchId }
+        })
     }
 }
