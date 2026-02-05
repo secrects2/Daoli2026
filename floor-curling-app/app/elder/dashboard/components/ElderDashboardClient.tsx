@@ -155,6 +155,28 @@ export default function ElderDashboardClient({
                         <h3 className="font-bold text-lg leading-tight">聊天室</h3>
                         <p className="text-orange-100 text-xs mt-1 font-medium">查看最新訊息</p>
                     </Link>
+
+                    <Link
+                        href="/elder/matches"
+                        className="bg-gradient-to-br from-[#AF52DE] to-[#9930D0] hover:from-[#b86ce0] hover:to-[#a340d8] active:scale-95 transition-all rounded-3xl p-5 shadow-lg shadow-purple-500/20 text-white text-left group"
+                    >
+                        <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center text-2xl mb-3 group-hover:scale-110 transition-transform">
+                            🏆
+                        </div>
+                        <h3 className="font-bold text-lg leading-tight">比賽記錄</h3>
+                        <p className="text-purple-100 text-xs mt-1 font-medium">查看歷史比賽</p>
+                    </Link>
+
+                    <Link
+                        href="/elder/shop"
+                        className="bg-gradient-to-br from-[#FF2D55] to-[#E0194E] hover:from-[#ff4368] hover:to-[#e82d5a] active:scale-95 transition-all rounded-3xl p-5 shadow-lg shadow-pink-500/20 text-white text-left group"
+                    >
+                        <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center text-2xl mb-3 group-hover:scale-110 transition-transform">
+                            🛍️
+                        </div>
+                        <h3 className="font-bold text-lg leading-tight">積分商店</h3>
+                        <p className="text-pink-100 text-xs mt-1 font-medium">兌換獎勵商品</p>
+                    </Link>
                 </div>
 
                 {/* Inventory */}
