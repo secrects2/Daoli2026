@@ -128,7 +128,18 @@ export default function LoginForm() {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 relative">
+            {/* 全屏加載覆蓋層 - 快速登入時顯示 */}
+            {loading && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+                    <div className="bg-white rounded-2xl p-8 shadow-2xl flex flex-col items-center gap-4 animate-fade-in">
+                        <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent"></div>
+                        <p className="text-lg font-bold text-gray-900">登入中...</p>
+                        <p className="text-sm text-gray-500">請稍候</p>
+                    </div>
+                </div>
+            )}
+
             {error && (
                 <div className="rounded-xl bg-red-50 p-4 border border-red-100 animate-fade-in text-center">
                     <p className="text-sm font-bold text-red-600">{error}</p>
