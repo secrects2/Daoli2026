@@ -22,7 +22,7 @@ WHERE type = 'avatar' AND (name LIKE '%冠軍%' OR name LIKE '%披風%');
 
 -- 高速壺底 (Speed Base)
 UPDATE products 
-SET image_url = '/products/speed-base.jpg'
+SET image_url = '/products/speed-base.png'
 WHERE type = 'equipment' AND (name LIKE '%高速%' OR name LIKE '%Speed%');
 
 -- 穩定底座 (Stable Base)
