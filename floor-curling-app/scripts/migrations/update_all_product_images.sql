@@ -49,7 +49,7 @@ WHERE type = 'badge' AND (name LIKE '%百場%' OR name LIKE '%老將%');
 
 -- 十連勝徽章 (Ten Win Badge)
 UPDATE products 
-SET image_url = '/products/ten-win-badge.png'
+SET image_url = '/products/ten-win-badge.jpg'
 WHERE type = 'badge' AND (name LIKE '%十連勝%' OR name LIKE '%連勝%');
 
 -- === 驗證更新 ===
