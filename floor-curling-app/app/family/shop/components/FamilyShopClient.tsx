@@ -87,7 +87,7 @@ export default function FamilyShopClient({ user, elder, products }: FamilyShopCl
                         </button>
                         <div>
                             <h1 className="text-xl font-bold text-gray-900">送禮給 {elder.full_name}</h1>
-                            <p className="text-xs text-gray-500">用真心為長輩挑選禮物</p>
+                            <p className="text-xs text-gray-500">💰 用新台幣為長輩購買禮物</p>
                         </div>
                     </div>
                 </div>
@@ -108,10 +108,10 @@ export default function FamilyShopClient({ user, elder, products }: FamilyShopCl
                                 <div className="p-5">
                                     <div className="flex justify-between items-start mb-2">
                                         <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${product.type === 'equipment'
-                                                ? 'bg-green-100 text-green-700'
-                                                : product.type === 'avatar'
-                                                    ? 'bg-blue-100 text-blue-700'
-                                                    : 'bg-purple-100 text-purple-700'
+                                            ? 'bg-green-100 text-green-700'
+                                            : product.type === 'avatar'
+                                                ? 'bg-blue-100 text-blue-700'
+                                                : 'bg-purple-100 text-purple-700'
                                             }`}>
                                             {product.type === 'equipment' ? '🛡️ 戰力裝備' : product.type === 'avatar' ? '👕 外觀造型' : '🏆 榮譽徽章'}
                                         </span>
