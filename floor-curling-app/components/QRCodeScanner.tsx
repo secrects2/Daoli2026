@@ -97,9 +97,10 @@ export function QRCodeScanner({ onScan, onError, className = '' }: QRCodeScanner
         }
     }, [isScanning])
 
-    // Auto-start on mount
+    // Auto-start on mount - only run once
     useEffect(() => {
         let mounted = true
+        const scannerInstance = scannerRef
 
         // Small delay to ensure DOM is ready
         const timer = setTimeout(() => {
@@ -111,9 +112,21 @@ export function QRCodeScanner({ onScan, onError, className = '' }: QRCodeScanner
         return () => {
             mounted = false
             clearTimeout(timer)
-            stopScanner()
+            // Cleanup inline to avoid dependency issues
+            const cleanup = async () => {
+                if (scannerInstance.current) {
+                    try {
+                        await scannerInstance.current.stop()
+                        scannerInstance.current.clear()
+                    } catch (e) {
+                        // Ignore cleanup errors
+                    }
+                }
+            }
+            cleanup()
         }
-    }, [startScanner, stopScanner])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []) // Empty dependency array - only run on mount
 
     return (
         <div className={`relative ${className}`}>
