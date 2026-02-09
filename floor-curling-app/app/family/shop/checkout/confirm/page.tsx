@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
 
@@ -13,7 +13,7 @@ interface OrderInfo {
     note: string | null
 }
 
-export default function CheckoutConfirmPage() {
+function CheckoutConfirmContent() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const orderId = searchParams.get('orderId')
@@ -79,7 +79,6 @@ export default function CheckoutConfirmPage() {
             const data = await res.json()
             if (!res.ok) throw new Error(data.error)
 
-            // 導向成功頁面
             router.push(`/family/shop/payment-result?success=true&orderNumber=${orderNumber}`)
 
         } catch (err: any) {
@@ -123,7 +122,7 @@ export default function CheckoutConfirmPage() {
             {/* Header */}
             <div className="bg-white shadow-sm py-4 px-4 sticky top-0 z-10">
                 <div className="max-w-lg mx-auto flex items-center gap-3">
-                    <button onClick={handleCancel} className="p-2 hover:bg-gray-100 rounded-full">
+                    <button onClick={handleCancel} className="p-2 hover:bg-gray-100 rounded-full" aria-label="返回">
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                         </svg>
@@ -210,5 +209,17 @@ export default function CheckoutConfirmPage() {
                 </button>
             </div>
         </div>
+    )
+}
+
+export default function CheckoutConfirmPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="animate-spin h-10 w-10 border-4 border-blue-600 border-t-transparent rounded-full"></div>
+            </div>
+        }>
+            <CheckoutConfirmContent />
+        </Suspense>
     )
 }
