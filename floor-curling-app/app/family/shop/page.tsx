@@ -3,6 +3,10 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import FamilyShopClient from './components/FamilyShopClient'
 
+// Force dynamic rendering - no caching
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function FamilyShop() {
     const cookieStore = await cookies()
     const supabase = createServerClient(
