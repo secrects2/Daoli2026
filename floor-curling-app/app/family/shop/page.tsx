@@ -31,7 +31,7 @@ export default async function FamilyShop() {
     let elder = null
     let points = 0
 
-    const productQuery = supabase.from('products').select('*').order('price', { ascending: true })
+    const productQuery = supabase.from('products').select('*').eq('is_active', true).order('price_points', { ascending: true })
 
     if (familyProfile?.linked_elder_id) {
         // Parallel fetch Elder Profile and Wallet and Products

@@ -7,9 +7,9 @@ interface Product {
     id: string
     name: string
     description: string
-    price: number
+    price_points: number
     image_url: string
-    category: string
+    type: string
 }
 
 interface FamilyShopClientProps {
@@ -27,7 +27,7 @@ export default function FamilyShopClient({ user, elder, points: initialPoints, p
     const handleBuy = async (product: Product) => {
         if (!elder) return alert('請先綁定長輩帳號')
 
-        if (!confirm(`確定要為 ${elder.full_name} 購買「${product.name}」嗎？\n(將扣除長輩積分 ${product.price})`)) return
+        if (!confirm(`確定要為 ${elder.full_name} 購買「${product.name}」嗎？\n(將扣除長輩積分 ${product.price_points})`)) return
 
         setPurchasing(product.id)
         try {
@@ -96,21 +96,21 @@ export default function FamilyShopClient({ user, elder, points: initialPoints, p
                             </div>
                             <div className="p-5">
                                 <div className="flex justify-between items-start mb-2">
-                                    <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${product.category === 'health'
+                                    <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${product.type === 'equipment'
                                         ? 'bg-green-100 text-green-700'
-                                        : 'bg-blue-100 text-blue-700'
+                                        : product.type === 'avatar' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
                                         }`}>
-                                        {product.category === 'health' ? '❤️ 健康補給' : '🛡️ 戰力裝備'}
+                                        {product.type === 'equipment' ? '🛡️ 戰力裝備' : product.type === 'avatar' ? '👕 外觀造型' : '🏆 榮譽徽章'}
                                     </span>
-                                    <span className="font-bold text-orange-600 text-lg">{product.price} 分</span>
+                                    <span className="font-bold text-orange-600 text-lg">{product.price_points} 分</span>
                                 </div>
                                 <h3 className="font-bold text-gray-900 text-lg mb-1">{product.name}</h3>
                                 <p className="text-sm text-gray-500 mb-4 h-10 line-clamp-2">{product.description}</p>
 
                                 <button
                                     onClick={() => handleBuy(product)}
-                                    disabled={!!purchasing || points < product.price}
-                                    className={`w-full py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors ${points >= product.price
+                                    disabled={!!purchasing || points < product.price_points}
+                                    className={`w-full py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors ${points >= product.price_points
                                         ? 'bg-blue-600 text-white hover:bg-blue-700'
                                         : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                         }`}
@@ -123,7 +123,7 @@ export default function FamilyShopClient({ user, elder, points: initialPoints, p
                                     ) : (
                                         <>
                                             <span>🎁</span>
-                                            {points >= product.price ? '贈送禮物' : '積分不足'}
+                                            {points >= product.price_points ? '贈送禮物' : '積分不足'}
                                         </>
                                     )}
                                 </button>
