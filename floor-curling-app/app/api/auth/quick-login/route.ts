@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
     const { role } = await request.json()
-    const cookieStore = cookies()
+    const cookieStore = await cookies()
 
     const creds: Record<string, any> = {
         admin: { email: 'admin@daoli.com', password: 'daoli_admin_2026' },

@@ -11,7 +11,32 @@ interface SystemStats {
 }
 
 export default function AdminSettingsPage() {
-    // ...
+    const [stats, setStats] = useState<SystemStats | null>(null)
+    const [loading, setLoading] = useState(true)
+    const [exporting, setExporting] = useState(false)
+    const [exportType, setExportType] = useState('overview')
+    const [dateRange, setDateRange] = useState({
+        start: new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString().split('T')[0],
+        end: new Date().toISOString().split('T')[0]
+    })
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const res = await fetch('/api/admin/stats')
+                const data = await res.json()
+                if (data.success) {
+                    setStats(data.stats)
+                }
+            } catch (error) {
+                console.error('Fetch stats error:', error)
+                toast.error('無法載入系統數據')
+            } finally {
+                setLoading(false)
+            }
+        }
+        fetchStats()
+    }, [])
 
     const handleExport = async (format: 'json' | 'csv') => {
         setExporting(true)
