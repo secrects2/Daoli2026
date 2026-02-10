@@ -101,6 +101,26 @@ export async function POST(req: NextRequest) {
 
         if (partError) throw new Error('建立參賽名單失敗: ' + partError.message)
 
+        // B2. Insert Match Ends (per-end scores + media URLs)
+        const matchEnds = ends.map((end: any, index: number) => ({
+            match_id: matchId,
+            end_number: end.endNumber || index + 1,
+            red_score: parseInt(end.redScore) || 0,
+            yellow_score: parseInt(end.yellowScore) || 0,
+            house_snapshot_url: end.houseSnapshotUrl || null,
+            vibe_video_url: end.vibeVideoUrl || null
+        }))
+
+        const { error: endsError } = await supabaseAdmin
+            .from('match_ends')
+            .insert(matchEnds)
+
+        if (endsError) {
+            console.error('寫入 match_ends 失敗:', endsError)
+            // Non-fatal: log but don't block match creation
+            // The match_ends table may not exist yet in some environments
+        }
+
         // C. Process Interactions & Points for EACH Elder
         const processElder = async (elderId: string, team: 'red' | 'yellow') => {
             let result: 'win' | 'loss' | 'draw' = 'draw'
