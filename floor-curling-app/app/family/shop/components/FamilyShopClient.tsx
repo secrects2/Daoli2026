@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import toast from 'react-hot-toast'
 
 interface Product {
     id: string
@@ -29,7 +30,7 @@ export default function FamilyShopClient({ user, elder, products }: FamilyShopCl
 
     const handleBuyClick = (product: Product) => {
         if (!elder) {
-            alert('請先綁定長輩帳號')
+            toast.error('請先綁定長輩帳號')
             return
         }
         setSelectedProduct(product)
@@ -60,7 +61,7 @@ export default function FamilyShopClient({ user, elder, products }: FamilyShopCl
             router.push(data.paymentUrl)
 
         } catch (error: any) {
-            alert(error.message)
+            toast.error(error.message)
             setPurchasing(null)
         }
     }

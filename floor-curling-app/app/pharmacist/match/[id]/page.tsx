@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClientComponentClient } from '@/lib/supabase'
+import toast from 'react-hot-toast'
+import { useConfirm } from '@/components/ConfirmContext'
 
 interface Match {
     id: string
@@ -30,6 +32,7 @@ interface Participant {
 export default function MatchEditPage() {
     const router = useRouter()
     const params = useParams()
+    const { confirm } = useConfirm()
     const matchId = params.id as string
 
     const [match, setMatch] = useState<Match | null>(null)
@@ -56,7 +59,7 @@ export default function MatchEditPage() {
             setParticipants(data.participants || [])
         } catch (error) {
             console.error('Error:', error)
-            alert('無法獲取比賽資料')
+            toast.error('無法獲取比賽資料')
         } finally {
             setLoading(false)
         }
@@ -99,17 +102,17 @@ export default function MatchEditPage() {
                 throw new Error(data.error)
             }
 
-            alert('儲存成功！')
+            toast.success('儲存成功！')
             router.push('/pharmacist/match/history')
         } catch (error: any) {
-            alert(error.message)
+            toast.error(error.message)
         } finally {
             setSaving(false)
         }
     }
 
     const handleDelete = async () => {
-        if (!confirm('確定要刪除此比賽嗎？此操作無法復原。')) return
+        if (!await confirm({ message: '確定要刪除此比賽嗎？此操作無法復原。', confirmLabel: '刪除', variant: 'danger' })) return
 
         try {
             const response = await fetch(`/api/match/${matchId}`, {
@@ -121,10 +124,10 @@ export default function MatchEditPage() {
                 throw new Error(data.error)
             }
 
-            alert('比賽已刪除')
+            toast.success('比賽已刪除')
             router.push('/pharmacist/match/history')
         } catch (error: any) {
-            alert(error.message)
+            toast.error(error.message)
         }
     }
 

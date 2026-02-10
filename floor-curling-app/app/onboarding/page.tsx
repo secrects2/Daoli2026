@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClientComponentClient } from '@/lib/supabase'
+import toast from 'react-hot-toast'
 
 export default function OnboardingPage() {
     const router = useRouter()
@@ -32,7 +33,7 @@ export default function OnboardingPage() {
             }
         } catch (error) {
             console.error('Error setting role:', error)
-            alert('設定身份時發生錯誤，請稍後再試')
+            toast.error('設定身份時發生錯誤，請稍後再試')
             setLoading(false)
         }
     }

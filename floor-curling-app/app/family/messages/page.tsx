@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { createBrowserClient } from '@supabase/ssr'
+import toast from 'react-hot-toast'
 
 interface Contact {
     id: string
@@ -112,7 +113,7 @@ export default function MessagesPage() {
             // or we could replace the temp ID if we managed state strictly.
         } catch (error) {
             console.error('Send failed', error)
-            alert('訊息發送失敗')
+            toast.error('訊息發送失敗')
         }
     }
 

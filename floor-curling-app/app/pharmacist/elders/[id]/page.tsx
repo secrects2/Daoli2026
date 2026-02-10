@@ -6,10 +6,13 @@ import Link from 'next/link'
 import { createBrowserClient } from '@supabase/ssr'
 import { QRCodeGenerator } from '@/components/QRCode'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
+import toast from 'react-hot-toast'
+import { useConfirm } from '@/components/ConfirmContext'
 
 export default function GenericElderDetailPage() {
     const params = useParams()
     const router = useRouter()
+    const { confirm } = useConfirm()
     const [elder, setElder] = useState<any>(null)
     const [family, setFamily] = useState<any[]>([])
     const [equipment, setEquipment] = useState<any[]>([])
@@ -41,7 +44,7 @@ export default function GenericElderDetailPage() {
                 .single()
 
             if (!profile) {
-                alert('查無此長輩')
+                toast.error('查無此長輩')
                 router.push('/pharmacist/elders')
                 return
             }
@@ -135,7 +138,7 @@ export default function GenericElderDetailPage() {
 
         // 1. Validate
         if (file.size > 50 * 1024 * 1024) { // 50MB limit
-            alert('檔案太大，請小於 50MB')
+            toast.error('檔案太大，請小於 50MB')
             return
         }
 
@@ -177,10 +180,10 @@ export default function GenericElderDetailPage() {
 
             // 5. Update UI
             setMediaList(prev => [newMedia, ...prev])
-            alert('上傳成功！')
+            toast.success('上傳成功！')
         } catch (err: any) {
             console.error('Upload failed:', err)
-            alert('上傳失敗: ' + err.message)
+            toast.error('上傳失敗: ' + err.message)
         } finally {
             setUploadingMedia(false)
             if (fileInputRef.current) fileInputRef.current.value = ''
@@ -189,7 +192,7 @@ export default function GenericElderDetailPage() {
 
     // Unbind Handler
     const handleUnbind = async () => {
-        if (!confirm('確定要將此長輩從您的店鋪移除嗎？\n此操作無法復原。')) return
+        if (!await confirm({ message: '確定要將此長輩從您的店鋪移除嗎？\n此操作無法復原。', confirmLabel: '移除', variant: 'danger' })) return
 
         try {
             const res = await fetch(`/api/pharmacist/elders/${params.id}`, {
@@ -199,10 +202,10 @@ export default function GenericElderDetailPage() {
             const result = await res.json()
             if (!res.ok) throw new Error(result.error)
 
-            alert('移除成功')
+            toast.success('移除成功')
             router.push('/pharmacist/elders')
         } catch (err: any) {
-            alert('移除失敗: ' + err.message)
+            toast.error('移除失敗: ' + err.message)
         }
     }
 
@@ -221,9 +224,9 @@ export default function GenericElderDetailPage() {
             // Update local state
             setElder((prev: any) => ({ ...prev, nickname: editData.nickname, notes: editData.notes })) // notes might be missing in schema but let's assume
             setIsEditing(false)
-            alert('更新成功')
+            toast.success('更新成功')
         } catch (err: any) {
-            alert('更新失敗: ' + err.message)
+            toast.error('更新失敗: ' + err.message)
         }
     }
 
@@ -274,7 +277,7 @@ export default function GenericElderDetailPage() {
                                             onClick={() => {
                                                 const link = `${window.location.origin}/family/bind?elderId=${elder.id}`
                                                 navigator.clipboard.writeText(link)
-                                                alert('連結已複製！請傳送給家屬')
+                                                toast.success('連結已複製！請傳送給家屬')
                                             }}
                                             className="w-full py-2 border border-blue-200 text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-50 flex items-center justify-center gap-2"
                                         >

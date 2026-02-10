@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import toast from 'react-hot-toast'
 
 interface SystemStats {
     totalMatches: number
@@ -10,32 +11,7 @@ interface SystemStats {
 }
 
 export default function AdminSettingsPage() {
-    const [loading, setLoading] = useState(true)
-    const [stats, setStats] = useState<SystemStats | null>(null)
-    const [exporting, setExporting] = useState(false)
-    const [exportType, setExportType] = useState('overview')
-    const [dateRange, setDateRange] = useState({
-        start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
-        end: new Date().toISOString().slice(0, 10)
-    })
-
-    useEffect(() => {
-        fetchStats()
-    }, [])
-
-    const fetchStats = async () => {
-        try {
-            const response = await fetch('/api/admin/export?type=overview')
-            const data = await response.json()
-            if (data.summary) {
-                setStats(data.summary)
-            }
-        } catch (error) {
-            console.error('獲取統計錯誤:', error)
-        } finally {
-            setLoading(false)
-        }
-    }
+    // ...
 
     const handleExport = async (format: 'json' | 'csv') => {
         setExporting(true)
@@ -62,10 +38,10 @@ export default function AdminSettingsPage() {
                 URL.revokeObjectURL(downloadUrl)
             }
 
-            alert('匯出成功！')
+            toast.success('匯出成功！')
         } catch (error) {
             console.error('匯出錯誤:', error)
-            alert('匯出失敗')
+            toast.error('匯出失敗')
         } finally {
             setExporting(false)
         }
@@ -141,8 +117,8 @@ export default function AdminSettingsPage() {
                                         key={opt.value}
                                         onClick={() => setExportType(opt.value)}
                                         className={`p-3 rounded-xl border-2 transition-all text-sm font-bold ${exportType === opt.value
-                                                ? 'border-blue-500 bg-blue-50 text-blue-700'
-                                                : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                                            ? 'border-blue-500 bg-blue-50 text-blue-700'
+                                            : 'border-gray-200 hover:border-gray-300 text-gray-600'
                                             }`}
                                     >
                                         <span className="mr-1">{opt.emoji}</span>

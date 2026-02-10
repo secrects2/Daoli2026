@@ -1,6 +1,8 @@
 import './globals.css'
 import { LanguageProvider } from '@/lib/i18n/LanguageContext'
 import { PullToRefresh } from '@/components/PullToRefresh'
+import ToastProvider from '@/components/ToastProvider'
+import { ConfirmProvider } from '@/components/ConfirmContext'
 
 export const metadata = {
     title: '道里地壺球 - Floor Curling Platform',
@@ -36,11 +38,14 @@ export default function RootLayout({
             {/* Revert to simple white/gray background */}
             <body className="bg-gray-50 text-slate-800 min-h-screen selection:bg-blue-100 selection:text-blue-900">
                 <LanguageProvider>
-                    <main className="relative min-h-screen">
-                        <PullToRefresh>
-                            {children}
-                        </PullToRefresh>
-                    </main>
+                    <ToastProvider />
+                    <ConfirmProvider>
+                        <main className="relative min-h-screen">
+                            <PullToRefresh>
+                                {children}
+                            </PullToRefresh>
+                        </main>
+                    </ConfirmProvider>
                 </LanguageProvider>
             </body>
         </html>

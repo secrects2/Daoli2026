@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createBrowserClient } from '@supabase/ssr'
 import { QRCodeGenerator, generateElderQRContent } from '@/components/QRCode'
+import toast from 'react-hot-toast'
+import { useConfirm } from '@/components/ConfirmContext'
 
 interface ElderDashboardClientProps {
     user: any
@@ -19,16 +21,16 @@ export default function ElderDashboardClient({
     stats,
     familyMembers,
     inventory,
-    cheers
 }: ElderDashboardClientProps) {
     const router = useRouter()
+    const { confirm } = useConfirm()
     const supabase = createBrowserClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )
 
     const handleCheckIn = async () => {
-        if (!confirm('發送「我已安全抵達」給家屬嗎？')) return
+        if (!await confirm({ message: '發送「我已安全抵達」給家屬嗎？', confirmLabel: '發送' })) return
 
         try {
             const res = await fetch('/api/interactions', {
@@ -43,15 +45,15 @@ export default function ElderDashboardClient({
             const data = await res.json()
             if (!res.ok) throw new Error(data.error || '發送失敗')
 
-            alert(`已通知 ${data.notified?.length || 0} 位家屬！`)
+            toast.success(`已通知 ${data.notified?.length || 0} 位家屬！`)
         } catch (error: any) {
             console.error(error)
-            alert('報平安失敗，請稍後再試')
+            toast.error('報平安失敗，請稍後再試')
         }
     }
 
     const handleLogout = async () => {
-        if (confirm('確定要登出嗎？')) {
+        if (await confirm({ message: '確定要登出嗎？', confirmLabel: '登出', variant: 'danger' })) {
             await supabase.auth.signOut()
             router.push('/login')
         }

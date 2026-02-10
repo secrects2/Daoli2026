@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClientComponentClient } from '@/lib/supabase'
+import toast from 'react-hot-toast'
 
 function BindingContent() {
     const searchParams = useSearchParams()
@@ -79,10 +80,10 @@ function BindingContent() {
             const result = await res.json()
             if (!res.ok) throw new Error(result.error)
 
-            alert('綁定成功！')
+            toast.success('綁定成功！')
             router.push('/family/portal')
         } catch (err: any) {
-            alert('綁定失敗: ' + err.message)
+            toast.error('綁定失敗: ' + err.message)
             setBinding(false)
         }
     }

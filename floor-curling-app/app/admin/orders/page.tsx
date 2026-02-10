@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
+import toast from 'react-hot-toast'
 
 interface Order {
     id: string
@@ -30,36 +31,38 @@ const STATUS_MAP: Record<string, { label: string; color: string }> = {
 export default function AdminOrdersPage() {
     const [orders, setOrders] = useState<Order[]>([])
     const [loading, setLoading] = useState(true)
-    const [filter, setFilter] = useState<string>('')
-    const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
+    const [filter, setFilter] = useState('')
     const [updating, setUpdating] = useState(false)
-
+    const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
     const supabase = createBrowserClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )
 
-    useEffect(() => {
-        fetchOrders()
-    }, [filter])
-
     const fetchOrders = async () => {
-        setLoading(true)
         try {
-            const params = new URLSearchParams()
-            if (filter) params.set('status', filter)
+            setLoading(true)
+            const query = new URLSearchParams()
+            if (filter) query.append('status', filter)
 
-            const res = await fetch(`/api/admin/orders?${params.toString()}`)
-            const data = await res.json()
+            const res = await fetch(`/api/admin/orders?${query.toString()}`)
             if (res.ok) {
-                setOrders(data.orders || [])
+                const data = await res.json()
+                setOrders(data)
+            } else {
+                toast.error('無法載入訂單')
             }
-        } catch (err) {
-            console.error('Fetch orders error:', err)
+        } catch (error) {
+            console.error('Error fetching orders:', error)
+            toast.error('無法載入訂單')
         } finally {
             setLoading(false)
         }
     }
+
+    useEffect(() => {
+        fetchOrders()
+    }, [filter])
 
     const handleUpdateStatus = async (orderId: string, newStatus: string) => {
         setUpdating(true)
@@ -73,12 +76,13 @@ export default function AdminOrdersPage() {
             if (res.ok) {
                 fetchOrders()
                 setSelectedOrder(null)
+                toast.success('狀態更新成功')
             } else {
                 const data = await res.json()
-                alert(data.error)
+                toast.error(data.error)
             }
         } catch (err: any) {
-            alert(err.message)
+            toast.error(err.message)
         } finally {
             setUpdating(false)
         }
@@ -246,8 +250,8 @@ export default function AdminOrdersPage() {
                                             onClick={() => handleUpdateStatus(selectedOrder.id, key)}
                                             disabled={updating || selectedOrder.status === key}
                                             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${selectedOrder.status === key
-                                                    ? 'bg-blue-600 text-white'
-                                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                ? 'bg-blue-600 text-white'
+                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                                 } disabled:opacity-50`}
                                         >
                                             {label}

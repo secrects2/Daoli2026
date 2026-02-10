@@ -3,6 +3,9 @@
 import { useTransition } from 'react'
 import { toggleStoreStatus } from './actions'
 
+import toast from 'react-hot-toast'
+import { useConfirm } from '@/components/ConfirmContext'
+
 interface Props {
     storeId: string
     currentStatus: string
@@ -10,10 +13,14 @@ interface Props {
 
 export function StoreStatusToggle({ storeId, currentStatus }: Props) {
     const [isPending, startTransition] = useTransition()
+    const { confirm } = useConfirm()
     const isActive = currentStatus === 'active'
 
-    const handleToggle = () => {
-        if (!confirm(`確定要${isActive ? '停權 (Suspend)' : '啟用 (Activate)'} 此加盟店嗎？\n\n注意：停權後，該店所有藥師將無法提交比賽成績。`)) {
+    const handleToggle = async () => {
+        if (!await confirm({
+            message: `確定要${isActive ? '停權 (Suspend)' : '啟用 (Activate)'} 此加盟店嗎？\n\n注意：停權後，該店所有藥師將無法提交比賽成績。`,
+            variant: 'danger'
+        })) {
             return
         }
 
@@ -21,7 +28,7 @@ export function StoreStatusToggle({ storeId, currentStatus }: Props) {
             try {
                 await toggleStoreStatus(storeId, currentStatus)
             } catch (error: any) {
-                alert(`操作失敗: ${error.message}`)
+                toast.error(`操作失敗: ${error.message}`)
             }
         })
     }

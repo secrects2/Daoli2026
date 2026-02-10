@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import toast from 'react-hot-toast'
+import { useConfirm } from '@/components/ConfirmContext'
 
 interface Product {
     id: string
@@ -30,8 +32,8 @@ export default function AdminProductsPage() {
     const [filter, setFilter] = useState<string>('all')
     const [showModal, setShowModal] = useState(false)
     const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+    const { confirm } = useConfirm()
 
-    // 表單狀態
     const [form, setForm] = useState({
         name: '',
         description: '',
@@ -43,30 +45,27 @@ export default function AdminProductsPage() {
         is_active: true
     })
 
-    useEffect(() => {
-        fetchProducts()
-    }, [filter])
-
     const fetchProducts = async () => {
-        setLoading(true)
         try {
-            let url = '/api/admin/products'
-            if (filter !== 'all') {
-                url += `?category=${filter}`
-            }
+            setLoading(true)
+            const query = new URLSearchParams()
+            if (filter !== 'all') query.append('category', filter)
 
-            const response = await fetch(url)
-            const data = await response.json()
-
-            if (data.products) {
-                setProducts(data.products)
-            }
+            const res = await fetch(`/api/admin/products?${query.toString()}`)
+            if (!res.ok) throw new Error('Failed to fetch products')
+            const data = await res.json()
+            setProducts(data)
         } catch (error) {
-            console.error('獲取商品錯誤:', error)
+            console.error('Error fetching products:', error)
+            toast.error('無法載入商品列表')
         } finally {
             setLoading(false)
         }
     }
+
+    useEffect(() => {
+        fetchProducts()
+    }, [filter])
 
     const handleCreate = async () => {
         try {
@@ -82,12 +81,12 @@ export default function AdminProductsPage() {
                 throw new Error(result.error)
             }
 
-            alert('商品新增成功！')
+            toast.success('商品新增成功！')
             setShowModal(false)
             resetForm()
             fetchProducts()
         } catch (error: any) {
-            alert(error.message)
+            toast.error(error.message)
         }
     }
 
@@ -109,18 +108,18 @@ export default function AdminProductsPage() {
                 throw new Error(result.error)
             }
 
-            alert('商品更新成功！')
+            toast.success('商品更新成功！')
             setShowModal(false)
             setEditingProduct(null)
             resetForm()
             fetchProducts()
         } catch (error: any) {
-            alert(error.message)
+            toast.error(error.message)
         }
     }
 
     const handleDelete = async (productId: string) => {
-        if (!confirm('確定要下架此商品嗎？')) return
+        if (!await confirm({ message: '確定要下架此商品嗎？', variant: 'danger' })) return
 
         try {
             const response = await fetch(`/api/admin/products?id=${productId}`, {
@@ -132,10 +131,10 @@ export default function AdminProductsPage() {
                 throw new Error(result.error)
             }
 
-            alert('商品已下架')
+            toast.success('商品已下架')
             fetchProducts()
         } catch (error: any) {
-            alert(error.message)
+            toast.error(error.message)
         }
     }
 
@@ -204,8 +203,8 @@ export default function AdminProductsPage() {
                     <button
                         onClick={() => setFilter('all')}
                         className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${filter === 'all'
-                                ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
-                                : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
+                            : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
                             }`}
                     >
                         全部
@@ -215,8 +214,8 @@ export default function AdminProductsPage() {
                             key={key}
                             onClick={() => setFilter(key)}
                             className={`px-4 py-2 rounded-full text-sm font-bold transition-all flex items-center gap-1 ${filter === key
-                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
-                                    : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+                                ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
+                                : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
                                 }`}
                         >
                             <span>{emoji}</span>

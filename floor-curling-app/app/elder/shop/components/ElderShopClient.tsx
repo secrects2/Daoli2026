@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import toast from 'react-hot-toast'
+import { useConfirm } from '@/components/ConfirmContext'
 
 interface Product {
     id: string
@@ -20,11 +22,12 @@ interface ElderShopClientProps {
 
 export default function ElderShopClient({ user, points: initialPoints, products }: ElderShopClientProps) {
     const router = useRouter()
+    const { confirm } = useConfirm()
     const [points, setPoints] = useState(initialPoints)
     const [purchasing, setPurchasing] = useState<string | null>(null)
 
     const handleBuy = async (product: Product) => {
-        if (!confirm(`確定要花費 ${product.price} 積分購買「${product.name}」嗎？`)) return
+        if (!await confirm({ message: `確定要花費 ${product.price} 積分購買「${product.name}」嗎？`, confirmLabel: '購買' })) return
 
         setPurchasing(product.id)
         try {
@@ -41,11 +44,11 @@ export default function ElderShopClient({ user, points: initialPoints, products 
             const data = await res.json()
             if (!res.ok) throw new Error(data.error)
 
-            alert('購買成功！')
+            toast.success('購買成功！')
             setPoints(data.remainingPoints)
             router.refresh()
         } catch (error: any) {
-            alert(error.message)
+            toast.error(error.message)
         } finally {
             setPurchasing(null)
         }

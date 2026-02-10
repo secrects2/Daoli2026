@@ -5,6 +5,8 @@ import { createBrowserClient } from '@supabase/ssr'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { QRScanModal } from '@/components/QRScanModal'
+import toast from 'react-hot-toast'
+import { useConfirm } from '@/components/ConfirmContext'
 
 interface ElderData {
     id: string
@@ -29,6 +31,7 @@ interface PortalClientProps {
 
 export default function PortalClient({ user, profile, elders, wallet }: PortalClientProps) {
     const router = useRouter()
+    const { confirm } = useConfirm()
     const supabase = createBrowserClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -44,7 +47,7 @@ export default function PortalClient({ user, profile, elders, wallet }: PortalCl
     const hasElders = elders.length > 0
 
     const handleLogout = async () => {
-        if (confirm('確定要登出嗎？')) {
+        if (await confirm({ message: '確定要登出嗎？', confirmLabel: '登出', variant: 'danger' })) {
             await supabase.auth.signOut()
             router.push('/login')
             router.refresh()
@@ -70,17 +73,17 @@ export default function PortalClient({ user, profile, elders, wallet }: PortalCl
                 throw new Error(result.error || '綁定失敗')
             }
 
-            alert('綁定成功！')
+            toast.success('綁定成功！')
             router.refresh()
         } catch (error: any) {
-            alert(error.message)
+            toast.error(error.message)
         } finally {
             setIsBinding(false)
         }
     }
 
     const handleUnbind = async (elderId: string) => {
-        if (!confirm('確定要解除與此長輩的綁定嗎？')) return
+        if (!await confirm({ message: '確定要解除與此長輩的綁定嗎？', confirmLabel: '解除綁定', variant: 'danger' })) return
 
         try {
             const response = await fetch(`/api/family/elders?elderId=${elderId}`, {
@@ -92,10 +95,10 @@ export default function PortalClient({ user, profile, elders, wallet }: PortalCl
                 throw new Error(result.error || '解除綁定失敗')
             }
 
-            alert('已解除綁定')
+            toast.success('已解除綁定')
             router.refresh()
         } catch (error: any) {
-            alert(error.message)
+            toast.error(error.message)
         }
     }
 
@@ -141,8 +144,8 @@ export default function PortalClient({ user, profile, elders, wallet }: PortalCl
                                         key={e.id}
                                         onClick={() => setSelectedElderIndex(idx)}
                                         className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-bold transition-all ${idx === selectedElderIndex
-                                                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200'
-                                                : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+                                            ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200'
+                                            : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
                                             }`}
                                     >
                                         {e.nickname || e.elder?.nickname || e.elder?.full_name || `長輩 ${idx + 1}`}

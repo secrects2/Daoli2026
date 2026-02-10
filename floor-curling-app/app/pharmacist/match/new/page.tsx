@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClientComponentClient } from '@/lib/supabase'
 import { uploadFile } from '@/app/actions/match'
@@ -8,6 +8,7 @@ import { useLanguage } from '@/lib/i18n/LanguageContext'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
 import { QRScanModal } from '@/components/QRScanModal'
 import clsx from 'clsx'
+import toast from 'react-hot-toast'
 
 type End = {
     endNumber: number
@@ -39,10 +40,27 @@ export default function NewMatchPage() {
     const [ends, setEnds] = useState<End[]>([])
     const [loading, setLoading] = useState(false)
     const [uploadProgress, setUploadProgress] = useState<string>('')
-    const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
     // QR 掃描狀態
     const [showQRScanner, setShowQRScanner] = useState<'red' | 'yellow' | null>(null)
+
+    useEffect(() => {
+        const fetchStoreId = async () => {
+            const { data: { user } } = await supabase.auth.getUser()
+            if (user) {
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('store_id')
+                    .eq('id', user.id)
+                    .single()
+
+                if (profile?.store_id) {
+                    setStoreId(profile.store_id)
+                }
+            }
+        }
+        fetchStoreId()
+    }, [supabase])
 
     const getMaxPlayers = () => {
         switch (matchMode) {
@@ -59,7 +77,7 @@ export default function NewMatchPage() {
     const handleQRScan = (elderId: string) => {
         if (showQRScanner === 'red') {
             if (redTeamIds.length >= MAX_PLAYERS) {
-                setMessage({ type: 'error', text: `此模式每隊最多 ${MAX_PLAYERS} 人` })
+                toast.error(`此模式每隊最多 ${MAX_PLAYERS} 人`)
                 return
             }
             if (!redTeamIds.includes(elderId) && !yellowTeamIds.includes(elderId)) {
@@ -67,7 +85,7 @@ export default function NewMatchPage() {
             }
         } else if (showQRScanner === 'yellow') {
             if (yellowTeamIds.length >= MAX_PLAYERS) {
-                setMessage({ type: 'error', text: `此模式每隊最多 ${MAX_PLAYERS} 人` })
+                toast.error(`此模式每隊最多 ${MAX_PLAYERS} 人`)
                 return
             }
             if (!yellowTeamIds.includes(elderId) && !redTeamIds.includes(elderId)) {
@@ -88,7 +106,7 @@ export default function NewMatchPage() {
                 setRedTeamIds([...redTeamIds, id])
                 setRedInput('')
             } else {
-                setMessage({ type: 'error', text: '此 ID 已存在' })
+                toast.error('此 ID 已存在')
             }
         } else {
             if (yellowTeamIds.length >= MAX_PLAYERS) return
@@ -96,7 +114,7 @@ export default function NewMatchPage() {
                 setYellowTeamIds([...yellowTeamIds, id])
                 setYellowInput('')
             } else {
-                setMessage({ type: 'error', text: '此 ID 已存在' })
+                toast.error('此 ID 已存在')
             }
         }
     }
@@ -113,7 +131,7 @@ export default function NewMatchPage() {
     // 添加新回合
     const addEnd = () => {
         if (ends.length >= 6) {
-            setMessage({ type: 'error', text: 'Max 6 ends' })
+            toast.error('Max 6 ends')
             return
         }
 
@@ -159,7 +177,6 @@ export default function NewMatchPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setLoading(true)
-        setMessage(null)
         setUploadProgress(t('matchNew.submitting'))
 
         try {
@@ -237,10 +254,7 @@ export default function NewMatchPage() {
                 throw new Error(result.error || t('common.error'))
             }
 
-            setMessage({
-                type: 'success',
-                text: t('matchNew.validation.success')
-            })
+            toast.success(t('matchNew.validation.success'))
 
             setTimeout(() => {
                 router.push('/pharmacist/dashboard')
@@ -248,7 +262,7 @@ export default function NewMatchPage() {
 
         } catch (error: any) {
             console.error('提交失败:', error)
-            setMessage({ type: 'error', text: error.message })
+            toast.error(error.message)
         } finally {
             setLoading(false)
             setUploadProgress('')
@@ -317,15 +331,19 @@ export default function NewMatchPage() {
 
                     <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
                         <div className="mb-6">
-                            <label className="block text-sm font-bold text-gray-900 mb-2">Store ID</label>
-                            <input
-                                type="text"
-                                value={storeId}
-                                onChange={(e) => setStoreId(e.target.value)}
-                                className="w-full px-5 py-3 rounded-2xl bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all font-mono"
-                                placeholder="Enter Store ID (e.g., S001)"
-                                required
-                            />
+                            <label className="block text-sm font-bold text-gray-900 mb-2">Store ID <span className="text-xs font-normal text-gray-400 ml-2">(Auto-filled)</span></label>
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    value={storeId}
+                                    readOnly
+                                    className="w-full px-5 py-3 pl-12 rounded-2xl bg-gray-50 border border-gray-200 text-gray-500 font-mono cursor-not-allowed select-all"
+                                    placeholder="Loading Store ID..."
+                                />
+                                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                                </div>
+                            </div>
                         </div>
 
                         <div className="mb-8">
@@ -629,13 +647,6 @@ export default function NewMatchPage() {
 
                     <div className="fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-lg border-t border-gray-200 p-4 pb-8 z-40">
                         <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
-                            {message && (
-                                <div className={`flex-1 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 ${message.type === 'error' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'
-                                    }`}>
-                                    {message.type === 'error' ? '⚠️' : '✅'}
-                                    {message.text}
-                                </div>
-                            )}
                             <div className="flex gap-3 ml-auto">
                                 <button
                                     type="button"

@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { createClientComponentClient } from '@/lib/supabase'
+import toast from 'react-hot-toast'
+import { useConfirm } from '@/components/ConfirmContext'
 
 interface User {
     id: string
@@ -26,14 +28,14 @@ const ROLE_LABELS: Record<string, { label: string; color: string }> = {
 
 export default function AdminUsersPage() {
     const supabase = createClientComponentClient()
+    const { confirm } = useConfirm()
     const [users, setUsers] = useState<User[]>([])
     const [loading, setLoading] = useState(true)
     const [filter, setFilter] = useState<string>('all')
     const [showModal, setShowModal] = useState(false)
     const [editingUser, setEditingUser] = useState<User | null>(null)
-    const [stores, setStores] = useState<any[]>([])
+    const [stores, setStores] = useState<{ id: string; name: string }[]>([])
 
-    // Form state
     const [form, setForm] = useState({
         email: '',
         password: '',
@@ -44,35 +46,40 @@ export default function AdminUsersPage() {
         phone: ''
     })
 
-    useEffect(() => {
-        fetchUsers()
-        fetchStores()
-    }, [filter])
-
     const fetchUsers = async () => {
-        setLoading(true)
         try {
-            const url = filter === 'all'
-                ? '/api/admin/users'
-                : `/api/admin/users?role=${filter}`
+            setLoading(true)
+            const query = new URLSearchParams()
+            if (filter !== 'all') query.append('role', filter)
 
-            const response = await fetch(url)
-            const data = await response.json()
-
-            if (data.users) {
-                setUsers(data.users)
-            }
+            const res = await fetch(`/api/admin/users?${query.toString()}`)
+            if (!res.ok) throw new Error('Failed to fetch users')
+            const data = await res.json()
+            setUsers(data)
         } catch (error) {
             console.error('Error fetching users:', error)
+            toast.error('無法載入用戶列表')
         } finally {
             setLoading(false)
         }
     }
 
     const fetchStores = async () => {
-        const { data } = await supabase.from('stores').select('id, name')
-        if (data) setStores(data)
+        try {
+            const res = await fetch('/api/admin/stores')
+            if (res.ok) {
+                const data = await res.json()
+                setStores(data)
+            }
+        } catch (error) {
+            console.error('Error fetching stores:', error)
+        }
     }
+
+    useEffect(() => {
+        fetchUsers()
+        fetchStores()
+    }, [filter])
 
     const handleCreate = async () => {
         try {
@@ -88,12 +95,12 @@ export default function AdminUsersPage() {
                 throw new Error(result.error)
             }
 
-            alert('用戶創建成功！')
+            toast.success('用戶創建成功！')
             setShowModal(false)
             resetForm()
             fetchUsers()
         } catch (error: any) {
-            alert(error.message)
+            toast.error(error.message)
         }
     }
 
@@ -119,18 +126,18 @@ export default function AdminUsersPage() {
                 throw new Error(result.error)
             }
 
-            alert('用戶更新成功！')
+            toast.success('用戶更新成功！')
             setShowModal(false)
             setEditingUser(null)
             resetForm()
             fetchUsers()
         } catch (error: any) {
-            alert(error.message)
+            toast.error(error.message)
         }
     }
 
     const handleDelete = async (userId: string) => {
-        if (!confirm('確定要停用此用戶嗎？')) return
+        if (!await confirm({ message: '確定要停用此用戶嗎？', variant: 'danger' })) return
 
         try {
             const response = await fetch(`/api/admin/users?id=${userId}`, {
@@ -142,10 +149,10 @@ export default function AdminUsersPage() {
                 throw new Error(result.error)
             }
 
-            alert('用戶已停用')
+            toast.success('用戶已停用')
             fetchUsers()
         } catch (error: any) {
-            alert(error.message)
+            toast.error(error.message)
         }
     }
 
@@ -220,8 +227,8 @@ export default function AdminUsersPage() {
                             key={item.key}
                             onClick={() => setFilter(item.key)}
                             className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${filter === item.key
-                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
-                                    : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+                                ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
+                                : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
                                 }`}
                         >
                             {item.label}

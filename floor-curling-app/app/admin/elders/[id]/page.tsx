@@ -5,15 +5,16 @@ import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { createBrowserClient } from '@supabase/ssr'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
+import toast from 'react-hot-toast'
 
 export default function ElderDetailPage() {
     const params = useParams()
     const router = useRouter()
     const [elder, setElder] = useState<any>(null)
+    const [stats, setStats] = useState({ totalMatches: 0, winRate: 0, points: 0 })
     const [family, setFamily] = useState<any[]>([])
     const [equipment, setEquipment] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
-    const [stats, setStats] = useState({ totalMatches: 0, winRate: 0, points: 0 })
 
     const supabase = createBrowserClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -32,7 +33,7 @@ export default function ElderDetailPage() {
                 .single()
 
             if (!profile) {
-                alert('查無此長輩')
+                toast.error('查無此長輩')
                 router.push('/admin/elders')
                 return
             }
