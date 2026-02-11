@@ -5,16 +5,17 @@ import { createNotification } from '@/lib/notifications'
 import { z } from 'zod' // We need to extend the schema locally or update it, easier to extend check here for now
 
 // 使用 Service Role Key 初始化 Supabase Admin 客戶端
-const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+// moved inside POST handler to avoid build-time env var issues
 
 const POINTS_WIN = 100
 const POINTS_DRAW = 50
 const POINTS_LOSS = 10
 
 export async function POST(req: NextRequest) {
+    const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
     try {
         const body = await req.json()
 
@@ -180,7 +181,7 @@ export async function POST(req: NextRequest) {
                 ? `您的長輩在團隊賽中獲勝！總分 ${Math.max(redTotal, yellowTotal)}`
                 : `比分 ${redTotal}:${yellowTotal}`
 
-            await notifyFamily(elderId, title, msg, matchId)
+            await notifyFamily(supabaseAdmin, elderId, title, msg, matchId)
         }
 
         // Run in parallel
@@ -205,7 +206,7 @@ export async function POST(req: NextRequest) {
 }
 
 // 輔助函數：通知家屬 (S2B2C) - 支持多長輩綁定
-async function notifyFamily(elderId: string, title: string, message: string, matchId: string) {
+async function notifyFamily(supabaseAdmin: any, elderId: string, title: string, message: string, matchId: string) {
     if (!elderId) return
 
     // 1. 從新的 family_elder_links 表查詢
@@ -224,10 +225,10 @@ async function notifyFamily(elderId: string, title: string, message: string, mat
     // 合併去重
     const familyIds = new Set<string>()
     if (familyLinks) {
-        familyLinks.forEach(link => familyIds.add(link.family_id))
+        familyLinks.forEach((link: any) => familyIds.add(link.family_id))
     }
     if (legacyFamilyMembers) {
-        legacyFamilyMembers.forEach(member => familyIds.add(member.id))
+        legacyFamilyMembers.forEach((member: any) => familyIds.add(member.id))
     }
 
     if (familyIds.size === 0) return

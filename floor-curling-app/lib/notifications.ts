@@ -1,10 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 
-// 使用 Service Role Key 初始化 Supabase Admin 客戶端
-const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+// moved inside createNotification to avoid build-time env var issues
 
 interface NotificationData {
     userId: string
@@ -15,6 +11,10 @@ interface NotificationData {
 }
 
 export async function createNotification(data: NotificationData) {
+    const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
     try {
         // 1. 創建數據庫通知記錄
         const { error } = await supabaseAdmin
@@ -46,6 +46,10 @@ export async function createNotification(data: NotificationData) {
 
 
 async function sendExternalPush(data: NotificationData) {
+    const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
     try {
         // 1. Get user's LINE ID from profile
         const { data: profile } = await supabaseAdmin
