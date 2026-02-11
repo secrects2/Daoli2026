@@ -4,23 +4,26 @@ import { PullToRefresh } from '@/components/PullToRefresh'
 import ToastProvider from '@/components/ToastProvider'
 import { ConfirmProvider } from '@/components/ConfirmContext'
 
-export const metadata = {
+import { Metadata, Viewport } from 'next'
+
+export const metadata: Metadata = {
     title: '道里地壺球 - Floor Curling Platform',
     description: 'Professional Floor Curling management platform',
     manifest: '/manifest.json',
-    themeColor: '#7c3aed',
-    viewport: {
-        width: 'device-width',
-        initialScale: 1,
-        maximumScale: 1,
-        userScalable: false,
-        viewportFit: 'cover',
-    },
     appleWebApp: {
         capable: true,
         statusBarStyle: 'default',
         title: '道里地壺',
     },
+}
+
+export const viewport: Viewport = {
+    themeColor: '#7c3aed',
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+    viewportFit: 'cover',
 }
 
 export default function RootLayout({
