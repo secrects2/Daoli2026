@@ -44,7 +44,7 @@ export default function FamilyShopClient({ user, elder, products }: FamilyShopCl
         setShowNoteModal(false)
 
         try {
-            const res = await fetch('/api/payment/line-pay/request', {
+            const res = await fetch('/api/payment/ecpay/create', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -54,11 +54,18 @@ export default function FamilyShopClient({ user, elder, products }: FamilyShopCl
                 })
             })
 
-            const data = await res.json()
-            if (!res.ok) throw new Error(data.error)
+            if (!res.ok) {
+                const data = await res.json()
+                throw new Error(data.error)
+            }
 
-            // 導向付款確認頁
-            router.push(data.paymentUrl)
+            // ECPay API 回傳 HTML 表單，需要在新頁面中渲染並自動提交到綠界
+            const html = await res.text()
+            const newWindow = window.open('', '_self')
+            if (newWindow) {
+                newWindow.document.write(html)
+                newWindow.document.close()
+            }
 
         } catch (error: any) {
             toast.error(error.message)
@@ -185,9 +192,9 @@ export default function FamilyShopClient({ user, elder, products }: FamilyShopCl
                             </button>
                             <button
                                 onClick={handleConfirmPurchase}
-                                className="flex-1 py-3 bg-[#06C755] text-white rounded-lg font-bold"
+                                className="flex-1 py-3 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition-colors"
                             >
-                                前往付款
+                                💳 信用卡付款
                             </button>
                         </div>
                     </div>
