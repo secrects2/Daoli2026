@@ -307,13 +307,13 @@ export default function NewMatchPage() {
 
                     <div className="relative z-10 grid grid-cols-2 gap-8 text-center text-white">
                         <div>
-                            <p className="text-red-500 font-bold uppercase tracking-widest text-sm mb-2">Red Team</p>
+                            <p className="text-red-500 font-bold uppercase tracking-widest text-sm mb-2">{t('matchNew.redTeam')}</p>
                             <div className="text-6xl font-black tabular-nums tracking-tighter text-red-500 drop-shadow-[0_0_15px_rgba(239,68,68,0.5)]">
                                 {redTotal}
                             </div>
                         </div>
                         <div className="border-l border-white/10">
-                            <p className="text-yellow-400 font-bold uppercase tracking-widest text-sm mb-2">Yellow Team</p>
+                            <p className="text-yellow-400 font-bold uppercase tracking-widest text-sm mb-2">{t('matchNew.yellowTeam')}</p>
                             <div className="text-6xl font-black tabular-nums tracking-tighter text-yellow-400 drop-shadow-[0_0_15px_rgba(250,204,21,0.5)]">
                                 {yellowTotal}
                             </div>
@@ -322,23 +322,23 @@ export default function NewMatchPage() {
 
                     <div className="absolute top-4 right-4 flex items-center gap-2">
                         <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                        <span className="text-xs font-mono text-gray-500">LIVE</span>
+                        <span className="text-xs font-mono text-gray-500">{t('matchNew.live')}</span>
                     </div>
-                    {storeId && <div className="absolute bottom-4 left-0 w-full text-center text-xs font-mono text-gray-600">STORE ID: {storeId}</div>}
+                    {storeId && <div className="absolute bottom-4 left-0 w-full text-center text-xs font-mono text-gray-600">{t('matchNew.storeId')}: {storeId}</div>}
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-8">
 
                     <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
                         <div className="mb-6">
-                            <label className="block text-sm font-bold text-gray-900 mb-2">Store ID <span className="text-xs font-normal text-gray-400 ml-2">(Auto-filled)</span></label>
+                            <label className="block text-sm font-bold text-gray-900 mb-2">{t('matchNew.storeId')} <span className="text-xs font-normal text-gray-400 ml-2">({t('matchNew.autoFilled')})</span></label>
                             <div className="relative">
                                 <input
                                     type="text"
                                     value={storeId}
                                     readOnly
                                     className="w-full px-5 py-3 pl-12 rounded-2xl bg-gray-50 border border-gray-200 text-gray-500 font-mono cursor-not-allowed select-all"
-                                    placeholder="Loading Store ID..."
+                                    placeholder={t('matchNew.loadingStoreId')}
                                 />
                                 <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
@@ -347,7 +347,7 @@ export default function NewMatchPage() {
                         </div>
 
                         <div className="mb-8">
-                            <label className="block text-sm font-bold text-gray-900 mb-2">Match Mode</label>
+                            <label className="block text-sm font-bold text-gray-900 mb-2">{t('matchNew.matchMode')}</label>
                             <div className="grid grid-cols-3 gap-3 p-1 bg-gray-50 rounded-2xl border border-gray-200">
                                 {matchModes.map(mode => (
                                     <button

@@ -78,6 +78,10 @@ export interface Translations {
         title: string
         subtitle: string
         storeId: string
+        autoFilled: string
+        loadingStoreId: string
+        matchMode: string
+        live: string
         redElderId: string
         yellowElderId: string
         redTeam: string
