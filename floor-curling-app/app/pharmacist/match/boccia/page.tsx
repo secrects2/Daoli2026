@@ -4,13 +4,21 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClientComponentClient } from '@/lib/supabase'
 import { QRScanModal } from '@/components/QRScanModal'
-import BocciaCam from '@/components/ai/BocciaCam'
+import dynamic from 'next/dynamic'
 import toast from 'react-hot-toast'
+
+// 動態載入 BocciaCam 避免 SSR 問題 (Webcam + MediaPipe)
+const BocciaCam = dynamic(() => import('@/components/ai/BocciaCam'), { ssr: false })
 
 interface BocciaEnd {
     endNumber: number
     redScore: number
     blueScore: number
+}
+
+interface AITarget {
+    elderId: string
+    side: 'red' | 'blue'
 }
 
 export default function BocciaMatchPage() {
@@ -22,6 +30,7 @@ export default function BocciaMatchPage() {
     const [redInput, setRedInput] = useState('')
     const [blueInput, setBlueInput] = useState('')
     const [storeId, setStoreId] = useState('')
+    const [matchId, setMatchId] = useState<string | undefined>(undefined)
     const [ends, setEnds] = useState<BocciaEnd[]>([
         { endNumber: 1, redScore: 0, blueScore: 0 },
         { endNumber: 2, redScore: 0, blueScore: 0 },
@@ -30,7 +39,9 @@ export default function BocciaMatchPage() {
     ])
     const [loading, setLoading] = useState(false)
     const [showQRScanner, setShowQRScanner] = useState<'red' | 'blue' | null>(null)
-    const [showAICam, setShowAICam] = useState(false)
+
+    // AI 分析模態框
+    const [aiTarget, setAiTarget] = useState<AITarget | null>(null)
 
     useEffect(() => {
         const fetchStoreId = async () => {
@@ -106,11 +117,10 @@ export default function BocciaMatchPage() {
         setLoading(true)
 
         try {
-            // 準備 ends 資料（Boccia 格式轉換為 RPC 預期格式）
             const endsData = ends.map(end => ({
                 endNumber: end.endNumber,
                 redScore: end.redScore,
-                yellowScore: end.blueScore, // RPC 仍用 yellowScore 欄位
+                yellowScore: end.blueScore,
             }))
 
             const { data, error } = await supabase.rpc('calculate_and_record_match_result', {
@@ -122,6 +132,11 @@ export default function BocciaMatchPage() {
             })
 
             if (error) throw error
+
+            // 儲存 match_id 供 AI 分析關聯
+            if (data?.match_id) {
+                setMatchId(data.match_id)
+            }
 
             toast.success(`🎯 滾球比賽完成！紅 ${redTotal} : ${blueTotal} 藍`)
             router.push('/pharmacist/match/history')
@@ -146,24 +161,10 @@ export default function BocciaMatchPage() {
                             <p className="text-orange-100 text-xs">Boccia • 4 回合制</p>
                         </div>
                     </div>
-                    <button
-                        onClick={() => setShowAICam(!showAICam)}
-                        className={`px-3 py-2 rounded-xl text-sm font-bold transition-all ${showAICam ? 'bg-white text-red-600' : 'bg-white/20 text-white hover:bg-white/30'}`}
-                        aria-label="AI 視覺分析"
-                    >
-                        📹 AI 分析
-                    </button>
                 </div>
             </div>
 
             <form onSubmit={handleSubmit} className="max-w-2xl mx-auto px-4 py-6 space-y-6">
-
-                {/* AI Camera Section */}
-                {showAICam && (
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-                        <BocciaCam className="w-full" />
-                    </div>
-                )}
 
                 {/* Team Selection */}
                 <div className="grid grid-cols-2 gap-4">
@@ -176,8 +177,18 @@ export default function BocciaMatchPage() {
                         <div className="space-y-2 mb-3">
                             {redTeamIds.map(id => (
                                 <div key={id} className="flex items-center justify-between bg-red-50 rounded-lg px-3 py-2">
-                                    <span className="text-sm text-red-700 font-mono truncate">{id.slice(0, 8)}...</span>
-                                    <button type="button" onClick={() => removePlayer('red', id)} className="text-red-400 hover:text-red-600" aria-label="移除選手">✕</button>
+                                    <span className="text-sm text-red-700 font-mono truncate flex-1">{id.slice(0, 8)}...</span>
+                                    <div className="flex items-center gap-1">
+                                        <button
+                                            type="button"
+                                            onClick={() => setAiTarget({ elderId: id, side: 'red' })}
+                                            className="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-lg font-bold hover:bg-red-200 transition-colors"
+                                            title="啟動 AI 分析"
+                                        >
+                                            📹 AI
+                                        </button>
+                                        <button type="button" onClick={() => removePlayer('red', id)} className="text-red-400 hover:text-red-600 ml-1" aria-label="移除選手">✕</button>
+                                    </div>
                                 </div>
                             ))}
                         </div>
@@ -204,8 +215,18 @@ export default function BocciaMatchPage() {
                         <div className="space-y-2 mb-3">
                             {blueTeamIds.map(id => (
                                 <div key={id} className="flex items-center justify-between bg-blue-50 rounded-lg px-3 py-2">
-                                    <span className="text-sm text-blue-700 font-mono truncate">{id.slice(0, 8)}...</span>
-                                    <button type="button" onClick={() => removePlayer('blue', id)} className="text-blue-400 hover:text-blue-600" aria-label="移除選手">✕</button>
+                                    <span className="text-sm text-blue-700 font-mono truncate flex-1">{id.slice(0, 8)}...</span>
+                                    <div className="flex items-center gap-1">
+                                        <button
+                                            type="button"
+                                            onClick={() => setAiTarget({ elderId: id, side: 'blue' })}
+                                            className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-lg font-bold hover:bg-blue-200 transition-colors"
+                                            title="啟動 AI 分析"
+                                        >
+                                            📹 AI
+                                        </button>
+                                        <button type="button" onClick={() => removePlayer('blue', id)} className="text-blue-400 hover:text-blue-600 ml-1" aria-label="移除選手">✕</button>
+                                    </div>
                                 </div>
                             ))}
                         </div>
@@ -230,7 +251,6 @@ export default function BocciaMatchPage() {
                         <h3 className="font-bold text-gray-900">回合計分</h3>
                     </div>
 
-                    {/* Scoreboard Header */}
                     <div className="grid grid-cols-[1fr_80px_80px] px-5 py-2 bg-gray-50 border-b text-xs font-bold text-gray-500">
                         <span>回合</span>
                         <span className="text-center text-red-600">🔴 紅隊</span>
@@ -253,7 +273,6 @@ export default function BocciaMatchPage() {
                         </div>
                     ))}
 
-                    {/* Total */}
                     <div className="grid grid-cols-[1fr_80px_80px] px-5 py-4 bg-gray-900 text-white items-center">
                         <span className="font-black text-lg">總分</span>
                         <span className="text-center font-black text-2xl text-red-400">{redTotal}</span>
@@ -278,13 +297,30 @@ export default function BocciaMatchPage() {
                 </button>
             </form>
 
-            {/* QR Scanner */}
+            {/* QR Scanner Modal */}
             {showQRScanner && (
                 <QRScanModal
                     isOpen={!!showQRScanner}
                     onScan={handleQRScan}
                     onClose={() => setShowQRScanner(null)}
                 />
+            )}
+
+            {/* AI Analysis Modal */}
+            {aiTarget && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+                    <div className="w-full max-w-lg animate-in fade-in zoom-in-95 duration-200">
+                        <BocciaCam
+                            elderId={aiTarget.elderId}
+                            matchId={matchId}
+                            side={aiTarget.side}
+                            onClose={() => {
+                                setAiTarget(null)
+                                toast.success('AI 分析完成')
+                            }}
+                        />
+                    </div>
+                </div>
             )}
         </div>
     )
