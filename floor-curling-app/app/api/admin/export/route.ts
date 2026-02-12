@@ -3,11 +3,8 @@ import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { autoRefreshToken: false, persistSession: false } }
-)
+// remove top-level init
+// const supabaseAdmin = ...
 
 // 驗證管理員身份
 async function verifyAdmin() {
@@ -54,26 +51,38 @@ export async function GET(request: NextRequest) {
     const startDate = searchParams.get('start')
     const endDate = searchParams.get('end')
     const storeId = searchParams.get('store')
+    const role = searchParams.get('role')
+    const status = searchParams.get('status')
     const format = searchParams.get('format') || 'json'
+
+    // Initialize inside handler
+    const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        { auth: { autoRefreshToken: false, persistSession: false } }
+    )
 
     try {
         let data: any = {}
 
         switch (type) {
             case 'overview':
-                data = await getOverviewReport(startDate, endDate, storeId)
+                data = await getOverviewReport(supabaseAdmin, startDate, endDate, storeId)
                 break
             case 'matches':
-                data = await getMatchesReport(startDate, endDate, storeId)
+                data = await getMatchesReport(supabaseAdmin, startDate, endDate, storeId)
                 break
             case 'users':
-                data = await getUsersReport(storeId)
+                data = await getUsersReport(supabaseAdmin, storeId, startDate, endDate, role)
                 break
             case 'transactions':
-                data = await getTransactionsReport(startDate, endDate)
+                data = await getTransactionsReport(supabaseAdmin, startDate, endDate)
+                break
+            case 'orders':
+                data = await getOrdersReport(supabaseAdmin, startDate, endDate, status)
                 break
             default:
-                data = await getOverviewReport(startDate, endDate, storeId)
+                data = await getOverviewReport(supabaseAdmin, startDate, endDate, storeId)
         }
 
         // 如果是 CSV 格式，轉換並返回
@@ -95,7 +104,7 @@ export async function GET(request: NextRequest) {
 }
 
 // 概覽報表
-async function getOverviewReport(startDate: string | null, endDate: string | null, storeId: string | null) {
+async function getOverviewReport(supabaseAdmin: any, startDate: string | null, endDate: string | null, storeId: string | null) {
     let matchQuery = supabaseAdmin.from('matches').select('id', { count: 'exact' })
     let userQuery = supabaseAdmin.from('profiles').select('id', { count: 'exact' })
     let transactionQuery = supabaseAdmin.from('point_transactions').select('amount')
@@ -118,7 +127,7 @@ async function getOverviewReport(startDate: string | null, endDate: string | nul
         transactionQuery
     ])
 
-    const totalPoints = transactions.data?.reduce((sum, t) => sum + (t.amount || 0), 0) || 0
+    const totalPoints = transactions.data?.reduce((sum: number, t: any) => sum + (t.amount || 0), 0) || 0
 
     // 按角色統計用戶
     const { data: roleStats } = await supabaseAdmin
@@ -126,7 +135,7 @@ async function getOverviewReport(startDate: string | null, endDate: string | nul
         .select('role')
 
     const roleCount: Record<string, number> = {}
-    roleStats?.forEach(p => {
+    roleStats?.forEach((p: any) => {
         roleCount[p.role] = (roleCount[p.role] || 0) + 1
     })
 
@@ -143,7 +152,7 @@ async function getOverviewReport(startDate: string | null, endDate: string | nul
 }
 
 // 比賽報表
-async function getMatchesReport(startDate: string | null, endDate: string | null, storeId: string | null) {
+async function getMatchesReport(supabaseAdmin: any, startDate: string | null, endDate: string | null, storeId: string | null) {
     let query = supabaseAdmin
         .from('matches')
         .select(`
@@ -171,7 +180,7 @@ async function getMatchesReport(startDate: string | null, endDate: string | null
 }
 
 // 用戶報表
-async function getUsersReport(storeId: string | null) {
+async function getUsersReport(supabaseAdmin: any, storeId: string | null, startDate: string | null, endDate: string | null, role: string | null) {
     let query = supabaseAdmin
         .from('profiles')
         .select(`
@@ -181,11 +190,14 @@ async function getUsersReport(storeId: string | null) {
             role,
             store_id,
             created_at,
-            is_active
+            is_active,
+            stores(name)
         `)
         .order('created_at', { ascending: false })
 
     if (storeId) query = query.eq('store_id', storeId)
+    if (startDate) query = query.gte('created_at', startDate)
+    if (endDate) query = query.lte('created_at', endDate)
 
     const { data: users } = await query
 
@@ -197,7 +209,7 @@ async function getUsersReport(storeId: string | null) {
 }
 
 // 積分交易報表
-async function getTransactionsReport(startDate: string | null, endDate: string | null) {
+async function getTransactionsReport(supabaseAdmin: any, startDate: string | null, endDate: string | null) {
     let query = supabaseAdmin
         .from('point_transactions')
         .select(`
@@ -217,13 +229,41 @@ async function getTransactionsReport(startDate: string | null, endDate: string |
 
     const { data: transactions } = await query
 
-    const totalEarned = transactions?.filter(t => t.type === 'earned').reduce((sum, t) => sum + t.amount, 0) || 0
-    const totalSpent = transactions?.filter(t => t.type === 'spent').reduce((sum, t) => sum + Math.abs(t.amount), 0) || 0
+    const totalEarned = transactions?.filter((t: any) => t.type === 'earned').reduce((sum: number, t: any) => sum + t.amount, 0) || 0
+    const totalSpent = transactions?.filter((t: any) => t.type === 'spent').reduce((sum: number, t: any) => sum + Math.abs(t.amount), 0) || 0
 
     return {
         transactions: transactions || [],
         total: transactions?.length || 0,
         summary: { totalEarned, totalSpent },
+        generatedAt: new Date().toISOString()
+    }
+}
+
+// 訂單報表
+async function getOrdersReport(supabaseAdmin: any, startDate: string | null, endDate: string | null, status: string | null) {
+    let query = supabaseAdmin
+        .from('orders')
+        .select(`
+            id,
+            order_number,
+            status,
+            total_amount,
+            created_at,
+            buyer:buyer_id(full_name, nickname),
+            recipient:recipient_id(full_name, nickname)
+        `)
+        .order('created_at', { ascending: false })
+
+    if (startDate) query = query.gte('created_at', startDate)
+    if (endDate) query = query.lte('created_at', endDate)
+    if (status && status !== 'all') query = query.eq('status', status)
+
+    const { data: orders } = await query
+
+    return {
+        orders: orders || [],
+        total: orders?.length || 0,
         generatedAt: new Date().toISOString()
     }
 }
@@ -249,7 +289,7 @@ function convertToCSV(data: any, type: string): string {
             break
 
         case 'users':
-            headers = ['ID', '姓名', '暱稱', '角色', '門店ID', '建立時間', '活躍']
+            headers = ['ID', '姓名', '暱稱', '角色', '門店', '建立時間', '活躍']
             rows = [headers.join(',')]
             data.users?.forEach((u: any) => {
                 rows.push([
@@ -257,7 +297,7 @@ function convertToCSV(data: any, type: string): string {
                     u.full_name || '',
                     u.nickname || '',
                     u.role,
-                    u.store_id || '',
+                    u.stores?.name || u.store_id || '',
                     u.created_at,
                     u.is_active ? '是' : '否'
                 ].join(','))
@@ -265,15 +305,34 @@ function convertToCSV(data: any, type: string): string {
             break
 
         case 'transactions':
-            headers = ['ID', '金額', '類型', '描述', '時間']
+            headers = ['ID', '用戶', '金額', '類型', '描述', '時間']
             rows = [headers.join(',')]
             data.transactions?.forEach((t: any) => {
+                const userName = t.wallets?.profiles?.nickname || t.wallets?.profiles?.full_name || '未知'
                 rows.push([
                     t.id,
+                    userName,
                     t.amount,
                     t.type,
                     `"${(t.description || '').replace(/"/g, '""')}"`,
                     t.created_at
+                ].join(','))
+            })
+            break
+
+        case 'orders':
+            headers = ['訂單編號', '購買者', '收禮者', '金額', '狀態', '時間']
+            rows = [headers.join(',')]
+            data.orders?.forEach((o: any) => {
+                const buyerName = o.buyer?.full_name || o.buyer?.nickname || '未知'
+                const recipientName = o.recipient?.full_name || o.recipient?.nickname || '同購買者'
+                rows.push([
+                    o.order_number,
+                    buyerName,
+                    recipientName,
+                    o.total_amount,
+                    o.status,
+                    o.created_at
                 ].join(','))
             })
             break

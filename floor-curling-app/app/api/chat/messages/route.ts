@@ -6,12 +6,13 @@ import { createServerClient } from '@supabase/ssr'
 export const dynamic = 'force-dynamic'
 
 // Service role for unrestricted message access/insert
-const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-)
+// const supabaseAdmin = ... removed top level init
 
 export async function GET(request: Request) {
+    const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+    )
     try {
         const { searchParams } = new URL(request.url)
         const targetId = searchParams.get('target_id')
@@ -51,6 +52,10 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+    const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+    )
     try {
         const { receiver_id, content } = await request.json()
 

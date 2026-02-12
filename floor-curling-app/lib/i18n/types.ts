@@ -98,6 +98,18 @@ export interface Translations {
             missingPhoto: string
             success: string
         }
+        gameEnds: string
+        noEnds: string
+        startRecording: string
+        uploadingFiles: string
+        uploadingPhoto: string
+        uploadingVideo: string
+        processing: string
+        waitingPlayer: string
+        scanOrType: string
+        maxPlayer: string
+        idExists: string
+        maxEnds: string
     }
     matchHistory: {
         title: string

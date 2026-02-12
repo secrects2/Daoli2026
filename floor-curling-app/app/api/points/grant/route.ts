@@ -2,21 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { z } from 'zod'
 
-// 使用 Service Role Key 繞過 RLS
-const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
-
-// 驗證 Schema
-const grantPointsSchema = z.object({
-    elderId: z.string().uuid({ message: '無效的長輩 ID' }),
-    localPoints: z.number().min(1, { message: '積分必須大於 0' }).max(10000, { message: '單次發放上限 10000 點' }),
-    description: z.string().min(1, { message: '請填寫發放原因' }).max(200),
-    storeId: z.string().min(1, { message: '缺少店鋪 ID' })
-})
-
 export async function POST(req: NextRequest) {
+    // 使用 Service Role Key 繞過 RLS
+    const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
     try {
         const body = await req.json()
 

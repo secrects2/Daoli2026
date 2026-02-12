@@ -5,13 +5,12 @@ import { createServerClient } from '@supabase/ssr'
 
 export const dynamic = 'force-dynamic'
 
-// Use Service Role for searching users across the store
-const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-)
-
 export async function GET(request: Request) {
+    // Use Service Role for searching users across the store
+    const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+    )
     try {
         const cookieStore = await cookies()
         const supabase = createServerClient(

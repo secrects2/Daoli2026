@@ -10,6 +10,15 @@ export const metadata: Metadata = {
     title: '道里地壺球 - Floor Curling Platform',
     description: 'Professional Floor Curling management platform',
     manifest: '/manifest.json',
+    icons: {
+        icon: '/favicon.ico',
+        shortcut: '/favicon.ico',
+        apple: '/apple-touch-icon.png',
+        other: {
+            rel: 'apple-touch-icon-precomposed',
+            url: '/apple-touch-icon-precomposed.png',
+        },
+    },
     appleWebApp: {
         capable: true,
         statusBarStyle: 'default',

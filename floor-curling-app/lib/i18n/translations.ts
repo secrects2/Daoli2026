@@ -98,7 +98,19 @@ export const translations: Record<string, Translations> = {
                 atLeastOneEnd: '至少需要新增一個回合',
                 missingPhoto: '第 {ends} 回合缺少證明照片，無法寫入積分',
                 success: '比賽建立成功！積分已更新，並已通知家屬。'
-            }
+            },
+            gameEnds: '比賽局數',
+            noEnds: '尚未記錄任何局數',
+            startRecording: '點擊「新增一局」開始記錄分數',
+            uploadingFiles: '正在上傳檔案...',
+            uploadingPhoto: '正在上傳第 {n} 局照片...',
+            uploadingVideo: '正在上傳第 {n} 局影片...',
+            processing: '處理中...',
+            waitingPlayer: '等待加入...',
+            scanOrType: '掃描或輸入 ID...',
+            maxPlayer: '此模式每隊最多 {n} 人',
+            idExists: '此 ID 已存在',
+            maxEnds: '最多 6 局'
         },
         matchHistory: {
             title: '比賽記錄',
@@ -303,7 +315,19 @@ export const translations: Record<string, Translations> = {
                 atLeastOneEnd: '至少需要添加一个回合',
                 missingPhoto: '第 {ends} 回合缺少证明照片，无法写入积分',
                 success: '比赛创建成功！积分已更新，并已通知家属。'
-            }
+            },
+            gameEnds: '比赛局数',
+            noEnds: '尚未记录任何局数',
+            startRecording: '点击“添加回合”开始记录分数',
+            uploadingFiles: '正在上传文件...',
+            uploadingPhoto: '正在上传第 {n} 局照片...',
+            uploadingVideo: '正在上传第 {n} 局视频...',
+            processing: '处理中...',
+            waitingPlayer: '等待加入...',
+            scanOrType: '扫描 or 输入 ID...',
+            maxPlayer: '此模式每队最多 {n} 人',
+            idExists: '此 ID 已存在',
+            maxEnds: '最多 6 局'
         },
         matchHistory: {
             title: '比赛记录',
@@ -508,7 +532,19 @@ export const translations: Record<string, Translations> = {
                 atLeastOneEnd: 'At least one end is required',
                 missingPhoto: 'End {ends} is missing evidence photo, points cannot be recorded',
                 success: 'Match created successfully! Points updated and family notified.'
-            }
+            },
+            gameEnds: 'Game Ends',
+            noEnds: 'No ends recorded yet',
+            startRecording: 'Press "Add End" to start recording scores',
+            uploadingFiles: 'Uploading Files...',
+            uploadingPhoto: 'Uploading End {n} Photo...',
+            uploadingVideo: 'Uploading End {n} Video...',
+            processing: 'Processing...',
+            waitingPlayer: 'Waiting for player...',
+            scanOrType: 'Scan or Type ID...',
+            maxPlayer: 'Max {n} players per team in this mode',
+            idExists: 'ID already exists',
+            maxEnds: 'Max 6 ends'
         },
         matchHistory: {
             title: 'Match History',

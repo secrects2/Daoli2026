@@ -4,11 +4,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 // Admin-only API for user management
-const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { autoRefreshToken: false, persistSession: false } }
-)
+// Admin-only API for user management
+// const supabaseAdmin = ... removed top level init
 
 // Helper to verify admin role
 async function verifyAdmin(request: NextRequest) {
@@ -45,6 +42,11 @@ async function verifyAdmin(request: NextRequest) {
 
 // GET: 獲取用戶列表
 export async function GET(request: NextRequest) {
+    const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        { auth: { autoRefreshToken: false, persistSession: false } }
+    )
     const admin = await verifyAdmin(request)
     if (!admin) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -84,6 +86,11 @@ export async function GET(request: NextRequest) {
 
 // POST: 創建新用戶
 export async function POST(request: NextRequest) {
+    const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        { auth: { autoRefreshToken: false, persistSession: false } }
+    )
     const admin = await verifyAdmin(request)
     if (!admin) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -143,6 +150,11 @@ export async function POST(request: NextRequest) {
 
 // PUT: 更新用戶
 export async function PUT(request: NextRequest) {
+    const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        { auth: { autoRefreshToken: false, persistSession: false } }
+    )
     const admin = await verifyAdmin(request)
     if (!admin) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -178,6 +190,11 @@ export async function PUT(request: NextRequest) {
 
 // DELETE: 刪除用戶（軟刪除 - 設為非活躍）
 export async function DELETE(request: NextRequest) {
+    const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        { auth: { autoRefreshToken: false, persistSession: false } }
+    )
     const admin = await verifyAdmin(request)
     if (!admin) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

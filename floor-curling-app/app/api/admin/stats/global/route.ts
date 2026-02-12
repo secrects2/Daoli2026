@@ -4,16 +4,11 @@ import { NextResponse } from 'next/server'
 export const dynamic = 'force-dynamic' // Ensure this route is never cached
 
 // Use Service Role for Admin Stats to bypass RLS/ensure access to all data
-const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-)
-
-if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    console.error('CRITICAL: SUPABASE_SERVICE_ROLE_KEY is missing in environment variables!')
-}
-
 export async function GET(request: Request) {
+    const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+    )
     try {
         console.log('📊 Fetching Global Stats (Direct Query)...')
 

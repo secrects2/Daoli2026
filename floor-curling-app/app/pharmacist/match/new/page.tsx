@@ -77,7 +77,7 @@ export default function NewMatchPage() {
     const handleQRScan = (elderId: string) => {
         if (showQRScanner === 'red') {
             if (redTeamIds.length >= MAX_PLAYERS) {
-                toast.error(`此模式每隊最多 ${MAX_PLAYERS} 人`)
+                toast.error(t('matchNew.maxPlayer', { n: MAX_PLAYERS }))
                 return
             }
             if (!redTeamIds.includes(elderId) && !yellowTeamIds.includes(elderId)) {
@@ -85,7 +85,7 @@ export default function NewMatchPage() {
             }
         } else if (showQRScanner === 'yellow') {
             if (yellowTeamIds.length >= MAX_PLAYERS) {
-                toast.error(`此模式每隊最多 ${MAX_PLAYERS} 人`)
+                toast.error(t('matchNew.maxPlayer', { n: MAX_PLAYERS }))
                 return
             }
             if (!yellowTeamIds.includes(elderId) && !redTeamIds.includes(elderId)) {
@@ -106,7 +106,7 @@ export default function NewMatchPage() {
                 setRedTeamIds([...redTeamIds, id])
                 setRedInput('')
             } else {
-                toast.error('此 ID 已存在')
+                toast.error(t('matchNew.idExists'))
             }
         } else {
             if (yellowTeamIds.length >= MAX_PLAYERS) return
@@ -114,7 +114,7 @@ export default function NewMatchPage() {
                 setYellowTeamIds([...yellowTeamIds, id])
                 setYellowInput('')
             } else {
-                toast.error('此 ID 已存在')
+                toast.error(t('matchNew.idExists'))
             }
         }
     }
@@ -131,7 +131,7 @@ export default function NewMatchPage() {
     // 添加新回合
     const addEnd = () => {
         if (ends.length >= 6) {
-            toast.error('Max 6 ends')
+            toast.error(t('matchNew.maxEnds'))
             return
         }
 
@@ -199,14 +199,14 @@ export default function NewMatchPage() {
             const tempMatchId = crypto.randomUUID()
 
             // 上传所有文件
-            setUploadProgress(t('common.loading') + ' (Files)')
+            setUploadProgress(t('matchNew.uploadingFiles'))
             const endsWithUrls = await Promise.all(
                 ends.map(async (end, index) => {
                     const endData = { ...end } as any
 
                     // 上传照片
                     if (end.houseSnapshotFile) {
-                        setUploadProgress(`Uploading End ${index + 1} Photo...`)
+                        setUploadProgress(t('matchNew.uploadingPhoto', { n: index + 1 }))
                         const result = await uploadFile(end.houseSnapshotFile, tempMatchId, index + 1, 'photo')
                         if (result.success) {
                             endData.houseSnapshotUrl = result.url
@@ -215,7 +215,7 @@ export default function NewMatchPage() {
 
                     // 上传视频
                     if (end.vibeVideoFile) {
-                        setUploadProgress(`Uploading End ${index + 1} Video...`)
+                        setUploadProgress(t('matchNew.uploadingVideo', { n: index + 1 }))
                         const result = await uploadFile(end.vibeVideoFile, tempMatchId, index + 1, 'video')
                         if (result.success) {
                             endData.vibeVideoUrl = result.url
@@ -280,7 +280,7 @@ export default function NewMatchPage() {
     ]
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-32">
+        <div className="min-h-screen bg-gray-50 pb-64">
             {/* Sticky Glass Header */}
             <div className="sticky top-0 z-30 backdrop-blur-xl bg-white/80 border-b border-white/50 px-5 pt-12 pb-4 shadow-glass transition-all">
                 <div className="flex justify-between items-center">
@@ -398,7 +398,7 @@ export default function NewMatchPage() {
                                         ) : (
                                             <div key={i} className="flex items-center gap-3 p-3 rounded-xl border border-dashed border-red-200 bg-white/50 text-sm text-red-300">
                                                 <div className="w-6 h-6 rounded-full bg-red-50 text-red-200 flex items-center justify-center font-bold text-xs">{i + 1}</div>
-                                                <span>Waiting for player...</span>
+                                                <span>{t('matchNew.waitingPlayer')}</span>
                                             </div>
                                         )
                                     ))}
@@ -416,7 +416,7 @@ export default function NewMatchPage() {
                                             }
                                         }}
                                         className="w-full px-4 py-3 rounded-xl bg-white border border-red-100 focus:ring-2 focus:ring-red-500 outline-none text-sm"
-                                        placeholder="Scan or Type ID..."
+                                        placeholder={t('matchNew.scanOrType')}
                                         disabled={redTeamIds.length >= MAX_PLAYERS}
                                     />
                                     {/* Manual Add Button */}
@@ -469,7 +469,7 @@ export default function NewMatchPage() {
                                         ) : (
                                             <div key={i} className="flex items-center gap-3 p-3 rounded-xl border border-dashed border-yellow-200 bg-white/50 text-sm text-yellow-500/50">
                                                 <div className="w-6 h-6 rounded-full bg-yellow-100 text-yellow-600/50 flex items-center justify-center font-bold text-xs">{i + 1}</div>
-                                                <span>Waiting for player...</span>
+                                                <span>{t('matchNew.waitingPlayer')}</span>
                                             </div>
                                         )
                                     ))}
@@ -487,7 +487,7 @@ export default function NewMatchPage() {
                                             }
                                         }}
                                         className="w-full px-4 py-3 rounded-xl bg-white border border-yellow-100 focus:ring-2 focus:ring-yellow-400 outline-none text-sm"
-                                        placeholder="Scan or Type ID..."
+                                        placeholder={t('matchNew.scanOrType')}
                                         disabled={yellowTeamIds.length >= MAX_PLAYERS}
                                     />
                                     {/* Manual Add Button */}
@@ -497,7 +497,7 @@ export default function NewMatchPage() {
                                         disabled={!yellowInput || yellowTeamIds.length >= MAX_PLAYERS}
                                         className="shrink-0 w-12 rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 flex items-center justify-center font-bold transition-colors disabled:opacity-50"
                                     >
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
                                     </button>
                                     {/* QR Button */}
                                     <button
@@ -516,7 +516,7 @@ export default function NewMatchPage() {
                     {/* Ends List ... */}
                     <div className="space-y-6">
                         <div className="flex items-center justify-between">
-                            <h3 className="text-xl font-bold text-gray-900">Game Ends</h3>
+                            <h3 className="text-xl font-bold text-gray-900">{t('matchNew.gameEnds')}</h3>
                             <button
                                 type="button"
                                 onClick={addEnd}
@@ -524,20 +524,20 @@ export default function NewMatchPage() {
                                 className="px-5 py-2.5 bg-blue-600 text-white font-bold rounded-full shadow-lg shadow-blue-200 active:scale-95 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-                                Add End
+                                {t('matchNew.addEnd')}
                             </button>
                         </div>
 
                         {ends.length === 0 ? (
                             <div className="text-center py-12 bg-white rounded-3xl border-2 border-dashed border-gray-200">
-                                <p className="text-gray-400 mb-2">No ends recorded yet</p>
-                                <p className="text-sm text-gray-400">Press "Add End" to start recording scores</p>
+                                <p className="text-gray-400 mb-2">{t('matchNew.noEnds')}</p>
+                                <p className="text-sm text-gray-400">{t('matchNew.startRecording')}</p>
                             </div>
                         ) : (
                             ends.map((end, index) => (
                                 <div key={index} className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 relative group overflow-hidden">
                                     <div className="absolute top-0 left-0 bg-gray-100 px-4 py-2 rounded-br-2xl text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                        End {end.endNumber}
+                                        {t('matchNew.end', { n: end.endNumber })}
                                     </div>
 
                                     <button
@@ -550,7 +550,7 @@ export default function NewMatchPage() {
 
                                     <div className="mt-8 grid grid-cols-2 gap-8 mb-8">
                                         <div className="text-center">
-                                            <label className="block text-xs font-bold text-red-400 uppercase tracking-wider mb-2">Red Score</label>
+                                            <label className="block text-xs font-bold text-red-400 uppercase tracking-wider mb-2">{t('matchNew.redScore')}</label>
                                             <div className="flex items-center justify-center gap-3">
                                                 <button type="button" onClick={() => updateEndScore(index, 'red', end.redScore - 1)} className="w-10 h-10 rounded-full bg-gray-100 text-gray-600 font-bold hover:bg-red-100 hover:text-red-600 transition-colors">-</button>
                                                 <input
@@ -563,7 +563,7 @@ export default function NewMatchPage() {
                                             </div>
                                         </div>
                                         <div className="text-center">
-                                            <label className="block text-xs font-bold text-yellow-500 uppercase tracking-wider mb-2">Yellow Score</label>
+                                            <label className="block text-xs font-bold text-yellow-500 uppercase tracking-wider mb-2">{t('matchNew.yellowScore')}</label>
                                             <div className="flex items-center justify-center gap-3">
                                                 <button type="button" onClick={() => updateEndScore(index, 'yellow', end.yellowScore - 1)} className="w-10 h-10 rounded-full bg-gray-100 text-gray-600 font-bold hover:bg-yellow-100 hover:text-yellow-600 transition-colors">-</button>
                                                 <input
@@ -603,7 +603,7 @@ export default function NewMatchPage() {
                                                         <div className="w-10 h-10 bg-white rounded-full shadow-sm flex items-center justify-center text-blue-500 mb-2">
                                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                                                         </div>
-                                                        <span className="text-xs font-bold text-gray-500 group-hover/upload:text-blue-600">Upload House Photo</span>
+                                                        <span className="text-xs font-bold text-gray-500 group-hover/upload:text-blue-600">{t('matchNew.camBPrompt')}</span>
                                                     </>
                                                 )}
                                             </div>
@@ -634,7 +634,7 @@ export default function NewMatchPage() {
                                                         <div className="w-10 h-10 bg-white rounded-full shadow-sm flex items-center justify-center text-green-500 mb-2">
                                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
                                                         </div>
-                                                        <span className="text-xs font-bold text-gray-500 group-hover/upload:text-green-600">Upload Vibe Video</span>
+                                                        <span className="text-xs font-bold text-gray-500 group-hover/upload:text-green-600">{t('matchNew.camAPrompt')}</span>
                                                     </>
                                                 )}
                                             </div>
@@ -653,7 +653,7 @@ export default function NewMatchPage() {
                                     onClick={() => router.back()}
                                     className="px-6 py-3 rounded-2xl font-bold text-gray-500 hover:bg-gray-100 transition-colors"
                                 >
-                                    Cancel
+                                    {t('common.cancel')}
                                 </button>
                                 <button
                                     type="submit"
@@ -663,11 +663,11 @@ export default function NewMatchPage() {
                                     {loading ? (
                                         <>
                                             <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                            Submitting...
+                                            {t('matchNew.submitting')}
                                         </>
                                     ) : (
                                         <>
-                                            Submit Match
+                                            {t('matchNew.submit')}
                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                                         </>
                                     )}
@@ -681,7 +681,7 @@ export default function NewMatchPage() {
                     <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center">
                         <div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl animate-scale-in">
                             <div className="w-16 h-16 border-4 border-blue-100 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-2">Processing</h3>
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">{t('matchNew.processing')}</h3>
                             <p className="text-gray-500 animate-pulse">{uploadProgress}</p>
                         </div>
                     </div>
@@ -692,7 +692,7 @@ export default function NewMatchPage() {
                 isOpen={showQRScanner !== null}
                 onClose={() => setShowQRScanner(null)}
                 onScan={handleQRScan}
-                title={showQRScanner === 'red' ? '掃描紅方長輩 QR Code' : '掃描黃方長輩 QR Code'}
+                title={showQRScanner === 'red' ? t('matchNew.redElderId') : t('matchNew.yellowElderId')}
             />
         </div>
     )

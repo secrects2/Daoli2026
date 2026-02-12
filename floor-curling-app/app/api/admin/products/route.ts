@@ -4,11 +4,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 // 使用 Admin 權限操作
-const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { autoRefreshToken: false, persistSession: false } }
-)
+// 使用 Admin 權限操作
+// const supabaseAdmin = ... removed top level init
 
 // 驗證管理員身份
 async function verifyAdmin() {
@@ -45,6 +42,11 @@ async function verifyAdmin() {
 
 // GET: 獲取商品列表
 export async function GET(request: NextRequest) {
+    const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        { auth: { autoRefreshToken: false, persistSession: false } }
+    )
     const admin = await verifyAdmin()
     if (!admin) {
         return NextResponse.json({ error: '未授權' }, { status: 401 })
@@ -90,6 +92,11 @@ export async function GET(request: NextRequest) {
 
 // POST: 新增商品
 export async function POST(request: NextRequest) {
+    const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        { auth: { autoRefreshToken: false, persistSession: false } }
+    )
     const admin = await verifyAdmin()
     if (!admin) {
         return NextResponse.json({ error: '未授權' }, { status: 401 })
@@ -136,6 +143,11 @@ export async function POST(request: NextRequest) {
 
 // PUT: 更新商品
 export async function PUT(request: NextRequest) {
+    const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        { auth: { autoRefreshToken: false, persistSession: false } }
+    )
     const admin = await verifyAdmin()
     if (!admin) {
         return NextResponse.json({ error: '未授權' }, { status: 401 })
@@ -171,6 +183,11 @@ export async function PUT(request: NextRequest) {
 
 // DELETE: 刪除商品（軟刪除 - 設為非上架）
 export async function DELETE(request: NextRequest) {
+    const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        { auth: { autoRefreshToken: false, persistSession: false } }
+    )
     const admin = await verifyAdmin()
     if (!admin) {
         return NextResponse.json({ error: '未授權' }, { status: 401 })
