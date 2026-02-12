@@ -8,21 +8,27 @@ import { saveRehabSession } from '@/app/actions/rehab'
  * BocciaCam - AI 視覺分析組件
  * 針對坐姿選手（輪椅使用者）優化的姿態分析
  * 
- * 接受 elderId/matchId/side 參數，分析完成後將數據存入 training_sessions
+ * 包含專利 MVP 三大指標：
+ * A. 手肘伸展度 (ROM)
+ * B. 軀幹穩定度 (Trunk Stability)
+ * C. 出手速度 (Release Velocity)
+ * 
+ * 以及 "The Brain" 診斷邏輯
  */
 
 interface BocciaCamProps {
-    elderId: string                  // 被分析的長輩 UUID（必填）
-    matchId?: string                 // 當前比賽 UUID（可選）
-    side: 'red' | 'blue'            // 隊伍顏色
+    elderId: string
+    matchId?: string
+    side: 'red' | 'blue'
     onMetricsUpdate?: (metrics: BocciaMetrics) => void
-    onClose?: () => void            // 關閉回調
+    onClose?: () => void
     className?: string
 }
 
 export interface BocciaMetrics {
     elbowROM: number | null
     trunkStability: number | null
+    velocity: number | null
     isArmExtended: boolean
     isTrunkStable: boolean
     isReadyToThrow: boolean
@@ -83,13 +89,20 @@ export default function BocciaCam({
     const startTimeRef = useRef<number>(Date.now())
 
     // 追蹤整個 session 的指標歷史
-    const metricsHistoryRef = useRef<{ rom: number; tilt: number }[]>([])
+    const metricsHistoryRef = useRef<{ rom: number; tilt: number; velocity: number }[]>([])
+
+    // Velocity Tracking
+    const prevWristRef = useRef<{ x: number, y: number, time: number } | null>(null)
 
     const [metrics, setMetrics] = useState<BocciaMetrics>({
-        elbowROM: null, trunkStability: null,
+        elbowROM: null, trunkStability: null, velocity: null,
         isArmExtended: true, isTrunkStable: true,
         isReadyToThrow: false, stableSeconds: 0,
     })
+
+    // Patent "The Brain" Rules - Diagnostic Message
+    const [diagnosticMsg, setDiagnosticMsg] = useState<{ text: string, color: string } | null>(null)
+
     const [cameraReady, setCameraReady] = useState(false)
     const [poseLoaded, setPoseLoaded] = useState(false)
     const [error, setError] = useState<string | null>(null)
@@ -116,23 +129,74 @@ export default function BocciaCam({
         if (!results.poseLandmarks) return
 
         const landmarks = results.poseLandmarks
+        const now = Date.now()
 
+        // 1. A. Elbow ROM (Shoulder-Elbow-Wrist)
         const shoulder = landmarks[LANDMARKS.RIGHT_SHOULDER]
         const elbow = landmarks[LANDMARKS.RIGHT_ELBOW]
         const wrist = landmarks[LANDMARKS.RIGHT_WRIST]
         const elbowROM = calculateAngle(shoulder, elbow, wrist)
 
+        // 2. B. Trunk Stability (Shoulder Tilt)
         const leftShoulder = landmarks[LANDMARKS.LEFT_SHOULDER]
         const rightShoulder = landmarks[LANDMARKS.RIGHT_SHOULDER]
         const trunkTilt = calculateTilt(leftShoulder, rightShoulder)
 
+        // 3. C. Velocity (Wrist Speed) - Normalized
+        let velocity = 0
+        if (wrist && wrist.visibility > 0.5) {
+            if (prevWristRef.current) {
+                const dt = (now - prevWristRef.current.time) / 1000
+                if (dt > 0) {
+                    const dx = wrist.x - prevWristRef.current.x
+                    const dy = wrist.y - prevWristRef.current.y
+                    const dist = Math.sqrt(dx * dx + dy * dy)
+                    // Normalize speed roughly to screens/sec
+                    velocity = Math.round((dist / dt) * 100)
+                }
+            }
+            prevWristRef.current = { x: wrist.x, y: wrist.y, time: now }
+        }
+
         const isArmExtended = elbowROM >= 160
         const isTrunkStable = trunkTilt <= 15
+
+        // --- PATENT LOGIC: "The Brain" Diagnostic Rules ---
+        let diagText = null
+        let diagColor = 'text-gray-400'
+
+        // Rule 1: Safety/Fall Risk
+        if (!isTrunkStable) {
+            diagText = "⚠️ 警告：身體重心偏移 (>15°)，跌倒風險偵測！"
+            diagColor = "text-red-500"
+        }
+        // Rule 2: Spasticity/Tone Indicator
+        else if (!isArmExtended) {
+            diagText = "ℹ️ 提示：手臂未完全伸展，疑似張力過高。"
+            diagColor = "text-orange-400"
+        }
+        // Rule 3: Performance/Power (Good Shot)
+        else if (isArmExtended && isTrunkStable && velocity > 50) {
+            diagText = "✅ 優秀：動作穩定且具發力速度！"
+            diagColor = "text-green-400"
+        }
+        else if (isArmExtended && isTrunkStable) {
+            diagText = "🔵 動作穩定，準備投球..."
+            diagColor = "text-blue-400"
+        }
+
+        setDiagnosticMsg(diagText ? { text: diagText, color: diagColor } : null)
+        // --------------------------------------------------
+
+        // Record history
+        metricsHistoryRef.current.push({
+            rom: Math.round(elbowROM),
+            tilt: Math.round(trunkTilt),
+            velocity: velocity
+        })
+
+        // Stability Check
         const isCurrentlyStable = isArmExtended && isTrunkStable
-
-        // 記錄指標歷史
-        metricsHistoryRef.current.push({ rom: Math.round(elbowROM), tilt: Math.round(trunkTilt) })
-
         if (isCurrentlyStable) {
             if (lastStableRef.current) {
                 stableTimerRef.current += 1 / 30
@@ -147,7 +211,7 @@ export default function BocciaCam({
         const stableSeconds = Math.min(stableTimerRef.current, 5)
         const isReadyToThrow = stableSeconds >= 3
 
-        // 骨架顏色：以隊伍色 or 紅色
+        // Drawing Skeleton
         const isGood = isArmExtended && isTrunkStable
         const skeletonColor = isGood ? sideColors.primary : '#EF4444'
         const pointColor = isGood ? sideColors.primary : '#DC2626'
@@ -186,9 +250,17 @@ export default function BocciaCam({
             ctx.fillText(`${Math.round(elbowROM)}°`, elbow.x * canvas.width + 10, elbow.y * canvas.height - 10)
         }
 
+        // Draw Velocity
+        if (wrist && wrist.visibility > 0.5 && velocity > 10) {
+            ctx.font = 'bold 14px monospace'
+            ctx.fillStyle = '#10B981'
+            ctx.fillText(`V: ${velocity}`, wrist.x * canvas.width + 10, wrist.y * canvas.height + 20)
+        }
+
         const newMetrics: BocciaMetrics = {
             elbowROM: Math.round(elbowROM),
             trunkStability: Math.round(trunkTilt),
+            velocity: velocity,
             isArmExtended, isTrunkStable, isReadyToThrow,
             stableSeconds: Math.round(stableSeconds * 10) / 10,
         }
@@ -206,10 +278,12 @@ export default function BocciaCam({
             // 計算摘要指標
             const romValues = history.map(h => h.rom).filter(v => v > 0)
             const tiltValues = history.map(h => h.tilt).filter(v => v >= 0)
+            const velocityValues = history.map(h => h.velocity).filter(v => v > 0)
 
             const metricsPayload = {
                 elbow_rom: metrics.elbowROM,
                 trunk_stability: metrics.trunkStability,
+                avg_velocity: velocityValues.length > 0 ? Math.round(velocityValues.reduce((a, b) => a + b, 0) / velocityValues.length) : 0,
                 max_rom: romValues.length > 0 ? Math.max(...romValues) : null,
                 min_rom: romValues.length > 0 ? Math.min(...romValues) : null,
                 avg_rom: romValues.length > 0 ? Math.round(romValues.reduce((a, b) => a + b, 0) / romValues.length) : null,
@@ -315,6 +389,17 @@ export default function BocciaCam({
                     style={{ transform: 'scaleX(-1)' }}
                 />
 
+                {/* Diagnostic Overlay */}
+                {diagnosticMsg && (
+                    <div className="absolute top-4 left-4 right-4 z-10">
+                        <div className="bg-black/70 backdrop-blur-md px-4 py-3 rounded-xl border border-white/10 shadow-lg">
+                            <p className={`font-bold text-lg ${diagnosticMsg.color} animate-pulse`}>
+                                {diagnosticMsg.text}
+                            </p>
+                        </div>
+                    </div>
+                )}
+
                 {!poseLoaded && !error && (
                     <div className="absolute inset-0 bg-gray-900/80 flex flex-col items-center justify-center text-white">
                         <div className="w-10 h-10 border-3 border-white border-t-transparent rounded-full animate-spin mb-3" />
@@ -337,8 +422,8 @@ export default function BocciaCam({
                     </div>
                 )}
 
-                {metrics.isReadyToThrow && !saved && (
-                    <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-green-500/90 text-white px-6 py-3 rounded-2xl font-black text-xl animate-pulse backdrop-blur-sm">
+                {metrics.isReadyToThrow && !saved && !diagnosticMsg && (
+                    <div className="absolute bottom-20 left-1/2 -translate-x-1/2 bg-green-500/90 text-white px-6 py-3 rounded-2xl font-black text-xl animate-pulse backdrop-blur-sm">
                         ✅ 準備投球
                     </div>
                 )}
@@ -351,9 +436,6 @@ export default function BocciaCam({
                     <p className={`text-2xl font-black ${metrics.isArmExtended ? sideColors.text : 'text-red-400'}`}>
                         {metrics.elbowROM !== null ? `${metrics.elbowROM}°` : '--'}
                     </p>
-                    {!metrics.isArmExtended && metrics.elbowROM !== null && (
-                        <p className="text-xs text-red-400 mt-1">⚠️ 手臂未伸直</p>
-                    )}
                 </div>
 
                 <div className={`rounded-xl p-3 text-center ${metrics.isTrunkStable ? sideColors.bg : 'bg-red-900/50'}`}>
@@ -361,18 +443,12 @@ export default function BocciaCam({
                     <p className={`text-2xl font-black ${metrics.isTrunkStable ? sideColors.text : 'text-red-400'}`}>
                         {metrics.trunkStability !== null ? `${metrics.trunkStability}°` : '--'}
                     </p>
-                    {!metrics.isTrunkStable && metrics.trunkStability !== null && (
-                        <p className="text-xs text-red-400 mt-1">⚠️ 軀幹不穩</p>
-                    )}
                 </div>
 
-                <div className={`rounded-xl p-3 text-center ${metrics.isReadyToThrow ? 'bg-green-900/50' : 'bg-gray-700/50'}`}>
-                    <p className="text-xs text-gray-400 mb-1">穩定時間</p>
-                    <p className={`text-2xl font-black ${metrics.isReadyToThrow ? 'text-green-400' : 'text-gray-400'}`}>
-                        {metrics.stableSeconds}s
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                        {metrics.isReadyToThrow ? '✅ 就緒' : '等待穩定...'}
+                <div className="rounded-xl p-3 text-center bg-gray-700/50">
+                    <p className="text-xs text-gray-400 mb-1">出手速度</p>
+                    <p className="text-2xl font-black text-emerald-400">
+                        {metrics.velocity || '--'} <span className="text-xs text-gray-500">v</span>
                     </p>
                 </div>
             </div>
