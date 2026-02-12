@@ -35,7 +35,7 @@ export default async function ElderDashboard() {
         // 2. Inventory
         supabase.from('inventory').select('*, products(*)').eq('user_id', user.id).eq('status', 'active'),
         // 3. Wallet (Total Points)
-        supabase.from('wallets').select('global_points').eq('user_id', user.id).single(),
+        supabase.from('wallets').select('global_points, local_points').eq('user_id', user.id).single(),
         // 4. Matches (Weekly Count)
         supabase.from('matches')
             .select('id', { count: 'exact', head: true })
@@ -68,7 +68,8 @@ export default async function ElderDashboard() {
 
     const stats = {
         weeklyMatches: weeklyMatches || 0,
-        totalPoints: walletRes.data?.global_points || 0
+        globalPoints: walletRes.data?.global_points || 0,
+        localPoints: walletRes.data?.local_points || 0
     }
 
     return (

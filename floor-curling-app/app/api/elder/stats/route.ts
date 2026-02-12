@@ -1,14 +1,37 @@
 import { NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
 
-    // In a real app, query DB. For now return mock/random to ensure UI works + non-zero.
-    // If we want real stats, we'd count matches.
-    // But user wants to see numbers NOW.
+    if (!id) {
+        return NextResponse.json({ error: 'Missing id' }, { status: 400 })
+    }
 
-    // Generate mock history for chart
+    const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+
+    // Fetch wallet data (dual points)
+    const { data: wallet } = await supabase
+        .from('wallets')
+        .select('global_points, local_points')
+        .eq('user_id', id)
+        .single()
+
+    // Fetch recent matches for this elder
+    const startOfWeek = new Date()
+    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay())
+
+    const { count: weeklyMatches } = await supabase
+        .from('matches')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', startOfWeek.toISOString())
+        .or(`red_team_id.eq.${id},yellow_team_id.eq.${id}`)
+
+    // Generate chart history (still mock for now as we don't have daily snapshots)
     const history = Array.from({ length: 7 }, (_, i) => {
         const d = new Date()
         d.setDate(d.getDate() - (6 - i))
@@ -18,23 +41,35 @@ export async function GET(request: Request) {
         }
     })
 
-    // Generate mock recent matches
-    const recentMatches = Array.from({ length: 5 }, (_, i) => {
-        const d = new Date()
-        d.setDate(d.getDate() - i)
-        const result = Math.random() > 0.5 ? 'win' : Math.random() > 0.5 ? 'draw' : 'loss'
+    // Fetch recent matches with results
+    const { data: recentMatchesData } = await supabase
+        .from('matches')
+        .select('created_at, winner_color, red_team_id, yellow_team_id')
+        .or(`red_team_id.eq.${id},yellow_team_id.eq.${id}`)
+        .order('created_at', { ascending: false })
+        .limit(5)
+
+    const recentMatches = (recentMatchesData || []).map(m => {
+        const isRed = m.red_team_id === id
+        let result: string
+        if (!m.winner_color) {
+            result = 'draw'
+        } else if ((isRed && m.winner_color === 'red') || (!isRed && m.winner_color === 'yellow')) {
+            result = 'win'
+        } else {
+            result = 'loss'
+        }
         return {
-            date: d.toLocaleDateString('zh-TW', { month: 'numeric', day: 'numeric' }),
+            date: new Date(m.created_at).toLocaleDateString('zh-TW', { month: 'numeric', day: 'numeric' }),
             result,
             points: result === 'win' ? 100 : result === 'draw' ? 50 : 10
         }
     })
 
     return NextResponse.json({
-        weeklyMatches: Math.floor(Math.random() * 5) + 3,
-        totalPoints: 1250, // Mock total
-        winRate: 60 + Math.floor(Math.random() * 30),
-        rank: Math.floor(Math.random() * 20) + 1,
+        weeklyMatches: weeklyMatches || 0,
+        globalPoints: wallet?.global_points || 0,
+        localPoints: wallet?.local_points || 0,
         history,
         recentMatches
     })

@@ -59,8 +59,9 @@ export default async function PharmacistDashboard() {
     ])
 
     // Fetch Total Points (Simplified aggregation)
-    const { data: walletsData } = await supabase.from('wallets').select('global_points')
-    const weeklyPoints = walletsData?.reduce((sum, w) => sum + (w.global_points || 0), 0) || 0
+    const { data: walletsData } = await supabase.from('wallets').select('global_points, local_points')
+    const totalGlobalPoints = walletsData?.reduce((sum, w) => sum + (w.global_points || 0), 0) || 0
+    const totalLocalPoints = walletsData?.reduce((sum, w) => sum + (w.local_points || 0), 0) || 0
 
     // Process Chart Data
     const matches = chartRes.data || []
@@ -92,7 +93,8 @@ export default async function PharmacistDashboard() {
     const stats = {
         todayMatches: matchRes.count || 0,
         activeElders: elderRes.count || 0,
-        weeklyPoints: weeklyPoints,
+        totalGlobalPoints: totalGlobalPoints,
+        totalLocalPoints: totalLocalPoints,
         totalEquipment: eqRes.count || 0
     }
 

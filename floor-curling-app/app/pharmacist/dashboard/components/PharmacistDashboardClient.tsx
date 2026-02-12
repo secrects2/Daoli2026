@@ -75,11 +75,21 @@ export default function PharmacistDashboardClient({ profile, stats, chartData }:
 
                     <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 flex flex-col justify-between h-32 hover:border-yellow-200 transition-colors">
                         <div className="w-10 h-10 rounded-xl bg-yellow-50 text-yellow-600 flex items-center justify-center">
+                            <span className="text-2xl">🏅</span>
+                        </div>
+                        <div>
+                            <p className="text-3xl font-black text-gray-900 tracking-tight">{stats.totalGlobalPoints.toLocaleString()}</p>
+                            <p className="text-xs font-bold text-gray-400 uppercase">榮譽積分</p>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 flex flex-col justify-between h-32 hover:border-green-200 transition-colors">
+                        <div className="w-10 h-10 rounded-xl bg-green-50 text-green-600 flex items-center justify-center">
                             <span className="text-2xl">💰</span>
                         </div>
                         <div>
-                            <p className="text-3xl font-black text-gray-900 tracking-tight">{stats.weeklyPoints.toLocaleString()}</p>
-                            <p className="text-xs font-bold text-gray-400 uppercase">{t('dashboard.stats.totalPoints')}</p>
+                            <p className="text-3xl font-black text-gray-900 tracking-tight">{stats.totalLocalPoints.toLocaleString()}</p>
+                            <p className="text-xs font-bold text-gray-400 uppercase">兌換積分</p>
                         </div>
                     </div>
                 </div>

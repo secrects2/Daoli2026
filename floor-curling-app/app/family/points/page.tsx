@@ -8,7 +8,8 @@ import { createClientComponentClient } from '@/lib/supabase'
 export default function FamilyPointsPage() {
     const router = useRouter()
     const supabase = createClientComponentClient()
-    const [points, setPoints] = useState(0)
+    const [globalPoints, setGlobalPoints] = useState(0)
+    const [localPoints, setLocalPoints] = useState(0)
     const [history, setHistory] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
 
@@ -18,8 +19,11 @@ export default function FamilyPointsPage() {
             if (user) {
                 const { data: profile } = await supabase.from('profiles').select('linked_elder_id').eq('id', user.id).single()
                 if (profile?.linked_elder_id) {
-                    const { data: wallet } = await supabase.from('wallets').select('global_points').eq('user_id', profile.linked_elder_id).single()
-                    if (wallet) setPoints(wallet.global_points)
+                    const { data: wallet } = await supabase.from('wallets').select('global_points, local_points').eq('user_id', profile.linked_elder_id).single()
+                    if (wallet) {
+                        setGlobalPoints(wallet.global_points)
+                        setLocalPoints(wallet.local_points)
+                    }
 
                     // Fake History
                     setHistory([
@@ -57,8 +61,17 @@ export default function FamilyPointsPage() {
             <div className="max-w-3xl mx-auto p-4 space-y-6">
                 {/* Balance Card */}
                 <div className="bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl p-6 text-white shadow-lg">
-                    <p className="opacity-90 text-sm font-medium mb-1">目前累積積分</p>
-                    <h2 className="text-4xl font-bold">{loading ? '...' : points.toLocaleString()}</h2>
+                    <p className="opacity-90 text-sm font-medium mb-1">長輩積分總覽</p>
+                    <div className="flex gap-6 mt-2">
+                        <div>
+                            <p className="text-xs opacity-80">🏅 榮譽積分</p>
+                            <h2 className="text-3xl font-bold">{loading ? '...' : globalPoints.toLocaleString()}</h2>
+                        </div>
+                        <div>
+                            <p className="text-xs opacity-80">💰 兌換積分</p>
+                            <h2 className="text-3xl font-bold">{loading ? '...' : localPoints.toLocaleString()}</h2>
+                        </div>
+                    </div>
                     <div className="mt-4 flex gap-3">
                         <Link href="/family/shop" className="bg-white/20 hover:bg-white/30 backdrop-blur-sm px-4 py-2 rounded-lg text-sm font-bold transition-colors">
                             🛍️ 兌換商品

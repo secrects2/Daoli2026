@@ -121,8 +121,13 @@ export default function ElderDashboardClient({
                                     {stats?.weeklyMatches || 0}
                                     <span className="text-xl font-medium opacity-80 ml-1">場</span>
                                 </h3>
-                                <div className="inline-block bg-white/20 backdrop-blur-sm px-3 py-1 rounded-lg text-xs font-bold">
-                                    積分 {stats?.totalPoints || 0}
+                                <div className="inline-flex items-center gap-3 flex-wrap">
+                                    <span className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-lg text-xs font-bold">
+                                        🏅 榮譽積分 {stats?.globalPoints || 0}
+                                    </span>
+                                    <span className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-lg text-xs font-bold">
+                                        💰 兌換積分 {stats?.localPoints || 0}
+                                    </span>
                                 </div>
                             </div>
                             <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md shadow-inner text-3xl">

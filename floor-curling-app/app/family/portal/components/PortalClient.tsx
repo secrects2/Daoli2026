@@ -274,7 +274,7 @@ export default function PortalClient({ user, profile, elders, wallet }: PortalCl
                                 <div>
                                     <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold mb-3">
                                         <span>🛍️</span>
-                                        <span>長輩積分: {wallet?.local_points || 0}</span>
+                                        <span>兌換積分: {wallet?.local_points || 0} ｜ 榮譽積分: {wallet?.global_points || 0}</span>
                                     </div>
                                     <h4 className="text-2xl font-black">送禮給長輩</h4>
                                     <p className="text-pink-100 text-sm mt-1 max-w-[200px]">

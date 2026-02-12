@@ -45,14 +45,18 @@ export default function ElderStatsPage() {
 
             <div className="p-4 space-y-6">
                 {/* Summary Cards */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-4">
                     <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center">
                         <p className="text-gray-500 text-sm mb-1">本週場次</p>
                         <p className="text-3xl font-bold text-blue-600">{stats?.weeklyMatches || 0}</p>
                     </div>
                     <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center">
-                        <p className="text-gray-500 text-sm mb-1">累積積分</p>
-                        <p className="text-3xl font-bold text-orange-500">{stats?.totalPoints || 0}</p>
+                        <p className="text-gray-500 text-sm mb-1">🏅 榮譽積分</p>
+                        <p className="text-3xl font-bold text-orange-500">{stats?.globalPoints || 0}</p>
+                    </div>
+                    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center">
+                        <p className="text-gray-500 text-sm mb-1">💰 兌換積分</p>
+                        <p className="text-3xl font-bold text-green-500">{stats?.localPoints || 0}</p>
                     </div>
                 </div>
 
@@ -99,8 +103,8 @@ export default function ElderStatsPage() {
                             <div key={index} className="p-4 flex items-center justify-between">
                                 <div className="flex items-center gap-3">
                                     <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg ${match.result === 'win' ? 'bg-yellow-100 text-yellow-600' :
-                                            match.result === 'loss' ? 'bg-gray-100 text-gray-500' :
-                                                'bg-blue-50 text-blue-500'
+                                        match.result === 'loss' ? 'bg-gray-100 text-gray-500' :
+                                            'bg-blue-50 text-blue-500'
                                         }`}>
                                         {match.result === 'win' ? '🏆' : match.result === 'loss' ? '💪' : '🤝'}
                                     </div>

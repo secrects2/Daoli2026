@@ -102,7 +102,7 @@ export default async function FamilyPortal() {
     if (primaryElder?.elder?.id) {
         const { data: w } = await supabase
             .from('wallets')
-            .select('local_points')
+            .select('local_points, global_points')
             .eq('user_id', primaryElder.elder.id)
             .single()
 

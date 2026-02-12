@@ -17,7 +17,7 @@ export default function GenericElderDetailPage() {
     const [family, setFamily] = useState<any[]>([])
     const [equipment, setEquipment] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
-    const [stats, setStats] = useState({ totalMatches: 0, winRate: 0, points: 0 })
+    const [stats, setStats] = useState({ totalMatches: 0, winRate: 0, globalPoints: 0, localPoints: 0 })
     const [mediaList, setMediaList] = useState<any[]>([])
     const [uploadingMedia, setUploadingMedia] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
@@ -55,7 +55,7 @@ export default function GenericElderDetailPage() {
                 .eq('user_id', params.id)
                 .single()
 
-            setElder({ ...profile, points: wallet?.global_points || 0 })
+            setElder({ ...profile, globalPoints: wallet?.global_points || 0, localPoints: wallet?.local_points || 0 })
 
             // 2. Fetch Linked Family
             const { data: familyMembers } = await supabase
@@ -82,7 +82,8 @@ export default function GenericElderDetailPage() {
             setStats({
                 totalMatches: matchCount || 0,
                 winRate: matchCount ? Math.round((winCount || 0) / matchCount * 100) : 0,
-                points: wallet?.global_points || 0
+                globalPoints: wallet?.global_points || 0,
+                localPoints: wallet?.local_points || 0
             })
 
             // 4. Fetch Equipment (Simulated via Point Transactions)
@@ -359,9 +360,15 @@ export default function GenericElderDetailPage() {
                         </p>
                     </div>
                     {/* Key Stat Big Number */}
-                    <div className="text-center p-4 bg-amber-50 rounded-xl border border-amber-100 min-w-[100px]">
-                        <p className="text-amber-600 text-xs font-bold uppercase mb-1">目前積分</p>
-                        <p className="text-3xl font-mono font-black text-amber-600">{stats.points}</p>
+                    <div className="flex gap-3">
+                        <div className="text-center p-4 bg-amber-50 rounded-xl border border-amber-100 min-w-[100px]">
+                            <p className="text-amber-600 text-xs font-bold uppercase mb-1">🏅 榮譽積分</p>
+                            <p className="text-3xl font-mono font-black text-amber-600">{stats.globalPoints}</p>
+                        </div>
+                        <div className="text-center p-4 bg-green-50 rounded-xl border border-green-100 min-w-[100px]">
+                            <p className="text-green-600 text-xs font-bold uppercase mb-1">💰 兌換積分</p>
+                            <p className="text-3xl font-mono font-black text-green-600">{stats.localPoints}</p>
+                        </div>
                     </div>
                 </div>
 

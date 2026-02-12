@@ -39,7 +39,8 @@ export default function AdminEldersPage() {
                 const w = wallets?.find(wallet => wallet.user_id === p.id)
                 return {
                     ...p,
-                    points: w?.global_points || 0
+                    globalPoints: w?.global_points || 0,
+                    localPoints: w?.local_points || 0
                 }
             })
 
@@ -54,7 +55,7 @@ export default function AdminEldersPage() {
             ]
 
             combined.forEach(e => {
-                const range = ranges.find(r => e.points >= r.min && e.points <= r.max)
+                const range = ranges.find(r => e.globalPoints >= r.min && e.globalPoints <= r.max)
                 if (range) range.count++
             })
 
@@ -110,7 +111,8 @@ export default function AdminEldersPage() {
                                     <th className="p-4">頭像</th>
                                     <th className="p-4">姓名</th>
                                     <th className="p-4">註冊時間</th>
-                                    <th className="p-4">積分錢包</th>
+                                    <th className="p-4">🏅 榮譽積分</th>
+                                    <th className="p-4">💰 兌換積分</th>
                                     <th className="p-4 text-center">狀態</th>
                                     <th className="p-4 text-right">操作</th>
                                 </tr>
@@ -130,7 +132,10 @@ export default function AdminEldersPage() {
                                             {new Date(elder.created_at).toLocaleDateString('zh-TW')}
                                         </td>
                                         <td className="p-4 font-mono text-amber-600 font-bold">
-                                            {elder.points.toLocaleString()}
+                                            {elder.globalPoints.toLocaleString()}
+                                        </td>
+                                        <td className="p-4 font-mono text-green-600 font-bold">
+                                            {elder.localPoints.toLocaleString()}
                                         </td>
                                         <td className="p-4 text-center">
                                             <span className="px-2 py-1 rounded-full text-xs bg-green-100 text-green-700 font-bold">
