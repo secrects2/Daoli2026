@@ -9,6 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@mediapipe/camera_utils": "^0.3.1675466862",
+    "@mediapipe/drawing_utils": "^0.3.1675466124",
+    "@mediapipe/pose": "^0.5.1675469404",
     "@supabase/auth-helpers-nextjs": "^0.10.0",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.48.1",
@@ -23,6 +26,7 @@
     "react-dom": "^19.0.0",
     "react-hot-toast": "^2.6.0",
     "react-qr-code": "^2.0.18",
+    "react-webcam": "^7.2.0",
     "recharts": "^3.7.0",
     "tailwind-merge": "^3.4.0",
     "zod": "^4.3.6"

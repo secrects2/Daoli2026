@@ -94,6 +94,37 @@ export default function PharmacistDashboardClient({ profile, stats, chartData }:
                     </div>
                 </div>
 
+                {/* Sport Selection */}
+                <div>
+                    <h3 className="ml-1 mb-3 text-xs font-bold text-gray-400 uppercase tracking-widest">選擇運動項目</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                        <Link href="/pharmacist/match/new" className="group relative bg-gradient-to-br from-blue-500 to-blue-700 rounded-3xl p-6 shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] overflow-hidden">
+                            <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-8 translate-x-8" />
+                            <div className="relative z-10">
+                                <span className="text-4xl mb-3 block">🥌</span>
+                                <h4 className="font-black text-white text-xl mb-1">地壺球</h4>
+                                <p className="text-blue-100 text-xs">Floor Curling</p>
+                                <div className="mt-3 inline-flex items-center gap-1 text-white/80 text-xs font-medium bg-white/20 rounded-full px-3 py-1">
+                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                                    開始比賽
+                                </div>
+                            </div>
+                        </Link>
+                        <Link href="/pharmacist/match/boccia" className="group relative bg-gradient-to-br from-orange-500 to-red-600 rounded-3xl p-6 shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] overflow-hidden">
+                            <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-8 translate-x-8" />
+                            <div className="relative z-10">
+                                <span className="text-4xl mb-3 block">🎯</span>
+                                <h4 className="font-black text-white text-xl mb-1">地板滾球</h4>
+                                <p className="text-orange-100 text-xs">Boccia</p>
+                                <div className="mt-3 inline-flex items-center gap-1 text-white/80 text-xs font-medium bg-white/20 rounded-full px-3 py-1">
+                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                                    開始比賽
+                                </div>
+                            </div>
+                        </Link>
+                    </div>
+                </div>
+
                 {/* Operations Menu */}
                 <div>
                     <h3 className="ml-1 mb-3 text-xs font-bold text-gray-400 uppercase tracking-widest">快速操作</h3>
