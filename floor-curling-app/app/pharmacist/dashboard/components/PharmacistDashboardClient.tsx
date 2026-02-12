@@ -125,6 +125,28 @@ export default function PharmacistDashboardClient({ profile, stats, chartData }:
                     </div>
                 </div>
 
+                {/* AI Smart Services */}
+                <div>
+                    <h3 className="ml-1 mb-3 text-xs font-bold text-gray-400 uppercase tracking-widest">AI 智能服務</h3>
+                    <Link href="/pharmacist/ai-test" className="group relative bg-gradient-to-br from-purple-600 to-indigo-700 rounded-3xl p-6 shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] overflow-hidden block">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-12 translate-x-8" />
+                        <div className="relative z-10 flex items-center justify-between">
+                            <div>
+                                <span className="text-4xl mb-3 block">🧬</span>
+                                <h4 className="font-black text-white text-xl mb-1">AI 動作檢測</h4>
+                                <p className="text-purple-100 text-xs">AI Motion Analysis Test</p>
+                                <div className="mt-3 inline-flex items-center gap-1 text-white/80 text-xs font-medium bg-white/20 rounded-full px-3 py-1">
+                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    啟動檢測
+                                </div>
+                            </div>
+                            <div className="hidden sm:block opacity-80 rotate-12 transform group-hover:rotate-6 transition-transform">
+                                <span className="text-6xl">🤖</span>
+                            </div>
+                        </div>
+                    </Link>
+                </div>
+
                 {/* Operations Menu */}
                 <div>
                     <h3 className="ml-1 mb-3 text-xs font-bold text-gray-400 uppercase tracking-widest">快速操作</h3>
