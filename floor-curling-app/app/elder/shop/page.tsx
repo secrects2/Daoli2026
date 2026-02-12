@@ -28,7 +28,7 @@ export default async function ElderShop() {
     // Parallel Fetching
     const [walletRes, productsRes] = await Promise.all([
         supabase.from('wallets').select('local_points').eq('user_id', user.id).single(),
-        supabase.from('products').select('*').order('price', { ascending: true })
+        supabase.from('products').select('*').eq('is_active', true).order('price_points', { ascending: true })
     ])
 
     const points = walletRes.data?.local_points || 0

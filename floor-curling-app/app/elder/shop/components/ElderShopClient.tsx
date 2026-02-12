@@ -9,7 +9,7 @@ interface Product {
     id: string
     name: string
     description: string
-    price: number
+    price_points: number
     image_url: string
     category: string
 }
@@ -27,7 +27,7 @@ export default function ElderShopClient({ user, points: initialPoints, products 
     const [purchasing, setPurchasing] = useState<string | null>(null)
 
     const handleBuy = async (product: Product) => {
-        if (!await confirm({ message: `確定要花費 ${product.price} 積分購買「${product.name}」嗎？`, confirmLabel: '購買' })) return
+        if (!await confirm({ message: `確定要花費 ${product.price_points} 積分購買「${product.name}」嗎？`, confirmLabel: '購買' })) return
 
         setPurchasing(product.id)
         try {
@@ -85,11 +85,11 @@ export default function ElderShopClient({ user, points: initialPoints, products 
                                 </div>
                                 <p className="text-gray-500 text-sm mt-1 line-clamp-2">{product.description}</p>
                                 <div className="mt-3 flex justify-between items-center">
-                                    <span className="text-orange-600 font-bold text-lg">{product.price} 分</span>
+                                    <span className="text-orange-600 font-bold text-lg">{product.price_points} 分</span>
                                     <button
                                         onClick={() => handleBuy(product)}
-                                        disabled={!!purchasing || points < product.price}
-                                        className={`px-4 py-2 rounded-full font-bold text-sm transition-all ${points >= product.price
+                                        disabled={!!purchasing || points < product.price_points}
+                                        className={`px-4 py-2 rounded-full font-bold text-sm transition-all ${points >= product.price_points
                                             ? 'bg-blue-600 text-white shadow-md active:scale-95'
                                             : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                             }`}
