@@ -49,6 +49,33 @@ export default function AITestPage() {
         checkUser()
     }, [router, supabase])
 
+    // [DEV] 自動填入測試用長輩 ID
+    useEffect(() => {
+        const fetchTestElder = async () => {
+            try {
+                // 取得最近新增的一位長輩
+                const { data: elder } = await supabase
+                    .from('profiles')
+                    .select('id')
+                    .eq('role', 'elder')
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .single()
+
+                if (elder) {
+                    setManualId(elder.id)
+                    toast('已自動填入測試用長輩 ID', { icon: '🧪', duration: 3000 })
+                }
+            } catch (e) {
+                console.error('Auto-fill error', e)
+            }
+        }
+
+        if (!loading && !elderId) {
+            fetchTestElder()
+        }
+    }, [loading, supabase, elderId])
+
     // 處理掃碼
     const handleScan = async (scannedId: string) => {
         try {
