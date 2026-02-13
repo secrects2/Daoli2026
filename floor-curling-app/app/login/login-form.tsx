@@ -103,10 +103,13 @@ export default function LoginForm() {
         const isLine = /Line/i.test(ua)
 
         // 如果是 LINE 瀏覽器，且沒有錯誤訊息 (避免無限迴圈)，則自動執行 LINE 登入
+        // [DEV] 用戶要求暫時關閉自動登入以測試店長身份
+        /* 
         if (isLine && !searchParams.get('error') && !searchParams.get('disable_auto_login')) {
             setIsAutoLoggingIn(true)
             handleLineLogin('family')
         }
+        */
     }, [searchParams])
 
     if (isAutoLoggingIn) {
