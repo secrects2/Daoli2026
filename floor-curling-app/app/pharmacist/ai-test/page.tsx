@@ -7,6 +7,7 @@ import { QRScanModal } from '@/components/QRScanModal'
 import BocciaCam, { BocciaMetrics } from '@/components/ai/BocciaCam'
 import toast from 'react-hot-toast'
 import Link from 'next/link'
+import AISetupGuideModal from '@/components/ai/AISetupGuideModal'
 
 export default function AITestPage() {
     const router = useRouter()
@@ -18,6 +19,8 @@ export default function AITestPage() {
     const [isCamOpen, setIsCamOpen] = useState(false)
     const [lastMetrics, setLastMetrics] = useState<BocciaMetrics | null>(null)
     const [manualId, setManualId] = useState('')
+    // Show guide by default on first load? Or just button? Let's add state first.
+    const [showGuide, setShowGuide] = useState(false)
 
     const handleManualSubmit = async () => {
         if (!manualId.trim()) return
@@ -196,6 +199,18 @@ export default function AITestPage() {
                             </button>
                         </div>
 
+                        {/* Guide Button - New */}
+                        <button
+                            onClick={() => setShowGuide(true)}
+                            className="w-full bg-blue-50 border border-blue-100 text-blue-700 px-6 py-4 rounded-2xl flex items-center justify-between font-bold hover:bg-blue-100 transition-colors"
+                        >
+                            <span className="flex items-center gap-2">
+                                <span className="text-xl">📏</span>
+                                AI 檢測架設規範與教學
+                            </span>
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                        </button>
+
                         {/* Camera Section */}
                         {isCamOpen ? (
                             <div className="bg-black rounded-3xl overflow-hidden shadow-2xl ring-4 ring-black/5">
@@ -250,6 +265,11 @@ export default function AITestPage() {
                 isOpen={showQRScanner}
                 onClose={() => setShowQRScanner(false)}
                 onScan={handleScan}
+            />
+
+            <AISetupGuideModal
+                isOpen={showGuide}
+                onClose={() => setShowGuide(false)}
             />
         </div>
     )

@@ -379,7 +379,7 @@ export default function BocciaCam({
                 <Webcam
                     ref={webcamRef} audio={false} mirrored
                     className="absolute inset-0 w-full h-full object-cover"
-                    videoConstraints={{ width: 640, height: 480, facingMode: 'user' }}
+                    videoConstraints={{ width: 640, height: 480, facingMode: 'environment' }}
                     onUserMedia={() => setCameraReady(true)}
                     onUserMediaError={() => setError('無法存取相機')}
                 />
@@ -459,8 +459,8 @@ export default function BocciaCam({
                     onClick={handleSaveAndStop}
                     disabled={saving || saved}
                     className={`flex-1 py-3 rounded-xl font-bold text-white transition-all ${saved ? 'bg-green-600' :
-                            saving ? 'bg-gray-600' :
-                                'bg-gradient-to-r from-green-500 to-emerald-600 hover:shadow-lg'
+                        saving ? 'bg-gray-600' :
+                            'bg-gradient-to-r from-green-500 to-emerald-600 hover:shadow-lg'
                         } disabled:cursor-not-allowed`}
                 >
                     {saved ? '✅ 已儲存' : saving ? '儲存中...' : '📊 儲存並停止'}
