@@ -17,6 +17,13 @@ export default function AITestPage() {
     const [elderName, setElderName] = useState<string>('')
     const [isCamOpen, setIsCamOpen] = useState(false)
     const [lastMetrics, setLastMetrics] = useState<BocciaMetrics | null>(null)
+    const [manualId, setManualId] = useState('')
+
+    const handleManualSubmit = async () => {
+        if (!manualId.trim()) return
+        // Reuse handleScan logic essentially
+        await handleScan(manualId.trim())
+    }
 
     // 驗證權限
     useEffect(() => {
@@ -115,6 +122,31 @@ export default function AITestPage() {
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
                             開啟掃描器
                         </button>
+
+                        <div className="mt-8 w-full max-w-xs mx-auto border-t border-gray-100 pt-6">
+                            <p className="text-xs text-gray-400 mb-2 font-medium">或手動輸入長輩 ID</p>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <span className="text-gray-400 font-mono text-sm">#</span>
+                                </div>
+                                <input
+                                    type="text"
+                                    className="block w-full pl-8 pr-20 py-3 bg-gray-50 border-gray-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-mono text-sm"
+                                    placeholder="輸入 ID (UUID)"
+                                    value={manualId}
+                                    onChange={(e) => setManualId(e.target.value)}
+                                    // 按 Enter 也可以提交
+                                    onKeyDown={(e) => e.key === 'Enter' && handleManualSubmit()}
+                                />
+                                <button
+                                    onClick={handleManualSubmit}
+                                    disabled={!manualId.trim()}
+                                    className="absolute inset-y-1.5 right-1.5 px-4 bg-white shadow-sm border border-gray-100 hover:bg-gray-50 rounded-xl text-xs font-bold text-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    確認
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 ) : (
                     <div className="space-y-6">
