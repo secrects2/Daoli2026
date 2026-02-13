@@ -366,6 +366,13 @@ export default function BocciaCam({
         }
     }, [processResults])
 
+    // Memoize video constraints to prevent re-renders triggering stream restart
+    const videoConstraints = React.useMemo(() => ({
+        width: 640,
+        height: 480,
+        facingMode: 'environment'
+    }), [])
+
     return (
         <div className={`relative bg-gray-900 rounded-2xl overflow-hidden ${className}`}>
             {/* Team Badge */}
@@ -377,16 +384,17 @@ export default function BocciaCam({
             {/* Webcam */}
             <div className="relative aspect-[4/3]">
                 <Webcam
-                    ref={webcamRef} audio={false} mirrored
+                    ref={webcamRef} audio={false}
+                    // Remove mirrored for back camera
                     className="absolute inset-0 w-full h-full object-cover"
-                    videoConstraints={{ width: 640, height: 480, facingMode: 'environment' }}
+                    videoConstraints={videoConstraints}
                     onUserMedia={() => setCameraReady(true)}
                     onUserMediaError={() => setError('無法存取相機')}
                 />
                 <canvas
                     ref={canvasRef}
                     className="absolute inset-0 w-full h-full object-cover"
-                    style={{ transform: 'scaleX(-1)' }}
+                // Remove scaleX(-1) if not mirrored
                 />
 
                 {/* Diagnostic Overlay */}

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClientComponentClient } from '@/lib/supabase'
 import { QRScanModal } from '@/components/QRScanModal'
@@ -214,11 +214,16 @@ export default function AITestPage() {
                         {/* Camera Section */}
                         {isCamOpen ? (
                             <div className="bg-black rounded-3xl overflow-hidden shadow-2xl ring-4 ring-black/5">
+    // Stabilize the handler to prevent BocciaCam re-renders
+    const handleMetricsUpdate = useCallback((m: BocciaMetrics) => {
+                                    setLastMetrics(m)
+                                }, [])
+                                // ...
                                 <BocciaCam
                                     elderId={elderId}
                                     side="blue" // Default to blue/neutral for test
                                     onClose={handleCamClose}
-                                    onMetricsUpdate={(m) => setLastMetrics(m)}
+                                    onMetricsUpdate={handleMetricsUpdate}
                                 />
                             </div>
                         ) : (
