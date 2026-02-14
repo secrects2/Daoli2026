@@ -315,14 +315,14 @@ export default function BocciaCam({
         }
     }
 
-    // 初始化 MediaPipe Pose
+    // 初始化 MediaPipe Pose (Custom Loop Refactor)
     useEffect(() => {
-        let camera: any
+        let requestAnimationId: number
 
         const initPose = async () => {
             try {
                 const { Pose } = await import('@mediapipe/pose')
-                const { Camera } = await import('@mediapipe/camera_utils')
+                // Remove @mediapipe/camera_utils import to avoid grabbing camera control
 
                 const pose = new Pose({
                     locateFile: (file: string) =>
@@ -339,20 +339,20 @@ export default function BocciaCam({
                 poseRef.current = pose
                 setPoseLoaded(true)
 
-                const checkCamera = setInterval(() => {
+                // Custom Frame Loop
+                const sendFrame = async () => {
                     if (webcamRef.current?.video && webcamRef.current.video.readyState === 4) {
-                        clearInterval(checkCamera)
-                        camera = new Camera(webcamRef.current.video, {
-                            onFrame: async () => {
-                                if (webcamRef.current?.video && poseRef.current) {
-                                    await poseRef.current.send({ image: webcamRef.current.video })
-                                }
-                            },
-                            width: 640, height: 480,
-                        })
-                        camera.start()
+                        try {
+                            await pose.send({ image: webcamRef.current.video })
+                        } catch (err) {
+                            console.error('Pose send error:', err)
+                        }
                     }
-                }, 500)
+                    requestAnimationId = requestAnimationFrame(sendFrame)
+                }
+
+                sendFrame()
+
             } catch (err: any) {
                 console.error('MediaPipe 初始化失敗:', err)
                 setError(err.message || '無法載入 AI 模型')
@@ -360,8 +360,9 @@ export default function BocciaCam({
         }
 
         initPose()
+
         return () => {
-            if (camera) camera.stop()
+            if (requestAnimationId) cancelAnimationFrame(requestAnimationId)
             if (poseRef.current) poseRef.current.close()
         }
     }, [processResults])
