@@ -117,6 +117,11 @@ export default function AITestPage() {
         setIsCamOpen(false)
     }
 
+    // Stabilize the handler to prevent BocciaCam re-renders
+    const handleMetricsUpdate = useCallback((m: BocciaMetrics) => {
+        setLastMetrics(m)
+    }, [])
+
     if (loading) return <div className="min-h-screen bg-gray-50 flex items-center justify-center">載入中...</div>
 
     return (
@@ -214,11 +219,6 @@ export default function AITestPage() {
                         {/* Camera Section */}
                         {isCamOpen ? (
                             <div className="bg-black rounded-3xl overflow-hidden shadow-2xl ring-4 ring-black/5">
-    // Stabilize the handler to prevent BocciaCam re-renders
-    const handleMetricsUpdate = useCallback((m: BocciaMetrics) => {
-                                    setLastMetrics(m)
-                                }, [])
-                                // ...
                                 <BocciaCam
                                     elderId={elderId}
                                     side="blue" // Default to blue/neutral for test
