@@ -9,6 +9,8 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'rec
 import toast from 'react-hot-toast'
 import { useConfirm } from '@/components/ConfirmContext'
 
+import { getAiPrescription } from '@/lib/ai-diagnosis'
+
 export default function GenericElderDetailPage() {
     const params = useParams()
     const router = useRouter()
@@ -19,6 +21,7 @@ export default function GenericElderDetailPage() {
     const [loading, setLoading] = useState(true)
     const [stats, setStats] = useState({ totalMatches: 0, winRate: 0, globalPoints: 0, localPoints: 0 })
     const [mediaList, setMediaList] = useState<any[]>([])
+    const [aiSessions, setAiSessions] = useState<any[]>([])
     const [uploadingMedia, setUploadingMedia] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -123,6 +126,15 @@ export default function GenericElderDetailPage() {
                 .order('created_at', { ascending: false })
 
             setMediaList(media || [])
+
+            // 6. Fetch AI Training Sessions
+            const { data: sessions } = await supabase
+                .from('training_sessions')
+                .select('*')
+                .eq('elder_id', params.id)
+                .order('created_at', { ascending: false })
+
+            setAiSessions(sessions || [])
 
             setLoading(false)
         }
