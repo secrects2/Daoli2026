@@ -86,3 +86,50 @@ $$
     *   $(x_t, y_t)$: 當前幀手腕 (Wrist 16) 座標
     *   $(x_{t-1}, y_{t-1})$: 上一幀手腕座標
     *   $\Delta t$: 幀間隔時間 (Time delta)
+
+---
+
+## 3. 系統方塊圖 (System Block Diagram)
+
+此圖用於說明本發明之系統架構與各模組之連接關係。
+
+```mermaid
+graph LR
+    subgraph Client [用戶端裝置 Client Device]
+        Cam[影像擷取單元<br>Camera Module] --> Proc[中央處理單元<br>Processing Unit]
+        UI[使用者介面<br>UI/Display] <--> Proc
+    end
+
+    subgraph Cloud [雲端伺服器 Server]
+        DB[(資料庫<br>Database)] <--> API[應用程式介面<br>API Gateway]
+    end
+
+    subgraph AI_Core [AI 運算核心]
+        Pre[預處理模組<br>Preprocessing] --> MP[骨架追蹤模組<br>MediaPipe Pose]
+        MP --> Feat[特徵提取模組<br>Feature Extraction]
+        Feat --> Diag[智慧診斷模組<br>Diagnostic Engine]
+    end
+
+    Proc <--> API
+    Proc <--> AI_Core
+```
+
+---
+
+## 4. 台灣發明專利申請備忘錄 (Taiwan Patent Application Notes)
+
+根據經濟部智慧財產局 (TIPO) 之規範，申請軟體/AI 相關發明專利時，請務必準備以下資料：
+
+### A. 必要文件
+1.  **專利說明書 (Specification)**：須詳細揭露技術內容，使該領域技術人員能據以實施。
+2.  **申請專利範圍 (Claims)**：界定權利範圍，建議包含「方法項」與「系統項」。
+3.  **摘要 (Abstract)**：簡要說明發明重點。
+4.  **圖式 (Drawings)**：包含上述之「流程圖」與「方塊圖」。
+
+### B. 軟體專利特別規範
+*   **技術性 (Technical Character)**：必須強調演算法如何與硬體資源結合（例如：利用攝像頭擷取、處理器運算、螢幕顯示），而非僅是抽象的數學公式。
+*   **具體實施方式**：
+    *   **輸入**：影像數據 (RGB Frames)。
+    *   **處理**：骨架節點座標轉換、幾何角度計算、物理速度推導。
+    *   **輸出**：醫療復健數據 (ROM 角度、穩定度警示)。
+*   **進步性 (Inventive Step)**：強調本發明與既有技術之差異（例如：針對「亞健康長輩坐姿」的優化演算法、即時視覺回饋機制）。
