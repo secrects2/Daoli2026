@@ -34,6 +34,11 @@ graph TD
     
     L --> M[數據存檔與閉環<br>Training Session DB]
     M --> N[長期趨勢分析<br>Long-term Analysis]
+
+    subgraph Optimize [坐姿優化識別 Sitting Optimization]
+    O[排除下肢雜訊] --> P[專注上半身 Up-Body ROI]
+    P --> B
+    end
 ```
 
 ---
