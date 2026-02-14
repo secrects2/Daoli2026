@@ -7,8 +7,8 @@ import { ConfirmProvider } from '@/components/ConfirmContext'
 import { Metadata, Viewport } from 'next'
 
 export const metadata: Metadata = {
-    title: '道里地壺球 - Floor Curling Platform',
-    description: 'Professional Floor Curling management platform',
+    title: '道里運動平台 - DaoLi Sports Platform',
+    description: 'Professional Sports management platform',
     manifest: '/manifest.json',
     icons: {
         icon: '/favicon.ico',
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     appleWebApp: {
         capable: true,
         statusBarStyle: 'default',
-        title: '道里地壺',
+        title: '道里運動',
     },
 }
 

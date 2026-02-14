@@ -25,7 +25,7 @@ export default function LoginPage() {
                             </svg>
                         </div>
                         <h2 className="text-3xl font-black tracking-tight text-gray-900">
-                            道里地壺球
+                            道里運動平台
                         </h2>
                         <p className="mt-2 text-sm font-medium text-gray-500 uppercase tracking-widest">
                             數位管理平台
@@ -44,7 +44,7 @@ export default function LoginPage() {
 
                 {/* Footer */}
                 <p className="mt-8 text-center text-xs text-gray-400 font-medium tracking-wide">
-                    &copy; 2026 DaoLi Floor Curling. <br /> Designed for Digital Health.
+                    &copy; 2026 DaoLi Sports Platform. <br /> Designed for Digital Health.
                 </p>
             </div>
         </div>
