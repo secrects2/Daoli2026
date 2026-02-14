@@ -375,15 +375,18 @@ export default function BocciaCam({
     }), [])
 
     return (
-        <div className={`relative bg-gray-900 rounded-2xl overflow-hidden ${className}`}>
-            {/* Team Badge */}
-            <div className={`px-4 py-2 ${side === 'red' ? 'bg-red-600' : 'bg-blue-600'} flex items-center justify-between`}>
-                <span className="text-white font-bold text-sm">{sideColors.label} AI 分析</span>
-                <span className="text-white/70 text-xs font-mono">{elderId.slice(0, 8)}...</span>
+        <div className={`relative bg-black overflow-hidden flex flex-col ${className}`}>
+            {/* Top Bar - Transparent Overlay */}
+            <div className={`absolute top-0 left-0 right-0 z-20 p-4 flex justify-between items-start bg-gradient-to-b from-black/80 to-transparent pointer-events-none`}>
+                {/* Team Badge - Move to right */}
+                <div className={`px-3 py-1 bg-black/50 backdrop-blur rounded-full border border-white/10 flex items-center gap-2`}>
+                    <div className={`w-2 h-2 rounded-full ${side === 'red' ? 'bg-red-500' : 'bg-blue-500'}`} />
+                    <span className="text-white font-mono text-xs opacity-70">{elderId.slice(0, 4)}...</span>
+                </div>
             </div>
 
-            {/* Webcam */}
-            <div className="relative aspect-[4/3]">
+            {/* Webcam - Expand to fill remaining space */}
+            <div className="relative flex-1 w-full bg-black">
                 <Webcam
                     ref={webcamRef} audio={false}
                     // Remove mirrored for back camera
@@ -398,11 +401,12 @@ export default function BocciaCam({
                 // Remove scaleX(-1) if not mirrored
                 />
 
-                {/* Diagnostic Overlay */}
+                {/* Diagnostic Overlay - Moved to Top Left & Smaller */}
                 {diagnosticMsg && (
-                    <div className="absolute top-4 left-4 right-4 z-10">
-                        <div className="bg-black/70 backdrop-blur-md px-4 py-3 rounded-xl border border-white/10 shadow-lg">
-                            <p className={`font-bold text-lg ${diagnosticMsg.color} animate-pulse`}>
+                    <div className="absolute top-4 left-4 z-10 max-w-[70%]">
+                        <div className="bg-black/60 backdrop-blur-md px-3 py-2 rounded-lg border border-white/10 shadow-lg flex items-center gap-2">
+                            <div className={`w-2 h-2 rounded-full ${diagnosticMsg.color === 'text-red-500' ? 'bg-red-500 animate-pulse' : diagnosticMsg.color === 'text-green-400' ? 'bg-green-400' : 'bg-blue-400'}`} />
+                            <p className={`font-bold text-sm text-white`}>
                                 {diagnosticMsg.text}
                             </p>
                         </div>
@@ -425,15 +429,15 @@ export default function BocciaCam({
 
                 {/* Saved Overlay */}
                 {saved && (
-                    <div className="absolute inset-0 bg-green-900/90 flex flex-col items-center justify-center text-white">
+                    <div className="absolute inset-0 bg-green-900/90 flex flex-col items-center justify-center text-white z-50">
                         <span className="text-6xl mb-4">✅</span>
                         <p className="text-xl font-black">數據已儲存！</p>
                     </div>
                 )}
 
                 {metrics.isReadyToThrow && !saved && !diagnosticMsg && (
-                    <div className="absolute bottom-20 left-1/2 -translate-x-1/2 bg-green-500/90 text-white px-6 py-3 rounded-2xl font-black text-xl animate-pulse backdrop-blur-sm">
-                        ✅ 準備投球
+                    <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-green-500/90 text-white px-4 py-2 rounded-full font-bold text-sm animate-pulse backdrop-blur-sm z-10 shadow-lg shadow-green-500/20">
+                        準備投球
                     </div>
                 )}
             </div>

@@ -218,12 +218,13 @@ export default function AITestPage() {
 
                         {/* Camera Section */}
                         {isCamOpen ? (
-                            <div className="bg-black rounded-3xl overflow-hidden shadow-2xl ring-4 ring-black/5">
+                            <div className="fixed inset-0 z-50 bg-black flex flex-col justify-center">
                                 <BocciaCam
                                     elderId={elderId}
                                     side="blue" // Default to blue/neutral for test
                                     onClose={handleCamClose}
                                     onMetricsUpdate={handleMetricsUpdate}
+                                    className="h-full w-full rounded-none"
                                 />
                             </div>
                         ) : (
