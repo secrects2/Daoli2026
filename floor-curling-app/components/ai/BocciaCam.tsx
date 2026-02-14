@@ -167,12 +167,12 @@ export default function BocciaCam({
 
         // Rule 1: Safety/Fall Risk
         if (!isTrunkStable) {
-            diagText = "⚠️ 警告：身體重心偏移 (>15°)，跌倒風險偵測！"
+            diagText = `⚠️ 警告：身體明顯傾斜 (>15°，目前 ${Math.round(trunkTilt)}°)`
             diagColor = "text-red-500"
         }
         // Rule 2: Spasticity/Tone Indicator
         else if (!isArmExtended) {
-            diagText = "ℹ️ 提示：手臂未完全伸展，疑似張力過高。"
+            diagText = `ℹ️ 提示：手臂未完全伸展 (目前 ${Math.round(elbowROM)}°)`
             diagColor = "text-orange-400"
         }
         // Rule 3: Performance/Power (Good Shot)
