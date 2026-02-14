@@ -6,7 +6,7 @@ import { saveRehabSession } from '@/app/actions/rehab'
 
 /**
  * BocciaCam - AI 視覺分析組件
- * 針對坐姿選手（輪椅使用者）優化的姿態分析
+ * 針對亞健康長輩（坐姿運動）優化的姿態分析
  * 
  * 包含專利 MVP 三大指標：
  * A. 手肘伸展度 (ROM)
@@ -487,7 +487,7 @@ export default function BocciaCam({
                 <p className="text-[10px] text-gray-400 uppercase tracking-widest mb-0.5">Patent Config</p>
                 <p className="text-xs font-bold text-white flex items-center gap-1">
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    🦽 坐姿優化識別中
+                    🪑 坐姿穩定追蹤 (Seated)
                 </p>
             </div>
 

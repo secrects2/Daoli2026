@@ -65,19 +65,34 @@ export default function AISetupGuideModal({ isOpen, onClose }: AISetupGuideModal
                                             </div>
                                             <h4 className="font-bold text-gray-900">1. 拍攝角度：45° 側前</h4>
                                         </div>
+                                        {/* SVG Schema: Top-down 45 degree view */}
+                                        <div className="w-full h-32 bg-white rounded-lg border border-blue-100 mb-3 flex items-center justify-center overflow-hidden">
+                                            <svg viewBox="0 0 200 120" className="w-full h-full">
+                                                {/* Person (Top view) */}
+                                                <circle cx="100" cy="80" r="15" fill="#CBD5E1" /> {/* Head */}
+                                                <ellipse cx="100" cy="80" rx="22" ry="10" fill="#94A3B8" /> {/* Shoulders */}
+                                                <rect x="85" y="90" width="30" height="5" rx="2" fill="#64748B" /> {/* Chair back */}
+
+                                                {/* Camera */}
+                                                <g transform="translate(150, 30) rotate(-45)">
+                                                    <rect x="0" y="0" width="20" height="12" fill="#3B82F6" />
+                                                    <polygon points="20,2 28,6 20,10" fill="#3B82F6" />
+                                                </g>
+
+                                                {/* Field of View */}
+                                                <path d="M150 36 L115 70" stroke="#60A5FA" strokeWidth="2" strokeDasharray="4 2" markerEnd="url(#arrowhead)" />
+                                                <text x="140" y="20" fontSize="10" fill="#3B82F6" fontWeight="bold">45° Camera</text>
+                                            </svg>
+                                        </div>
                                         <ul className="text-sm text-gray-600 space-y-2">
                                             <li className="flex gap-2">
                                                 <span className="text-blue-500">✅</span>
-                                                <span>請站在投擲手的<strong>斜前方 45 度</strong></span>
+                                                <span>請站在長輩的<strong>斜前方 45 度</strong></span>
                                             </li>
                                             <li className="flex gap-2">
                                                 <span className="text-blue-500">✅</span>
-                                                <span>確保能同時看到<strong>手臂伸直</strong>與<strong>雙肩</strong></span>
+                                                <span>能看清<strong>投擲手臂</strong>與<strong>雙肩</strong></span>
                                             </li>
-                                            <div className="mt-2 text-xs bg-white p-2 rounded-lg text-gray-500">
-                                                ❌ 避免純正面 (手臂重疊)<br />
-                                                ❌ 避免純側面 (擋住肩膀)
-                                            </div>
                                         </ul>
                                     </div>
 
@@ -89,18 +104,33 @@ export default function AISetupGuideModal({ isOpen, onClose }: AISetupGuideModal
                                             </div>
                                             <h4 className="font-bold text-gray-900">2. 拍攝高度：視線平行</h4>
                                         </div>
+                                        {/* SVG Schema: Side view eye level */}
+                                        <div className="w-full h-32 bg-white rounded-lg border border-purple-100 mb-3 flex items-center justify-center overflow-hidden">
+                                            <svg viewBox="0 0 200 120" className="w-full h-full">
+                                                {/* Person (Side view sitting) */}
+                                                <circle cx="140" cy="50" r="10" fill="#CBD5E1" /> {/* Head */}
+                                                <path d="M140 60 L140 90 L160 90" stroke="#94A3B8" strokeWidth="6" strokeLinecap="round" /> {/* Body/Leg */}
+                                                <path d="M135 90 L135 110" stroke="#64748B" strokeWidth="4" strokeLinecap="round" /> {/* Chair Leg */}
+                                                <path d="M130 90 L150 90" stroke="#64748B" strokeWidth="4" strokeLinecap="round" /> {/* Chair Seat */}
+
+                                                {/* Camera */}
+                                                <rect x="40" y="45" width="15" height="10" fill="#8B5CF6" />
+                                                <line x1="47" y1="55" x2="47" y2="110" stroke="#8B5CF6" strokeWidth="2" /> {/* Tripod */}
+
+                                                {/* Level Line */}
+                                                <line x1="55" y1="50" x2="130" y2="50" stroke="#A78BFA" strokeWidth="2" strokeDasharray="4 2" />
+                                                <text x="65" y="45" fontSize="10" fill="#8B5CF6" fontWeight="bold">Eye Level (100-120cm)</text>
+                                            </svg>
+                                        </div>
                                         <ul className="text-sm text-gray-600 space-y-2">
                                             <li className="flex gap-2">
                                                 <span className="text-purple-500">✅</span>
-                                                <span>約 <strong>100-120cm</strong> (肩膀高度)</span>
+                                                <span>約 <strong>100-120cm</strong> (與肩膀平行)</span>
                                             </li>
                                             <li className="flex gap-2">
                                                 <span className="text-red-500 font-bold">❌</span>
                                                 <span><strong>嚴禁俯拍</strong> (由上往下)</span>
                                             </li>
-                                            <div className="mt-2 text-xs bg-white p-2 rounded-lg text-gray-500">
-                                                俯拍會導致角度計算錯誤，嚴重影響判讀！
-                                            </div>
                                         </ul>
                                     </div>
 
@@ -111,6 +141,35 @@ export default function AISetupGuideModal({ isOpen, onClose }: AISetupGuideModal
                                                 💡
                                             </div>
                                             <h4 className="font-bold text-gray-900">3. 環境光線</h4>
+                                        </div>
+                                        {/* SVG Schema: Lighting */}
+                                        <div className="w-full h-32 bg-white rounded-lg border border-amber-100 mb-3 flex items-center justify-center overflow-hidden">
+                                            <svg viewBox="0 0 200 120" className="w-full h-full">
+                                                {/* Good Light */}
+                                                <g transform="translate(40, 20)">
+                                                    <circle cx="20" cy="20" r="10" fill="#FCD34D" opacity="0.5" />
+                                                    <circle cx="20" cy="20" r="5" fill="#F59E0B" />
+                                                    <text x="0" y="45" fontSize="8" fill="#D97706">Front Light</text>
+                                                    <text x="50" y="60" fontSize="20" fill="#10B981">✓</text>
+
+                                                    {/* Person */}
+                                                    <circle cx="50" cy="80" r="8" fill="#CBD5E1" />
+                                                </g>
+
+                                                {/* Divider */}
+                                                <line x1="100" y1="10" x2="100" y2="110" stroke="#E2E8F0" strokeWidth="1" />
+
+                                                {/* Bad Light */}
+                                                <g transform="translate(130, 20)">
+                                                    {/* Window */}
+                                                    <rect x="30" y="60" width="20" height="30" fill="#BAE6FD" />
+                                                    <text x="35" y="55" fontSize="8" fill="#0EA5E9">Window</text>
+                                                    <text x="0" y="60" fontSize="20" fill="#EF4444">✕</text>
+
+                                                    {/* Person Silhouette */}
+                                                    <circle cx="20" cy="80" r="8" fill="#1E293B" />
+                                                </g>
+                                            </svg>
                                         </div>
                                         <ul className="text-sm text-gray-600 space-y-2">
                                             <li className="flex gap-2">
@@ -130,12 +189,32 @@ export default function AISetupGuideModal({ isOpen, onClose }: AISetupGuideModal
                                             <div className="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-xl">
                                                 🪑
                                             </div>
-                                            <h4 className="font-bold text-gray-900">4. 長輩坐姿</h4>
+                                            <h4 className="font-bold text-gray-900">4. 亞健康長輩坐姿</h4>
+                                        </div>
+                                        {/* SVG Schema: Seated Posture */}
+                                        <div className="w-full h-32 bg-white rounded-lg border border-green-100 mb-3 flex items-center justify-center overflow-hidden">
+                                            <svg viewBox="0 0 200 120" className="w-full h-full">
+                                                {/* Chair */}
+                                                <path d="M80 60 L80 110" stroke="#94A3B8" strokeWidth="4" />
+                                                <path d="M80 90 L120 90" stroke="#94A3B8" strokeWidth="4" />
+                                                <path d="M120 90 L120 110" stroke="#94A3B8" strokeWidth="4" />
+
+                                                {/* Person Sitting Upright */}
+                                                <line x1="100" y1="90" x2="100" y2="40" stroke="#10B981" strokeWidth="6" strokeLinecap="round" /> {/* Spine */}
+                                                <circle cx="100" cy="30" r="12" fill="#10B981" opacity="0.2" /> {/* Halo */}
+                                                <circle cx="100" cy="30" r="8" fill="#047857" /> {/* Head */}
+
+                                                <text x="130" y="50" fontSize="10" fill="#047857" fontWeight="bold">Sit Upright</text>
+                                                <path d="M125 55 L110 40" stroke="#047857" strokeWidth="1" markerEnd="url(#arrowhead)" />
+
+                                                {/* Arm */}
+                                                <path d="M100 50 L120 70" stroke="#047857" strokeWidth="4" strokeLinecap="round" />
+                                            </svg>
                                         </div>
                                         <ul className="text-sm text-gray-600 space-y-2">
                                             <li className="flex gap-2">
                                                 <span className="text-green-500">✅</span>
-                                                <span>臀部坐滿椅背</span>
+                                                <span>坐姿端正，臀部坐滿單人椅</span>
                                             </li>
                                             <li className="flex gap-2">
                                                 <span className="text-green-500">✅</span>
