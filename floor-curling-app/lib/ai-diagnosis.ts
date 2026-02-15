@@ -14,20 +14,20 @@ export function getAiPrescription(metrics: any): { title: string; content: strin
     const stability = metrics.trunk_stability || metrics.trunkStability || 0
     const velocity = metrics.avg_velocity || metrics.velocity || 0
 
-    // 優先級 1: 安全性 (核心/軀幹穩定)
-    if (stability > 20) {
+    // 優先級 1: 安全性 (核心/軀幹穩定) - Patent Threshold: > 15 degrees
+    if (stability > 15) {
         return {
-            title: '⚠️ 核心穩定度不足',
-            content: '偵測到投球時軀幹明顯傾斜，這可能增加跌倒風險。建議加強核心肌群訓練（如坐姿轉體），並檢查輪椅擺位是否穩固。',
+            title: '⚠️ 核心穩定度警示 (Fall Risk)',
+            content: `偵測到投球時軀幹傾斜 ${Math.round(stability)}° (>15°)，這可能增加跌倒風險。建議加強核心肌群訓練（如坐姿轉體），並檢查輪椅擺位是否穩固。`,
             color: 'text-red-600 bg-red-50 border-red-200'
         }
     }
 
-    // 優先級 2: 張力/伸展 (手肘 ROM)
-    if (rom < 130) {
+    // 優先級 2: 張力/伸展 (手肘 ROM) - Patent Threshold: < 160 degrees
+    if (rom < 160) {
         return {
-            title: '💪 上肢伸展受限',
-            content: '手肘伸展角度不足 (<130°)，可能是肌肉張力過高或關節活動度受限。建議在投球前進行被動伸展按摩，並練習懸吊運動。',
+            title: '💪 上肢伸展受限 (Spasticity)',
+            content: `手肘伸展角度僅 ${Math.round(rom)}° (<160°)，未達完全伸展標準。可能是肌肉張力過高。建議投球前進行被動伸展按摩。`,
             color: 'text-orange-600 bg-orange-50 border-orange-200'
         }
     }

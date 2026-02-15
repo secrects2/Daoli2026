@@ -467,6 +467,72 @@ export default function GenericElderDetailPage() {
                     </div>
                 </div>
 
+                {/* AI Analysis & Prescription Section */}
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <span>🤖</span> AI 動作分析與處方
+                    </h3>
+
+                    {aiSessions.length > 0 ? (
+                        <div className="space-y-6">
+                            {/* Latest Prescription Card */}
+                            <div className={`p-5 rounded-xl border-l-4 shadow-sm ${getAiPrescription(aiSessions[0].metrics || {}).color}`}>
+                                <div className="flex justify-between items-start mb-2">
+                                    <h4 className="font-bold text-lg">{getAiPrescription(aiSessions[0].metrics || {}).title}</h4>
+                                    <span className="text-xs opacity-75">{new Date(aiSessions[0].created_at).toLocaleDateString()}</span>
+                                </div>
+                                <p className="text-sm opacity-90">{getAiPrescription(aiSessions[0].metrics || {}).content}</p>
+
+                                {/* Key Metrics Grid */}
+                                <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-black/5">
+                                    <div className="text-center">
+                                        <p className="text-xs opacity-70">手肘 ROM</p>
+                                        <p className="font-black text-xl">{aiSessions[0].metrics?.avg_rom || '--'}°</p>
+                                    </div>
+                                    <div className="text-center">
+                                        <p className="text-xs opacity-70">軀幹穩定</p>
+                                        <p className="font-black text-xl">{aiSessions[0].metrics?.avg_trunk_tilt || '--'}°</p>
+                                    </div>
+                                    <div className="text-center">
+                                        <p className="text-xs opacity-70">穩定率</p>
+                                        <p className="font-black text-xl">{aiSessions[0].metrics?.stable_ratio || 0}%</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* History List */}
+                            <div className="space-y-2">
+                                <h5 className="text-sm font-bold text-gray-500">歷史檢測紀錄</h5>
+                                {aiSessions.slice(1, 4).map(session => (
+                                    <div key={session.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                        <div>
+                                            <p className="font-bold text-sm">{new Date(session.created_at).toLocaleDateString()}</p>
+                                            <p className="text-xs text-gray-500">
+                                                ROM: {session.metrics?.avg_rom}° | 穩定: {session.metrics?.avg_trunk_tilt}°
+                                            </p>
+                                        </div>
+                                        <div className="text-right">
+                                            <span className={`text-xs px-2 py-1 rounded-full ${getAiPrescription(session.metrics).color.includes('green') ? 'bg-green-100 text-green-700' :
+                                                    getAiPrescription(session.metrics).color.includes('red') ? 'bg-red-100 text-red-700' :
+                                                        'bg-orange-100 text-orange-700'
+                                                }`}>
+                                                {getAiPrescription(session.metrics).title.split(' ')[1]}
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="text-center py-8 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                            <p className="text-gray-500">尚無 AI 檢測紀錄</p>
+                            <Link href="/pharmacist/ai-test" className="text-blue-600 font-bold text-sm mt-2 inline-block hover:underline">
+                                前往進行檢測 &rarr;
+                            </Link>
+                        </div>
+                    )}
+                </div>
+
                 {/* Media Gallery */}
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                     <div className="flex justify-between items-center mb-4">
