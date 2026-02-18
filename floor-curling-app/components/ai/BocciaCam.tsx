@@ -356,7 +356,63 @@ export default function BocciaCam({
         }
     }
 
-    // ... useEffect for Pose ...
+    // 初始化 MediaPipe Pose (Custom Loop Refactor)
+    useEffect(() => {
+        let requestAnimationId: number
+
+        const initPose = async () => {
+            try {
+                const { Pose } = await import('@mediapipe/pose')
+
+                const pose = new Pose({
+                    locateFile: (file: string) =>
+                        `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`,
+                })
+
+                pose.setOptions({
+                    modelComplexity: 1, smoothLandmarks: true,
+                    enableSegmentation: false,
+                    minDetectionConfidence: 0.5, minTrackingConfidence: 0.5,
+                })
+
+                pose.onResults(processResults)
+                poseRef.current = pose
+                setPoseLoaded(true)
+
+                // Custom Frame Loop
+                const sendFrame = async () => {
+                    if (webcamRef.current?.video && webcamRef.current.video.readyState === 4) {
+                        try {
+                            await pose.send({ image: webcamRef.current.video })
+                        } catch (err) {
+                            console.error('Pose send error:', err)
+                        }
+                    }
+                    requestAnimationId = requestAnimationFrame(sendFrame)
+                }
+
+                sendFrame()
+
+            } catch (err: any) {
+                console.error('MediaPipe 初始化失敗:', err)
+                setError(err.message || '無法載入 AI 模型')
+            }
+        }
+
+        initPose()
+
+        return () => {
+            if (requestAnimationId) cancelAnimationFrame(requestAnimationId)
+            if (poseRef.current) poseRef.current.close()
+        }
+    }, [processResults])
+
+    // Memoize video constraints to prevent re-renders triggering stream restart
+    const videoConstraints = React.useMemo(() => ({
+        width: 640,
+        height: 480,
+        facingMode: 'environment'
+    }), [])
 
     // Render Report View if sessionReport exists
     if (sessionReport) {
