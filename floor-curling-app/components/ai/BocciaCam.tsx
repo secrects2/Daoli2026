@@ -374,6 +374,65 @@ export default function BocciaCam({
         facingMode: 'environment'
     }), [])
 
+    // Throttled Prescription Update
+    const [prescription, setPrescription] = useState<{ title: string; content: string; color: string } | null>(null)
+    const lastPrescriptionTimeRef = useRef<number>(0)
+
+    useEffect(() => {
+        const now = Date.now()
+        if (now - lastPrescriptionTimeRef.current > 1000) { // Update every 1 second
+            // Import dynamically or use the imported function if I add import at top. 
+            // Since I cannot change top imports easily without context, I will use a simple logical copy or ideally Import it properly.
+            // Wait, I can't easily add import to top with replace_file_content if I don't target it.
+            // I'll assume I can duplicate the logic or better, add the import in a separate step? 
+            // No, I can add the import at the top in a separate block or try to replace the whole file? 
+            // Replacing whole file is safer for Imports. 
+            // Or I can just replicate the simple logic here to avoid import issues in this tool call. 
+            // The logic is simple enough:
+
+            const rom = metrics.elbowROM || 0
+            const stability = metrics.trunkStability || 0
+            const velocity = metrics.velocity || 0
+
+            let newPrescription = { title: '計算中...', content: '...', color: 'text-gray-400 border-gray-600' }
+
+            if (stability > 15) {
+                newPrescription = {
+                    title: '⚠️ 核心穩定度警示',
+                    content: '軀幹傾斜 > 15°，建議加強核心肌群訓練。',
+                    color: 'text-red-400 border-red-500 bg-red-900/30'
+                }
+            } else if (rom > 0 && rom < 160) {
+                newPrescription = {
+                    title: '💪 上肢伸展受限',
+                    content: '手肘未完全伸展 (<160°)，或是肌肉張力過高。',
+                    color: 'text-orange-400 border-orange-500 bg-orange-900/30'
+                }
+            } else if (metrics.isReadyToThrow && velocity < 30) {
+                newPrescription = {
+                    title: '⚡ 發力速度偏慢',
+                    content: '出手速度較慢，建議練習爆發力訓練。',
+                    color: 'text-blue-400 border-blue-500 bg-blue-900/30'
+                }
+            } else if (metrics.isReadyToThrow) {
+                newPrescription = {
+                    title: '✅ 動作表現優異',
+                    content: '各項指標均在標準範圍內，動作流暢穩定！',
+                    color: 'text-green-400 border-green-500 bg-green-900/30'
+                }
+            } else {
+                newPrescription = {
+                    title: '🔵 準備中...',
+                    content: '請長輩坐好，系統正在分析動作...',
+                    color: 'text-gray-400 border-gray-600 bg-gray-800'
+                }
+            }
+
+            setPrescription(newPrescription)
+            lastPrescriptionTimeRef.current = now
+        }
+    }, [metrics])
+
     return (
         <div className={`relative bg-black overflow-hidden flex flex-col ${className}`}>
             {/* Top Bar - Transparent Overlay */}
@@ -441,65 +500,77 @@ export default function BocciaCam({
                     </div>
                 )}
             </div>
+
+            {/* Metrics Dashboard */}
+            <div className="p-4 bg-gray-800 space-y-3">
+
+                {/* Real-time Prescription Card */}
+                {prescription && (
+                    <div className={`rounded-xl p-3 border ${prescription.color} transition-colors duration-500`}>
+                        <div className="flex justify-between items-center mb-1">
+                            <p className={`text-xs font-bold uppercase tracking-wider opacity-80`}>AI 處方建議</p>
+                            <span className="text-[10px] bg-black/30 px-2 py-0.5 rounded text-white/70">LIVE</span>
+                        </div>
+                        <p className="font-bold text-base mb-0.5">{prescription.title}</p>
+                        <p className="text-xs opacity-80">{prescription.content}</p>
+                    </div>
                 )}
+
+                <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Medical Rehab Data (即時醫療數據)</p>
+                <div className="grid grid-cols-3 gap-3">
+                    <div className={`rounded-xl p-3 text-center ${metrics.isArmExtended ? sideColors.bg : 'bg-red-900/50'}`}>
+                        <p className="text-xs text-gray-400 mb-1">肘部 ROM</p>
+                        <p className={`text-2xl font-black ${metrics.isArmExtended ? sideColors.text : 'text-red-400'}`}>
+                            {metrics.elbowROM !== null ? `${metrics.elbowROM}°` : '--'}
+                        </p>
+                    </div>
+
+                    <div className={`rounded-xl p-3 text-center ${metrics.isTrunkStable ? sideColors.bg : 'bg-red-900/50'}`}>
+                        <p className="text-xs text-gray-400 mb-1">軀幹傾斜</p>
+                        <p className={`text-2xl font-black ${metrics.isTrunkStable ? sideColors.text : 'text-red-400'}`}>
+                            {metrics.trunkStability !== null ? `${metrics.trunkStability}°` : '--'}
+                        </p>
+                    </div>
+
+                    <div className="rounded-xl p-3 text-center bg-gray-700/50">
+                        <p className="text-xs text-gray-400 mb-1">出手速度</p>
+                        <p className="text-2xl font-black text-emerald-400">
+                            {metrics.velocity || '--'} <span className="text-xs text-gray-500">v</span>
+                        </p>
+                    </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-3">
+                    <button
+                        onClick={handleSaveAndStop}
+                        disabled={saving || saved}
+                        className={`flex-1 py-3 rounded-xl font-bold text-white transition-all ${saved ? 'bg-green-600' :
+                            saving ? 'bg-gray-600' :
+                                'bg-gradient-to-r from-green-500 to-emerald-600 hover:shadow-lg'
+                            } disabled:cursor-not-allowed`}
+                    >
+                        {saved ? '✅ 已儲存' : saving ? '儲存中...' : '📊 儲存並停止'}
+                    </button>
+                    {/* Sitting Optimization Badge */}
+                    <div className="absolute top-16 right-4 bg-gray-900/60 backdrop-blur border border-white/20 rounded-lg px-3 py-1.5 flex flex-col items-end pointer-events-none">
+                        <p className="text-[10px] text-gray-400 uppercase tracking-widest mb-0.5">Patent Config</p>
+                        <p className="text-xs font-bold text-white flex items-center gap-1">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                            🪑 坐姿穩定追蹤 (Seated)
+                        </p>
+                    </div>
+
+                    {onClose && (
+                        <button
+                            onClick={onClose}
+                            className="px-6 py-3 rounded-xl font-bold text-gray-400 bg-gray-800 hover:bg-gray-700 transition-colors"
+                        >
+                            取消
+                        </button>
+                    )}
+                </div>
+            </div>
         </div>
-
-            {/* Metrics Dashboard */ }
-    <div className="p-4 bg-gray-800">
-        <p className="text-[10px] text-gray-500 mb-2 uppercase tracking-widest font-bold">Medical Rehab Data (即時醫療數據)</p>
-        <div className="grid grid-cols-3 gap-3">
-            <div className={`rounded-xl p-3 text-center ${metrics.isArmExtended ? sideColors.bg : 'bg-red-900/50'}`}>
-                <p className="text-xs text-gray-400 mb-1">肘部 ROM</p>
-                <p className={`text-2xl font-black ${metrics.isArmExtended ? sideColors.text : 'text-red-400'}`}>
-                    {metrics.elbowROM !== null ? `${metrics.elbowROM}°` : '--'}
-                </p>
-            </div>
-
-            <div className={`rounded-xl p-3 text-center ${metrics.isTrunkStable ? sideColors.bg : 'bg-red-900/50'}`}>
-                <p className="text-xs text-gray-400 mb-1">軀幹傾斜</p>
-                <p className={`text-2xl font-black ${metrics.isTrunkStable ? sideColors.text : 'text-red-400'}`}>
-                    {metrics.trunkStability !== null ? `${metrics.trunkStability}°` : '--'}
-                </p>
-            </div>
-
-            <div className="rounded-xl p-3 text-center bg-gray-700/50">
-                <p className="text-xs text-gray-400 mb-1">出手速度</p>
-                <p className="text-2xl font-black text-emerald-400">
-                    {metrics.velocity || '--'} <span className="text-xs text-gray-500">v</span>
-                </p>
-            </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="p-4 bg-gray-900 flex gap-3">
-            <button
-                onClick={handleSaveAndStop}
-                disabled={saving || saved}
-                className={`flex-1 py-3 rounded-xl font-bold text-white transition-all ${saved ? 'bg-green-600' :
-                    saving ? 'bg-gray-600' :
-                        'bg-gradient-to-r from-green-500 to-emerald-600 hover:shadow-lg'
-                    } disabled:cursor-not-allowed`}
-            >
-                {saved ? '✅ 已儲存' : saving ? '儲存中...' : '📊 儲存並停止'}
-            </button>
-            {/* Sitting Optimization Badge */}
-            <div className="absolute top-16 right-4 bg-gray-900/60 backdrop-blur border border-white/20 rounded-lg px-3 py-1.5 flex flex-col items-end pointer-events-none">
-                <p className="text-[10px] text-gray-400 uppercase tracking-widest mb-0.5">Patent Config</p>
-                <p className="text-xs font-bold text-white flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    🪑 坐姿穩定追蹤 (Seated)
-                </p>
-            </div>
-
-            {onClose && (
-                <button
-                    onClick={onClose}
-                    className="px-6 py-3 rounded-xl font-bold text-gray-400 bg-gray-800 hover:bg-gray-700 transition-colors"
-                >
-                    取消
-                </button>
-            )}
-        </div>
-    </div>
-            )
+    )
 }
