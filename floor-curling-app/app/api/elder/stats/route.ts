@@ -29,7 +29,7 @@ export async function GET(request: Request) {
         .from('matches')
         .select('*', { count: 'exact', head: true })
         .gte('created_at', startOfWeek.toISOString())
-        .or(`red_team_id.eq.${id},yellow_team_id.eq.${id}`)
+        .or(`red_team_elder_id.eq.${id},yellow_team_elder_id.eq.${id}`)
 
     // Generate chart history (still mock for now as we don't have daily snapshots)
     const history = Array.from({ length: 7 }, (_, i) => {
@@ -44,13 +44,13 @@ export async function GET(request: Request) {
     // Fetch recent matches with results
     const { data: recentMatchesData } = await supabase
         .from('matches')
-        .select('created_at, winner_color, red_team_id, yellow_team_id')
-        .or(`red_team_id.eq.${id},yellow_team_id.eq.${id}`)
+        .select('created_at, winner_color, red_team_elder_id, yellow_team_elder_id')
+        .or(`red_team_elder_id.eq.${id},yellow_team_elder_id.eq.${id}`)
         .order('created_at', { ascending: false })
         .limit(5)
 
     const recentMatches = (recentMatchesData || []).map(m => {
-        const isRed = m.red_team_id === id
+        const isRed = m.red_team_elder_id === id
         let result: string
         if (!m.winner_color) {
             result = 'draw'

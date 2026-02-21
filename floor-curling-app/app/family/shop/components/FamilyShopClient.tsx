@@ -61,12 +61,19 @@ export default function FamilyShopClient({ user, elder, products, aiSessions = [
                 throw new Error(data.error)
             }
 
-            // ECPay API 回傳 HTML 表單，需要在新頁面中渲染並自動提交到綠界
+            // ECPay API 回傳 HTML 表單，包含自動送出腳本
+            // 使用動態建立 div 方式插入當前頁面以避免破壞 PWA 路由歷史
             const html = await res.text()
-            const newWindow = window.open('', '_self')
-            if (newWindow) {
-                newWindow.document.write(html)
-                newWindow.document.close()
+            const tempDiv = document.createElement('div')
+            tempDiv.innerHTML = html
+            tempDiv.style.display = 'none'
+            document.body.appendChild(tempDiv)
+
+            const form = tempDiv.querySelector('form')
+            if (form) {
+                form.submit()
+            } else {
+                throw new Error('無法產生付款表單')
             }
 
         } catch (error: any) {

@@ -71,13 +71,15 @@ export default function ElderDashboardClient({
                     <div className="flex items-center gap-3">
                         <button
                             onClick={handleLogout}
-                            className="w-10 h-10 rounded-full bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-100 transition-colors"
+                            title="登出"
+                            className="flex items-center gap-1.5 px-3 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-xl text-sm font-bold transition-colors"
                         >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                            登出
                         </button>
                         <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden ring-2 ring-white shadow-sm">
                             {user?.user_metadata?.avatar_url ? (
-                                <img src={user.user_metadata.avatar_url} className="w-full h-full object-cover" />
+                                <img src={user.user_metadata.avatar_url} alt="User Avatar" className="w-full h-full object-cover" />
                             ) : (
                                 <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300" />
                             )}
@@ -203,7 +205,7 @@ export default function ElderDashboardClient({
                                 <div key={item.id} className="flex-shrink-0 w-24 flex flex-col items-center gap-2">
                                     <div className="w-20 h-20 bg-gray-50 rounded-2xl flex items-center justify-center border border-gray-100 shadow-sm p-2">
                                         {item.products?.image_url ? (
-                                            <img src={item.products.image_url} className="w-full h-full object-contain drop-shadow-sm" />
+                                            <img src={item.products.image_url} alt={item.products.name || "Product Image"} className="w-full h-full object-contain drop-shadow-sm" />
                                         ) : (
                                             <span className="text-3xl">🛡️</span>
                                         )}
@@ -235,7 +237,7 @@ export default function ElderDashboardClient({
                                 <div key={member.id} className="flex items-center gap-4 p-3 bg-gray-50/50 rounded-2xl border border-gray-100">
                                     <div className="w-12 h-12 bg-white rounded-xl shadow-sm overflow-hidden p-0.5">
                                         {member.avatar_url ? (
-                                            <img src={member.avatar_url} className="w-full h-full object-cover rounded-lg" />
+                                            <img src={member.avatar_url} alt={member.full_name || "Family Member"} className="w-full h-full object-cover rounded-lg" />
                                         ) : (
                                             <div className="w-full h-full bg-gray-100 rounded-lg flex items-center justify-center">👤</div>
                                         )}
