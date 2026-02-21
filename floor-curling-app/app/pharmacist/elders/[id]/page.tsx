@@ -500,6 +500,28 @@ export default function GenericElderDetailPage() {
                                 </div>
                             </div>
 
+                            {/* AI Smart Recommendation */}
+                            <div className="p-5 rounded-xl border border-indigo-100 bg-gradient-to-br from-indigo-50 to-purple-50 shadow-sm relative overflow-hidden">
+                                <div className="absolute -top-4 -right-4 text-7xl opacity-5">💡</div>
+                                <h4 className="font-bold text-lg text-indigo-900 mb-2 flex items-center gap-2 relative z-10">
+                                    <span>✨</span> AI 智能推薦
+                                </h4>
+                                <p className="text-sm text-indigo-800 mb-4 relative z-10 font-medium tracking-wide">
+                                    根據您的AI處方分析結果，我們為您推薦最適合的產品組合：
+                                </p>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 relative z-10">
+                                    {getAiPrescription(aiSessions[0].metrics || {}).recommendedProducts?.map((product, idx) => (
+                                        <div key={idx} className="bg-white/90 backdrop-blur-sm p-3 rounded-xl flex items-center gap-3 shadow-sm border border-indigo-50 hover:border-indigo-200 transition-all cursor-pointer group">
+                                            <div className="text-3xl bg-indigo-50/50 w-12 h-12 flex items-center justify-center rounded-lg group-hover:scale-110 transition-transform">{product.icon}</div>
+                                            <div>
+                                                <p className="font-bold text-gray-900">{product.name}</p>
+                                                <p className="text-xs text-gray-600 mt-0.5">{product.reason}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
                             {/* History List */}
                             <div className="space-y-2">
                                 <h5 className="text-sm font-bold text-gray-500">歷史檢測紀錄</h5>
@@ -513,8 +535,8 @@ export default function GenericElderDetailPage() {
                                         </div>
                                         <div className="text-right">
                                             <span className={`text-xs px-2 py-1 rounded-full ${getAiPrescription(session.metrics).color.includes('green') ? 'bg-green-100 text-green-700' :
-                                                    getAiPrescription(session.metrics).color.includes('red') ? 'bg-red-100 text-red-700' :
-                                                        'bg-orange-100 text-orange-700'
+                                                getAiPrescription(session.metrics).color.includes('red') ? 'bg-red-100 text-red-700' :
+                                                    'bg-orange-100 text-orange-700'
                                                 }`}>
                                                 {getAiPrescription(session.metrics).title.split(' ')[1]}
                                             </span>

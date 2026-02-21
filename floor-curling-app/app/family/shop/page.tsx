@@ -38,11 +38,16 @@ export default async function FamilyShop() {
     const productQuery = supabase.from('products').select('*').eq('is_active', true).order('price_points', { ascending: true })
 
     if (familyProfile?.linked_elder_id) {
-        // Parallel fetch Elder Profile and Wallet and Products
-        const [elderRes, walletRes, productsRes] = await Promise.all([
+        // Parallel fetch Elder Profile and Wallet and Products and AI Sessions
+        const [elderRes, walletRes, productsRes, sessionRes] = await Promise.all([
             supabase.from('profiles').select('id, full_name').eq('id', familyProfile.linked_elder_id).single(),
             supabase.from('wallets').select('local_points').eq('user_id', familyProfile.linked_elder_id).single(),
-            productQuery
+            productQuery,
+            supabase.from('training_sessions')
+                .select('*')
+                .eq('elder_id', familyProfile.linked_elder_id)
+                .order('created_at', { ascending: false })
+                .limit(1)
         ])
 
         if (elderRes.data) elder = elderRes.data
@@ -54,6 +59,7 @@ export default async function FamilyShop() {
                 elder={elder}
                 points={points}
                 products={productsRes.data || []}
+                aiSessions={sessionRes.data || []}
             />
         )
     }

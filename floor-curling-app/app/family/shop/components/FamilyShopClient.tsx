@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
+import { getAiPrescription } from '@/lib/ai-diagnosis'
 
 interface Product {
     id: string
@@ -19,9 +20,10 @@ interface FamilyShopClientProps {
     elder: any | null
     points: number
     products: Product[]
+    aiSessions?: any[]
 }
 
-export default function FamilyShopClient({ user, elder, products }: FamilyShopClientProps) {
+export default function FamilyShopClient({ user, elder, products, aiSessions = [] }: FamilyShopClientProps) {
     const router = useRouter()
     const [purchasing, setPurchasing] = useState<string | null>(null)
     const [note, setNote] = useState('')
@@ -102,6 +104,43 @@ export default function FamilyShopClient({ user, elder, products }: FamilyShopCl
             </div>
 
             <main className="max-w-7xl mx-auto px-4 py-6">
+                {aiSessions.length > 0 && (
+                    <div className="mb-8 p-5 rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 to-purple-50 shadow-sm relative overflow-hidden">
+                        <div className="absolute -top-4 -right-4 text-8xl opacity-5">💡</div>
+                        <h4 className="font-bold text-lg text-indigo-900 mb-2 flex items-center gap-2 relative z-10">
+                            <span>✨</span> 專屬 AI 智能推薦
+                        </h4>
+                        <p className="text-sm text-indigo-800 mb-4 relative z-10 font-medium tracking-wide">
+                            根據 {elder.full_name} 的最新 AI 處方分析結果，我們為您推薦最適合的配件：
+                        </p>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 relative z-10">
+                            {getAiPrescription(aiSessions[0].metrics || {}).recommendedProducts?.map((product, idx) => {
+                                // Find actual product to pass to handleBuyClick
+                                const actualProduct = products.find(p => p.name === product.name)
+
+                                return (
+                                    <div
+                                        key={idx}
+                                        onClick={() => actualProduct && handleBuyClick(actualProduct)}
+                                        className={`bg-white/90 backdrop-blur-sm p-4 rounded-xl flex items-center gap-4 shadow-sm border border-indigo-50 transition-all group ${actualProduct ? 'hover:border-indigo-300 hover:shadow-md cursor-pointer' : 'opacity-70'}`}
+                                    >
+                                        <div className="text-4xl bg-indigo-50/50 w-16 h-16 flex items-center justify-center rounded-xl group-hover:scale-110 transition-transform">{product.icon}</div>
+                                        <div className="flex-1">
+                                            <p className="font-bold text-gray-900 text-lg">{product.name}</p>
+                                            <p className="text-xs text-gray-600 mt-1 line-clamp-2">{product.reason}</p>
+                                        </div>
+                                        {actualProduct && (
+                                            <button className="text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-lg text-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                                贈送 &rarr;
+                                            </button>
+                                        )}
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    </div>
+                )}
+
                 {products.length === 0 ? (
                     <div className="text-center py-16">
                         <p className="text-gray-500">目前沒有可購買的商品</p>
