@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { createBrowserClient } from '@supabase/ssr'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import MetricDetailModal from '@/components/MetricDetailModal'
+import AiAnalysisSection from '@/components/AiAnalysisSection'
 
 // SVG Icons
 const StepsIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11" /></svg>
@@ -24,11 +25,13 @@ export default function ElderStatsPage() {
     const [stats, setStats] = useState<any>(null)
     const [loading, setLoading] = useState(true)
     const [activeModal, setActiveModal] = useState<string | null>(null)
+    const [userId, setUserId] = useState<string | null>(null)
 
     useEffect(() => {
         const fetchStats = async () => {
             const { data: { user } } = await supabase.auth.getUser()
             if (!user) { router.push('/login'); return }
+            setUserId(user.id)
             const res = await fetch(`/api/elder/stats?id=${user.id}`)
             const data = await res.json()
             setStats(data)
@@ -139,6 +142,9 @@ export default function ElderStatsPage() {
                         </div>
                     </div>
                 </div>
+
+                {/* AI 動作分析與處方 */}
+                {userId && <AiAnalysisSection elderId={userId} />}
 
                 {/* Section Divider */}
                 <div className="flex items-center gap-2 px-2">

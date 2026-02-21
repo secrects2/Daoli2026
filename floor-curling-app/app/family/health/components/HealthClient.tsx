@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { createBrowserClient } from '@supabase/ssr'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import MetricDetailModal from '@/components/MetricDetailModal'
+import AiAnalysisSection from '@/components/AiAnalysisSection'
 
 interface HealthClientProps {
     elderId: string | null
@@ -209,6 +210,9 @@ export default function HealthClient({ elderId, elderName }: HealthClientProps) 
                         <p className="text-4xl font-black text-orange-900 relative z-10">{stats?.globalPoints || 0}</p>
                     </div>
                 </div>
+
+                {/* AI 動作分析與處方 */}
+                <AiAnalysisSection elderId={elderId} />
 
                 {/* Points Trend Chart */}
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
