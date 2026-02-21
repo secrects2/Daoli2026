@@ -8,6 +8,7 @@ import { QRCodeGenerator } from '@/components/QRCode'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import toast from 'react-hot-toast'
 import { useConfirm } from '@/components/ConfirmContext'
+import MetricDetailModal from '@/components/MetricDetailModal'
 
 import { getAiPrescription } from '@/lib/ai-diagnosis'
 
@@ -24,6 +25,8 @@ export default function GenericElderDetailPage() {
     const [aiSessions, setAiSessions] = useState<any[]>([])
     const [uploadingMedia, setUploadingMedia] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
+    const [activeModal, setActiveModal] = useState<string | null>(null)
+    const [healthData, setHealthData] = useState<any>(null)
 
     // UI States
     const [isEditing, setIsEditing] = useState(false)
@@ -135,6 +138,13 @@ export default function GenericElderDetailPage() {
                 .order('created_at', { ascending: false })
 
             setAiSessions(sessions || [])
+
+            // 7. Fetch health metrics
+            try {
+                const healthRes = await fetch(`/api/elder/stats?id=${params.id}`)
+                const healthJson = await healthRes.json()
+                setHealthData(healthJson)
+            } catch (e) { console.error('Health metrics fetch failed', e) }
 
             setLoading(false)
         }
@@ -431,6 +441,56 @@ export default function GenericElderDetailPage() {
                             </div>
                         </div>
                     </div>
+                </div>
+
+                {/* Health Metrics Dashboard */}
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <span>❤️</span> 健康存摺
+                    </h3>
+                    {healthData?.healthMetrics ? (() => {
+                        const hm = healthData.healthMetrics
+                        const today = hm.today || {}
+                        const getModalData = (key: string) => hm.history?.map((h: any) => ({ date: h.date, value: h[key] })) || []
+                        return (
+                            <>
+                                <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                                    <button onClick={() => setActiveModal('steps')} className="p-4 bg-blue-50 rounded-xl border border-blue-100 text-left hover:shadow-md transition-all active:scale-[0.97]">
+                                        <p className="text-xs font-bold text-gray-500 mb-1">今日步數</p>
+                                        <p className="text-2xl font-black text-gray-900">{(today.steps || 0).toLocaleString()} <span className="text-xs text-gray-400">步</span></p>
+                                        {today.stepsTrend !== undefined && <p className={`text-[10px] font-bold mt-1 ${today.stepsTrend >= 0 ? 'text-green-500' : 'text-red-500'}`}>{today.stepsTrend >= 0 ? '↑' : '↓'} {Math.abs(today.stepsTrend)}%</p>}
+                                    </button>
+                                    <button onClick={() => setActiveModal('heartRate')} className="p-4 bg-red-50 rounded-xl border border-red-100 text-left hover:shadow-md transition-all active:scale-[0.97]">
+                                        <p className="text-xs font-bold text-gray-500 mb-1">平均心率</p>
+                                        <p className="text-2xl font-black text-gray-900">{today.heartRate || 0} <span className="text-xs text-gray-400">bpm</span></p>
+                                    </button>
+                                    <button onClick={() => setActiveModal('ranking')} className="p-4 bg-yellow-50 rounded-xl border border-yellow-100 text-left hover:shadow-md transition-all active:scale-[0.97]">
+                                        <p className="text-xs font-bold text-gray-500 mb-1">全國排名</p>
+                                        <p className="text-2xl font-black text-gray-900">{today.ranking || 0} <span className="text-xs text-gray-400">名</span></p>
+                                        {today.rankChange > 0 && <p className="text-[10px] font-bold text-green-500 mt-1">↑ 上升{today.rankChange}名</p>}
+                                    </button>
+                                    <button onClick={() => setActiveModal('calories')} className="p-4 bg-orange-50 rounded-xl border border-orange-100 text-left hover:shadow-md transition-all active:scale-[0.97]">
+                                        <p className="text-xs font-bold text-gray-500 mb-1">消耗熱量</p>
+                                        <p className="text-2xl font-black text-gray-900">{today.calories || 0} <span className="text-xs text-gray-400">kcal</span></p>
+                                        {today.caloriesTrend !== undefined && <p className={`text-[10px] font-bold mt-1 ${today.caloriesTrend >= 0 ? 'text-green-500' : 'text-red-500'}`}>{today.caloriesTrend >= 0 ? '↑' : '↓'} {Math.abs(today.caloriesTrend)}%</p>}
+                                    </button>
+                                    <div className="p-4 bg-green-50 rounded-xl border border-green-100">
+                                        <p className="text-xs font-bold text-gray-500 mb-1">連續運動</p>
+                                        <p className="text-2xl font-black text-gray-900">{today.consecutiveDays || 0} <span className="text-xs text-gray-400">天</span></p>
+                                        {(today.consecutiveDays || 0) >= 7 && <p className="text-[10px] font-bold text-green-500 mt-1">達標！</p>}
+                                    </div>
+                                </div>
+
+                                {/* Modals */}
+                                <MetricDetailModal isOpen={activeModal === 'steps'} onClose={() => setActiveModal(null)} title="今日步數" unit="步" color="#3B82F6" icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11" /></svg>} data={getModalData('steps')} chartType="bar" />
+                                <MetricDetailModal isOpen={activeModal === 'heartRate'} onClose={() => setActiveModal(null)} title="平均心率" unit="bpm" color="#EF4444" icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>} data={getModalData('heartRate')} chartType="line" />
+                                <MetricDetailModal isOpen={activeModal === 'calories'} onClose={() => setActiveModal(null)} title="消耗熱量" unit="kcal" color="#F97316" icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" /></svg>} data={getModalData('calories')} chartType="bar" />
+                                <MetricDetailModal isOpen={activeModal === 'ranking'} onClose={() => setActiveModal(null)} title="全國排名" unit="名" color="#EAB308" icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" /></svg>} data={getModalData('steps')} chartType="line" />
+                            </>
+                        )
+                    })() : (
+                        <p className="text-gray-400 text-sm text-center py-4">載入中...</p>
+                    )}
                 </div>
 
                 {/* Equipment Inventory */}
