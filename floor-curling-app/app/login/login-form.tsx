@@ -91,8 +91,8 @@ export default function LoginForm() {
         { role: 'admin', label: '後台', color: 'bg-red-500 hover:bg-red-600 text-white' },
         { role: 'pharmacist', label: '店長', color: 'bg-blue-500 hover:bg-blue-600 text-white' },
         { role: 'family', label: '家屬', color: 'bg-green-500 hover:bg-green-600 text-white' },
-        { role: 'family_bound', label: '林伯伯', color: 'bg-purple-500 hover:bg-purple-600 text-white' },
-        { role: 'elder', label: '林伯伯', color: 'bg-white hover:bg-gray-50 text-gray-700 border border-gray-200' },
+        { role: 'family_bound', label: '已綁家屬', color: 'bg-purple-500 hover:bg-purple-600 text-white' },
+        { role: 'elder', label: '長輩', color: 'bg-white hover:bg-gray-50 text-gray-700 border border-gray-200' },
     ]
 
     const [isAutoLoggingIn, setIsAutoLoggingIn] = useState(false)
