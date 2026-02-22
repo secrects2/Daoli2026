@@ -133,7 +133,7 @@ export default function AITestPage() {
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
                     </Link>
                     <div>
-                        <h1 className="text-xl font-black text-gray-900">AI 動作檢測</h1>
+                        <h1 className="text-xl font-black text-gray-900">AI 動作檢測(地板滾球)</h1>
                         <p className="text-xs text-gray-500">獨立檢測模式 • 不計入比賽</p>
                     </div>
                 </div>

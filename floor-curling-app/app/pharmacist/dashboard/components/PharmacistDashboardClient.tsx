@@ -133,7 +133,7 @@ export default function PharmacistDashboardClient({ profile, stats, chartData }:
                         <div className="relative z-10 flex items-center justify-between">
                             <div>
                                 <span className="text-4xl mb-3 block">🧬</span>
-                                <h4 className="font-black text-white text-xl mb-1">AI 動作檢測</h4>
+                                <h4 className="font-black text-white text-xl mb-1">AI 動作檢測(地板滾球)</h4>
                                 <p className="text-purple-100 text-xs">AI Motion Analysis Test</p>
                                 <div className="mt-3 inline-flex items-center gap-1 text-white/80 text-xs font-medium bg-white/20 rounded-full px-3 py-1">
                                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
