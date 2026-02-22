@@ -109,9 +109,11 @@ export default async function FamilyPortal() {
         if (w) wallet = w
     }
 
+    const familyName = profile?.full_name || profile?.nickname || user.user_metadata?.full_name || '家屬'
+
     return (
         <PortalClient
-            user={user}
+            user={{ ...user, user_metadata: { ...user.user_metadata, full_name: familyName } }}
             profile={profile}
             elders={elders}
             wallet={wallet}

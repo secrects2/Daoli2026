@@ -70,11 +70,14 @@ export async function POST(request: Request) {
                     const lineUserId = lineIdentity?.identity_data?.sub || lineIdentity?.id
 
                     if (lineUserId) {
+                        const { data: elderProfile } = await supabase.from('profiles').select('full_name, nickname').eq('id', user.id).single()
+                        const elderName = elderProfile?.full_name || elderProfile?.nickname || user.user_metadata?.full_name || '長輩'
+
                         // Send Push Message
-                        await pushMessage(lineUserId, [
+                        await pushMessage(lineUserId, [ // Assuming pushMessage is the function to use, or it's been renamed to sendLineMessage
                             {
                                 type: 'text',
-                                text: `${user.user_metadata.full_name || '長輩'} 已安全抵達！📍`
+                                text: `${elderName} 已安全抵達！📍`
                             },
                             {
                                 type: 'sticker',

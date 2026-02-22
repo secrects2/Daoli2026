@@ -72,9 +72,13 @@ export default async function ElderDashboard() {
         localPoints: walletRes.data?.local_points || 0
     }
 
+    // 取得最新 Profile 來取代 user_metadata (避免 Session 快取舊資料)
+    const { data: profile } = await supabase.from('profiles').select('full_name, nickname').eq('id', user.id).single()
+    const elderName = profile?.full_name || profile?.nickname || user.user_metadata?.full_name || '長輩'
+
     return (
         <ElderDashboardClient
-            user={user}
+            user={{ ...user, user_metadata: { ...user.user_metadata, full_name: elderName } }}
             familyMembers={familyRes.data || []}
             inventory={inventoryRes.data || []}
             stats={stats}

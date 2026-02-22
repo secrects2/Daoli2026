@@ -87,12 +87,29 @@ export async function POST(request: Request) {
 
         if (error) throw error
 
+        // Fetch sender and receiver profiles for notifications
+        const { data: senderProfile } = await supabase.from('profiles').select('full_name, nickname').eq('id', user.id).single()
+        const { data: receiverProfile } = await supabase.from('profiles').select('line_user_id').eq('id', receiver_id).single()
+        const senderName = senderProfile?.full_name || senderProfile?.nickname || user.user_metadata?.full_name || '新訊息'
+
+        // If the receiver has a line_user_id, send LINE Push Message
+        if (receiverProfile?.line_user_id) {
+            // Dynamic import for pushMessage
+            import('@/lib/line').then(({ pushMessage }) => {
+                pushMessage(receiverProfile.line_user_id, [{
+                    type: 'text',
+                    text: `[${senderName}]: ${content}`
+                }
+                ]).catch((lineError: any) => console.error('LINE Push Message Error:', lineError));
+            });
+        }
+
         // Trigger Notification (Async, don't await/block response)
         // Dynamic import to avoid circular dependency issues if any
         import('@/lib/notifications').then(({ createNotification }) => {
             createNotification({
                 userId: receiver_id,
-                title: user.user_metadata?.full_name || '新訊息',
+                title: senderName, // Use fetched sender name
                 message: content,
                 type: 'info',
                 metadata: {
@@ -104,7 +121,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ success: true, message })
 
     } catch (error: any) {
-        console.error('Send Message Error:', error)
+        console.error('Message Error:', error)
         return NextResponse.json({ error: error.message }, { status: 500 })
     }
 }
