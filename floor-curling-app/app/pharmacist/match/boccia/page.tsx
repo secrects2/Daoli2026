@@ -302,8 +302,8 @@ export default function BocciaMatchPage() {
 
             {/* AI Analysis Modal */}
             {aiTarget && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-                    <div className="w-full max-w-lg animate-in fade-in zoom-in-95 duration-200">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+                    <div className="w-full max-w-lg h-[80vh] bg-gray-900 rounded-3xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
                         <BocciaCam
                             elderId={aiTarget.elderId}
                             matchId={matchId}
@@ -312,6 +312,7 @@ export default function BocciaMatchPage() {
                                 setAiTarget(null)
                                 toast.success('AI 分析完成')
                             }}
+                            className="h-full w-full"
                         />
                     </div>
                 </div>
