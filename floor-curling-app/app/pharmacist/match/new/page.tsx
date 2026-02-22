@@ -7,6 +7,7 @@ import { uploadFile } from '@/app/actions/match'
 import { useLanguage } from '@/lib/i18n/LanguageContext'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
 import { QRScanModal } from '@/components/QRScanModal'
+import ElderSearchInput from '@/components/ElderSearchInput'
 import clsx from 'clsx'
 import toast from 'react-hot-toast'
 
@@ -31,10 +32,6 @@ export default function NewMatchPage() {
     const [matchMode, setMatchMode] = useState<MatchMode>('3v3')
     const [redTeamIds, setRedTeamIds] = useState<string[]>([])
     const [yellowTeamIds, setYellowTeamIds] = useState<string[]>([])
-
-    // Manual Input State
-    const [redInput, setRedInput] = useState('')
-    const [yellowInput, setYellowInput] = useState('')
 
     const [storeId, setStoreId] = useState('')
     const [ends, setEnds] = useState<End[]>([])
@@ -96,15 +93,13 @@ export default function NewMatchPage() {
     }
 
     // 手動添加 ID
-    const addElder = (team: 'red' | 'yellow') => {
-        const id = team === 'red' ? redInput.trim() : yellowInput.trim()
+    const addElder = (team: 'red' | 'yellow', id: string) => {
         if (!id) return
 
         if (team === 'red') {
             if (redTeamIds.length >= MAX_PLAYERS) return
             if (!redTeamIds.includes(id) && !yellowTeamIds.includes(id)) {
                 setRedTeamIds([...redTeamIds, id])
-                setRedInput('')
             } else {
                 toast.error(t('matchNew.idExists'))
             }
@@ -112,7 +107,6 @@ export default function NewMatchPage() {
             if (yellowTeamIds.length >= MAX_PLAYERS) return
             if (!yellowTeamIds.includes(id) && !redTeamIds.includes(id)) {
                 setYellowTeamIds([...yellowTeamIds, id])
-                setYellowInput('')
             } else {
                 toast.error(t('matchNew.idExists'))
             }
@@ -404,38 +398,23 @@ export default function NewMatchPage() {
                                     ))}
                                 </div>
 
-                                <div className="flex gap-2 relative z-10 mt-auto">
-                                    <input
-                                        type="text"
-                                        value={redInput}
-                                        onChange={(e) => setRedInput(e.target.value)}
-                                        onKeyDown={(e) => {
-                                            if (e.key === 'Enter') {
-                                                e.preventDefault()
-                                                addElder('red')
-                                            }
-                                        }}
-                                        className="w-full px-4 py-3 rounded-xl bg-white border border-red-100 focus:ring-2 focus:ring-red-500 outline-none text-sm"
-                                        placeholder={t('matchNew.scanOrType')}
+                                <div className="flex flex-col gap-2 relative z-10 mt-auto">
+                                    <ElderSearchInput
+                                        onSelect={(id) => addElder('red', id)}
+                                        excludeIds={[...redTeamIds, ...yellowTeamIds]}
                                         disabled={redTeamIds.length >= MAX_PLAYERS}
+                                        storeId={storeId}
+                                        className="w-full"
                                     />
-                                    {/* Manual Add Button */}
-                                    <button
-                                        type="button"
-                                        onClick={() => addElder('red')}
-                                        disabled={!redInput || redTeamIds.length >= MAX_PLAYERS}
-                                        className="shrink-0 w-12 rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 flex items-center justify-center font-bold transition-colors disabled:opacity-50"
-                                    >
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-                                    </button>
                                     {/* QR Button */}
                                     <button
                                         type="button"
                                         onClick={() => setShowQRScanner('red')}
                                         disabled={redTeamIds.length >= MAX_PLAYERS}
-                                        className="shrink-0 w-12 rounded-xl bg-red-500 text-white flex items-center justify-center shadow-lg shadow-red-200 active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="w-full h-12 rounded-xl bg-red-500 text-white flex items-center justify-center gap-2 shadow-lg shadow-red-200 active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed font-bold"
                                     >
-                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
+                                        掃描加入
                                     </button>
                                 </div>
                             </div>
@@ -475,38 +454,23 @@ export default function NewMatchPage() {
                                     ))}
                                 </div>
 
-                                <div className="flex gap-2 relative z-10 mt-auto">
-                                    <input
-                                        type="text"
-                                        value={yellowInput}
-                                        onChange={(e) => setYellowInput(e.target.value)}
-                                        onKeyDown={(e) => {
-                                            if (e.key === 'Enter') {
-                                                e.preventDefault()
-                                                addElder('yellow')
-                                            }
-                                        }}
-                                        className="w-full px-4 py-3 rounded-xl bg-white border border-yellow-100 focus:ring-2 focus:ring-yellow-400 outline-none text-sm"
-                                        placeholder={t('matchNew.scanOrType')}
+                                <div className="flex flex-col gap-2 relative z-10 mt-auto">
+                                    <ElderSearchInput
+                                        onSelect={(id) => addElder('yellow', id)}
+                                        excludeIds={[...redTeamIds, ...yellowTeamIds]}
                                         disabled={yellowTeamIds.length >= MAX_PLAYERS}
+                                        storeId={storeId}
+                                        className="w-full"
                                     />
-                                    {/* Manual Add Button */}
-                                    <button
-                                        type="button"
-                                        onClick={() => addElder('yellow')}
-                                        disabled={!yellowInput || yellowTeamIds.length >= MAX_PLAYERS}
-                                        className="shrink-0 w-12 rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 flex items-center justify-center font-bold transition-colors disabled:opacity-50"
-                                    >
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-                                    </button>
                                     {/* QR Button */}
                                     <button
                                         type="button"
                                         onClick={() => setShowQRScanner('yellow')}
                                         disabled={yellowTeamIds.length >= MAX_PLAYERS}
-                                        className="shrink-0 w-12 rounded-xl bg-yellow-400 text-white flex items-center justify-center shadow-lg shadow-yellow-200 active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="w-full h-12 rounded-xl bg-yellow-400 text-white flex items-center justify-center gap-2 shadow-lg shadow-yellow-200 active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed font-bold"
                                     >
-                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
+                                        掃描加入
                                     </button>
                                 </div>
                             </div>

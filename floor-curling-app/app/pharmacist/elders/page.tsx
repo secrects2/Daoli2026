@@ -145,9 +145,39 @@ export default function EldersPage() {
                     setWallets(walletsByUser)
                 }
 
-                // 暫時跳過比賽統計以避免超時
-                // TODO: 優化比賽統計查詢
-                setMatchStats({})
+                // 獲取比賽統計（從 matches 表查詢）
+                try {
+                    const { data: matchesData } = await supabase
+                        .from('matches')
+                        .select('id, red_team_elder_id, yellow_team_elder_id, winner_color')
+                        .or(elderIds.map(id => `red_team_elder_id.eq.${id},yellow_team_elder_id.eq.${id}`).join(','))
+
+                    if (matchesData) {
+                        const statsMap: Record<string, MatchStats> = {}
+                        matchesData.forEach((match: any) => {
+                            // 統計紅隊長者
+                            if (match.red_team_elder_id && elderIds.includes(match.red_team_elder_id)) {
+                                if (!statsMap[match.red_team_elder_id]) statsMap[match.red_team_elder_id] = { total_matches: 0, wins: 0, losses: 0 }
+                                statsMap[match.red_team_elder_id].total_matches++
+                                if (match.winner_color === 'red') statsMap[match.red_team_elder_id].wins++
+                                else if (match.winner_color === 'yellow') statsMap[match.red_team_elder_id].losses++
+                            }
+                            // 統計黃隊長者
+                            if (match.yellow_team_elder_id && elderIds.includes(match.yellow_team_elder_id)) {
+                                if (!statsMap[match.yellow_team_elder_id]) statsMap[match.yellow_team_elder_id] = { total_matches: 0, wins: 0, losses: 0 }
+                                statsMap[match.yellow_team_elder_id].total_matches++
+                                if (match.winner_color === 'yellow') statsMap[match.yellow_team_elder_id].wins++
+                                else if (match.winner_color === 'red') statsMap[match.yellow_team_elder_id].losses++
+                            }
+                        })
+                        setMatchStats(statsMap)
+                    } else {
+                        setMatchStats({})
+                    }
+                } catch (statsErr) {
+                    console.error('比賽統計查詢失敗:', statsErr)
+                    setMatchStats({})
+                }
             }
         } catch (error: any) {
             console.error('獲取長者數據失敗:', error)
@@ -160,8 +190,11 @@ export default function EldersPage() {
     // 篩選長者
     const filteredElders = elders.filter(elder => {
         if (!searchTerm) return true
-        return elder.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            elder.store_id?.toLowerCase().includes(searchTerm.toLowerCase())
+        const term = searchTerm.toLowerCase()
+        return elder.id.toLowerCase().includes(term) ||
+            elder.store_id?.toLowerCase().includes(term) ||
+            elder.full_name?.toLowerCase().includes(term) ||
+            elder.nickname?.toLowerCase().includes(term)
     })
 
     // 格式化日期

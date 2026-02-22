@@ -7,6 +7,7 @@ import { createBrowserClient } from '@supabase/ssr'
 import { QRCodeGenerator, generateElderQRContent } from '@/components/QRCode'
 import toast from 'react-hot-toast'
 import { useConfirm } from '@/components/ConfirmContext'
+import AiAnalysisSection from '@/components/AiAnalysisSection'
 
 interface ElderDashboardClientProps {
     user: any
@@ -140,6 +141,9 @@ export default function ElderDashboardClient({
                         <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
                     </div>
                 </Link>
+
+                {/* AI 動作分析與處方 */}
+                <AiAnalysisSection elderId={user.id} />
 
                 {/* Action Buttons Grid */}
                 <div className="grid grid-cols-2 gap-4">

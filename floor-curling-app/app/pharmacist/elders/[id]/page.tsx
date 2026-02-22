@@ -71,23 +71,21 @@ export default function GenericElderDetailPage() {
 
             setFamily(familyMembers || [])
 
-            // 3. Fetch Stats (Matches)
-            const { count: matchCount } = await supabase
-                .from('user_interactions')
-                .select('*', { count: 'exact', head: true })
-                .eq('user_id', params.id)
-                .eq('interaction_type', 'match_result')
+            // 3. Fetch Stats (Matches) - 從 matches 表查詢
+            const { data: matchesData } = await supabase
+                .from('matches')
+                .select('id, winner_color, red_team_elder_id, yellow_team_elder_id')
+                .or(`red_team_elder_id.eq.${params.id},yellow_team_elder_id.eq.${params.id}`)
 
-            const { count: winCount } = await supabase
-                .from('user_interactions')
-                .select('*', { count: 'exact', head: true })
-                .eq('user_id', params.id)
-                .eq('interaction_type', 'match_result')
-                .eq('data->>result', 'win')
+            const totalMatches = matchesData?.length || 0
+            const winCount = (matchesData || []).filter(m => {
+                const isRed = m.red_team_elder_id === params.id
+                return (isRed && m.winner_color === 'red') || (!isRed && m.winner_color === 'yellow')
+            }).length
 
             setStats({
-                totalMatches: matchCount || 0,
-                winRate: matchCount ? Math.round((winCount || 0) / matchCount * 100) : 0,
+                totalMatches,
+                winRate: totalMatches ? Math.round(winCount / totalMatches * 100) : 0,
                 globalPoints: wallet?.global_points || 0,
                 localPoints: wallet?.local_points || 0
             })

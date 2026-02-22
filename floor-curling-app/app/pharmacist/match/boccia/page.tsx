@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClientComponentClient } from '@/lib/supabase'
 import { QRScanModal } from '@/components/QRScanModal'
+import ElderSearchInput from '@/components/ElderSearchInput'
 import dynamic from 'next/dynamic'
 import toast from 'react-hot-toast'
 
@@ -27,8 +28,6 @@ export default function BocciaMatchPage() {
 
     const [redTeamIds, setRedTeamIds] = useState<string[]>([])
     const [blueTeamIds, setBlueTeamIds] = useState<string[]>([])
-    const [redInput, setRedInput] = useState('')
-    const [blueInput, setBlueInput] = useState('')
     const [storeId, setStoreId] = useState('')
     const [matchId, setMatchId] = useState<string | undefined>(undefined)
     const [ends, setEnds] = useState<BocciaEnd[]>([
@@ -73,18 +72,15 @@ export default function BocciaMatchPage() {
         setShowQRScanner(null)
     }
 
-    const addPlayer = (team: 'red' | 'blue') => {
-        const input = team === 'red' ? redInput : blueInput
-        if (!input.trim()) return
+    const addPlayer = (team: 'red' | 'blue', id: string) => {
+        if (!id.trim()) return
         if (team === 'red') {
-            if (!redTeamIds.includes(input)) {
-                setRedTeamIds(prev => [...prev, input])
-                setRedInput('')
+            if (!redTeamIds.includes(id)) {
+                setRedTeamIds(prev => [...prev, id])
             }
         } else {
-            if (!blueTeamIds.includes(input)) {
-                setBlueTeamIds(prev => [...prev, input])
-                setBlueInput('')
+            if (!blueTeamIds.includes(id)) {
+                setBlueTeamIds(prev => [...prev, id])
             }
         }
     }
@@ -192,14 +188,13 @@ export default function BocciaMatchPage() {
                                 </div>
                             ))}
                         </div>
-                        <div className="flex gap-2">
-                            <input
-                                value={redInput}
-                                onChange={e => setRedInput(e.target.value)}
-                                placeholder="輸入 ID"
-                                className="flex-1 px-3 py-2 border rounded-lg text-sm"
+                        <div className="mb-2">
+                            <ElderSearchInput
+                                onSelect={(id) => addPlayer('red', id)}
+                                excludeIds={[...redTeamIds, ...blueTeamIds]}
+                                storeId={storeId}
+                                className="w-full"
                             />
-                            <button type="button" onClick={() => addPlayer('red')} className="px-3 py-2 bg-red-100 text-red-600 rounded-lg text-sm font-bold" aria-label="加入紅隊">+</button>
                         </div>
                         <button type="button" onClick={() => setShowQRScanner('red')} className="w-full mt-2 py-2 bg-red-500 text-white rounded-lg text-sm font-bold hover:bg-red-600 transition-colors">
                             📷 掃描 QR Code
@@ -230,14 +225,13 @@ export default function BocciaMatchPage() {
                                 </div>
                             ))}
                         </div>
-                        <div className="flex gap-2">
-                            <input
-                                value={blueInput}
-                                onChange={e => setBlueInput(e.target.value)}
-                                placeholder="輸入 ID"
-                                className="flex-1 px-3 py-2 border rounded-lg text-sm"
+                        <div className="mb-2">
+                            <ElderSearchInput
+                                onSelect={(id) => addPlayer('blue', id)}
+                                excludeIds={[...redTeamIds, ...blueTeamIds]}
+                                storeId={storeId}
+                                className="w-full"
                             />
-                            <button type="button" onClick={() => addPlayer('blue')} className="px-3 py-2 bg-blue-100 text-blue-600 rounded-lg text-sm font-bold" aria-label="加入藍隊">+</button>
                         </div>
                         <button type="button" onClick={() => setShowQRScanner('blue')} className="w-full mt-2 py-2 bg-blue-500 text-white rounded-lg text-sm font-bold hover:bg-blue-600 transition-colors">
                             📷 掃描 QR Code
