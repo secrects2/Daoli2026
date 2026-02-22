@@ -33,8 +33,8 @@ export function getAiPrescription(metrics: any): AiPrescription {
             content: `偵測到投球時軀幹傾斜 ${Math.round(stability)}° (>15°)，這可能增加跌倒風險。建議加強核心肌群訓練（如坐姿轉體），並檢查輪椅擺位是否穩固。`,
             color: 'text-red-600 bg-red-50 border-red-200',
             recommendedProducts: [
-                { id: 3, name: '穩定底座 (Stable Base)', icon: '🪨', reason: '增加坐姿穩定性，降低傾斜風險' },
-                { id: 4, name: '經典藍衫', icon: '👕', reason: '舒適透氣，訓練時保持乾爽' }
+                { id: 1, name: '特製高背支撐座椅', icon: '🪑', reason: '🎽 道里國際｜含骨盆固定帶，維持投擲重心穩定' },
+                { id: 4, name: 'UC-II 膠原蛋白 + 鈣', icon: '💊', reason: '💊 宇勝生技｜強化關節軟骨與骨質結構穩定度' }
             ]
         }
     }
@@ -46,8 +46,8 @@ export function getAiPrescription(metrics: any): AiPrescription {
             content: `手肘伸展角度僅 ${Math.round(rom)}° (<160°)，未達完全伸展標準。可能是肌肉張力過高。建議投球前進行被動伸展按摩。`,
             color: 'text-orange-600 bg-orange-50 border-orange-200',
             recommendedProducts: [
-                { id: 2, name: '精準把手 (Precision Handle)', icon: '🎯', reason: '輔助握持投球，減少手部關節負擔' },
-                { id: 3, name: '穩定底座 (Stable Base)', icon: '🪨', reason: '減少投球時的姿態代償' }
+                { id: 2, name: '輔助投擲軌道 (Boccia Ramp)', icon: '🎯', reason: '🎽 道里國際｜符合 IPC BC3 標準，免持球伸展設計' },
+                { id: 5, name: '高濃度 Omega-3 魚油', icon: '🐟', reason: '💊 宇勝生技｜降低發炎反應，緩解關節不適' }
             ]
         }
     }
@@ -59,8 +59,8 @@ export function getAiPrescription(metrics: any): AiPrescription {
             content: '投球速度較慢，可能影響遠距離投擲表現。建議練習爆發力訓練（如快速推球），或嘗試減輕球重以建立神經連結。',
             color: 'text-blue-600 bg-blue-50 border-blue-200',
             recommendedProducts: [
-                { id: 1, name: '高速壺底 (Speed Base)', icon: '🚀', reason: '減少地面摩擦力，提升投擲距離' },
-                { id: 2, name: '精準把手 (Precision Handle)', icon: '🎯', reason: '增加旋轉控制力，投擲更精準' }
+                { id: 3, name: '高硬度規格地板滾球', icon: '🔴', reason: '🎽 道里國際｜低動能損耗，小力量即達高球速' },
+                { id: 6, name: 'BCAA 乳清蛋白', icon: '💪', reason: '💊 宇勝生技｜促進肌肉合成，提升出球肌耐力' }
             ]
         }
     }
@@ -70,8 +70,8 @@ export function getAiPrescription(metrics: any): AiPrescription {
         content: '各項指標均在標準範圍內，動作流暢穩定。請繼續保持目前的訓練強度，可嘗試提升投球精準度挑戰。',
         color: 'text-green-600 bg-green-50 border-green-200',
         recommendedProducts: [
-            { id: 5, name: '黃金戰袍 (Golden Jersey)', icon: '🏆', reason: '榮耀專屬——表現優異者的象徵' },
-            { id: 6, name: '冠軍披風', icon: '🦸', reason: '真正的王者才配得上的榮譽裝備' }
+            { id: 3, name: '高硬度規格地板滾球', icon: '🔴', reason: '🎽 道里國際｜進階挑戰用球，提升精準度' },
+            { id: 6, name: 'BCAA 乳清蛋白', icon: '💪', reason: '💊 宇勝生技｜維持優異狀態的營養補給' }
         ]
     }
 }
