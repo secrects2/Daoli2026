@@ -9,6 +9,7 @@ import { getAiPrescription } from '@/lib/ai-diagnosis'
 import toast from 'react-hot-toast'
 import Link from 'next/link'
 import AISetupGuideModal from '@/components/ai/AISetupGuideModal'
+import ElderSearchInput from '@/components/ElderSearchInput'
 
 export default function AITestPage() {
     const router = useRouter()
@@ -19,15 +20,8 @@ export default function AITestPage() {
     const [elderName, setElderName] = useState<string>('')
     const [isCamOpen, setIsCamOpen] = useState(false)
     const [lastMetrics, setLastMetrics] = useState<BocciaMetrics | null>(null)
-    const [manualId, setManualId] = useState('')
     // Show guide by default on first load? Or just button? Let's add state first.
     const [showGuide, setShowGuide] = useState(false)
-
-    const handleManualSubmit = async () => {
-        if (!manualId.trim()) return
-        // Reuse handleScan logic essentially
-        await handleScan(manualId.trim())
-    }
 
     // 驗證權限
     useEffect(() => {
@@ -53,22 +47,21 @@ export default function AITestPage() {
         checkUser()
     }, [router, supabase])
 
-    // [DEV] 自動填入測試用長輩 ID
+    // [DEV] 自動填入林萬海
     useEffect(() => {
         const fetchTestElder = async () => {
             try {
-                // 取得最近新增的一位長輩
+                // 取得名為林萬海的長輩
                 const { data: elder } = await supabase
                     .from('profiles')
-                    .select('id')
-                    .eq('role', 'elder')
-                    .order('created_at', { ascending: false })
-                    .limit(1)
+                    .select('id, full_name, nickname')
+                    .eq('id', '93c08e56-c71f-418d-8fb2-48885e00ff9a')
                     .single()
 
                 if (elder) {
-                    setManualId(elder.id)
-                    toast('已自動填入測試用長輩 ID', { icon: '🧪', duration: 3000 })
+                    setElderId(elder.id)
+                    setElderName(elder.full_name || elder.nickname || '林萬海')
+                    toast('已自動載入檢測對象：林萬海', { icon: '🧪', duration: 3000 })
                 }
             } catch (e) {
                 console.error('Auto-fill error', e)
@@ -160,28 +153,14 @@ export default function AITestPage() {
                         </button>
 
                         <div className="mt-8 w-full max-w-xs mx-auto border-t border-gray-100 pt-6">
-                            <p className="text-xs text-gray-400 mb-2 font-medium">或手動輸入長輩 ID</p>
-                            <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                    <span className="text-gray-400 font-mono text-sm">#</span>
-                                </div>
-                                <input
-                                    type="text"
-                                    className="block w-full pl-8 pr-20 py-3 bg-gray-50 border-gray-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-mono text-sm"
-                                    placeholder="輸入 ID (UUID)"
-                                    value={manualId}
-                                    onChange={(e) => setManualId(e.target.value)}
-                                    // 按 Enter 也可以提交
-                                    onKeyDown={(e) => e.key === 'Enter' && handleManualSubmit()}
-                                />
-                                <button
-                                    onClick={handleManualSubmit}
-                                    disabled={!manualId.trim()}
-                                    className="absolute inset-y-1.5 right-1.5 px-4 bg-white shadow-sm border border-gray-100 hover:bg-gray-50 rounded-xl text-xs font-bold text-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    確認
-                                </button>
-                            </div>
+                            <p className="text-xs text-gray-400 mb-2 font-medium">或搜尋長輩姓名</p>
+                            <ElderSearchInput
+                                onSelect={(id, name) => {
+                                    setElderId(id)
+                                    setElderName(name)
+                                    toast.success(`已載入長輩：${name}`)
+                                }}
+                            />
                         </div>
                     </div>
                 ) : (
