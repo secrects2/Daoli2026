@@ -16,7 +16,9 @@ export default function AiAnalysisSection({ elderId, showLink = false }: AiAnaly
     useEffect(() => {
         const fetchSessions = async () => {
             try {
-                const res = await fetch(`/api/elder/ai-sessions?elderId=${elderId}`)
+                const res = await fetch(`/api/elder/ai-sessions?elderId=${elderId}&t=${Date.now()}`, {
+                    cache: 'no-store'
+                })
                 const data = await res.json()
                 setAiSessions(data.sessions || [])
             } catch (err) {
