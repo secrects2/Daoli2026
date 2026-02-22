@@ -115,8 +115,9 @@ export default function EldersPage() {
                 .from('profiles')
                 .select('*')
                 .eq('role', 'elder')
+                .not('full_name', 'ilike', '%(停用)%')
                 .order('created_at', { ascending: false })
-                .limit(50) // 防止大量數據導致超時
+                .limit(200) // 排除停用帳號並放寬上限
 
             if (storeId) {
                 query = query.eq('store_id', storeId)

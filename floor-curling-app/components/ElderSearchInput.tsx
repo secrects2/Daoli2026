@@ -55,6 +55,7 @@ export default function ElderSearchInput({
                     .from('profiles')
                     .select('id, full_name, nickname')
                     .eq('role', 'elder')
+                    .not('full_name', 'ilike', '%(停用)%')
                     .or(`full_name.ilike.%${query}%,nickname.ilike.%${query}%`)
                     .limit(8)
 
