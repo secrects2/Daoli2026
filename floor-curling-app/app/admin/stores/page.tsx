@@ -54,15 +54,15 @@ export default async function AdminStoresPage() {
     const isTableMissing = errorMsg && errorMsg.includes('relation "stores" does not exist')
 
     return (
-        <div className="min-h-screen bg-gray-50 p-6">
+        <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
             <div className="max-w-6xl mx-auto">
-                <div className="flex justify-between items-center mb-6">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
                     <div>
                         <h1 className="text-2xl font-bold text-gray-900">加盟店管理 (Franchise Control)</h1>
-                        <p className="text-gray-500">管理各分店的營運狀態與權限</p>
+                        <p className="text-gray-500 text-sm sm:text-base">管理各分店的營運狀態與權限</p>
                     </div>
-                    <div className="flex gap-3">
-                        <Link href="/admin/stores/new" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors">
+                    <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
+                        <Link href="/admin/stores/new" className="flex-1 sm:flex-none text-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors">
                             + 新增加盟店
                         </Link>
                         <Link href="/admin" className="px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg hover:text-gray-900 transition-colors">
@@ -97,7 +97,7 @@ export default async function AdminStoresPage() {
                         </div>
                     </div>
                 ) : (
-                    <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+                    <div className="bg-white shadow overflow-x-auto sm:rounded-lg">
                         <table className="min-w-full divide-y divide-gray-200">
                             <thead className="bg-gray-50">
                                 <tr>
