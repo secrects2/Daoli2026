@@ -21,10 +21,8 @@ interface Match {
     winner_color: string | null
     red_team_elder_id: string
     yellow_team_elder_id: string | null
-    blue_team_elder_id: string | null
     red_total_score: number
     yellow_total_score: number | null
-    blue_total_score: number | null
     match_ends: MatchEnd[]
 }
 
@@ -87,10 +85,8 @@ export default function FamilyMatchesPage() {
                     winner_color,
                     red_team_elder_id,
                     yellow_team_elder_id,
-                    blue_team_elder_id,
                     red_total_score,
                     yellow_total_score,
-                    blue_total_score,
                     match_ends (
                         id,
                         end_number,
@@ -99,7 +95,7 @@ export default function FamilyMatchesPage() {
                         house_snapshot_url
                     )
                 `)
-                .or(`red_team_elder_id.eq.${profile.linked_elder_id},yellow_team_elder_id.eq.${profile.linked_elder_id},blue_team_elder_id.eq.${profile.linked_elder_id}`)
+                .or(`red_team_elder_id.eq.${profile.linked_elder_id},yellow_team_elder_id.eq.${profile.linked_elder_id}`)
                 .eq('status', 'completed')
                 .order('created_at', { ascending: false })
                 .limit(50)
@@ -118,8 +114,7 @@ export default function FamilyMatchesPage() {
         if (!elderId) return { text: '—', color: 'text-gray-500', won: false }
         const isRed = match.red_team_elder_id === elderId
         const won = (isRed && match.winner_color === 'red') ||
-            (match.yellow_team_elder_id === elderId && match.winner_color === 'yellow') ||
-            (match.blue_team_elder_id === elderId && match.winner_color === 'blue')
+            (match.yellow_team_elder_id === elderId && match.winner_color === 'yellow')
 
         if (match.winner_color === null) {
             return { text: '平手', color: 'text-gray-500', icon: '🤝', won: false }
@@ -131,21 +126,17 @@ export default function FamilyMatchesPage() {
 
     const getElderScore = (match: Match) => {
         if (!elderId) return { elder: 0, opponent: 0 }
+        const isRed = match.red_team_elder_id === elderId
         const isYellow = match.yellow_team_elder_id === elderId
-        const isBlue = match.blue_team_elder_id === elderId
 
-        // 判斷對手分數
         let opponentScore = 0
         let myScore = 0
 
         if (isRed) {
             myScore = match.red_total_score || 0
-            opponentScore = (match.yellow_total_score || 0) + (match.blue_total_score || 0) // One of them will be 0/null
+            opponentScore = match.yellow_total_score || 0
         } else if (isYellow) {
             myScore = match.yellow_total_score || 0
-            opponentScore = match.red_total_score || 0
-        } else if (isBlue) {
-            myScore = match.blue_total_score || 0
             opponentScore = match.red_total_score || 0
         }
 

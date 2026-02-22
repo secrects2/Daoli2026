@@ -3,6 +3,7 @@ import { LanguageProvider } from '@/lib/i18n/LanguageContext'
 import { PullToRefresh } from '@/components/PullToRefresh'
 import ToastProvider from '@/components/ToastProvider'
 import { ConfirmProvider } from '@/components/ConfirmContext'
+import NextTopLoader from 'nextjs-toploader'
 
 import { Metadata, Viewport } from 'next'
 
@@ -49,6 +50,7 @@ export default function RootLayout({
             </head>
             {/* Revert to simple white/gray background */}
             <body className="bg-gray-50 text-slate-800 min-h-screen selection:bg-blue-100 selection:text-blue-900">
+                <NextTopLoader color="#7c3aed" height={4} showSpinner={true} easing="ease" speed={200} shadow="0 0 10px #7c3aed,0 0 5px #7c3aed" zIndex={1600} />
                 <LanguageProvider>
                     <ToastProvider />
                     <ConfirmProvider>
