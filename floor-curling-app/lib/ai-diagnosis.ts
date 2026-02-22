@@ -33,8 +33,8 @@ export function getAiPrescription(metrics: any): AiPrescription {
             content: `偵測到投球時軀幹傾斜 ${Math.round(stability)}° (>15°)，這可能增加跌倒風險。建議加強核心肌群訓練（如坐姿轉體），並檢查輪椅擺位是否穩固。`,
             color: 'text-red-600 bg-red-50 border-red-200',
             recommendedProducts: [
-                { id: 2, name: '防滑運動手套', icon: '🧤', reason: '提升抓地力與穩定度，防護跌倒' },
-                { id: 4, name: '紀念毛巾', icon: '🧣', reason: '訓練後擦汗保暖，避免著涼' }
+                { id: 3, name: '穩定底座 (Stable Base)', icon: '🪨', reason: '增加坐姿穩定性，降低傾斜風險' },
+                { id: 4, name: '經典藍衫', icon: '👕', reason: '舒適透氣，訓練時保持乾爽' }
             ]
         }
     }
@@ -46,8 +46,8 @@ export function getAiPrescription(metrics: any): AiPrescription {
             content: `手肘伸展角度僅 ${Math.round(rom)}° (<160°)，未達完全伸展標準。可能是肌肉張力過高。建議投球前進行被動伸展按摩。`,
             color: 'text-orange-600 bg-orange-50 border-orange-200',
             recommendedProducts: [
-                { id: 1, name: '專業冰壺推桿', icon: '🏑', reason: '輔助上肢伸展，減少關節負擔' },
-                { id: 2, name: '防滑運動手套', icon: '🧤', reason: '保護手部關節，舒適握持' }
+                { id: 2, name: '精準把手 (Precision Handle)', icon: '🎯', reason: '輔助握持投球，減少手部關節負擔' },
+                { id: 3, name: '穩定底座 (Stable Base)', icon: '🪨', reason: '減少投球時的姿態代償' }
             ]
         }
     }
@@ -59,8 +59,8 @@ export function getAiPrescription(metrics: any): AiPrescription {
             content: '投球速度較慢，可能影響遠距離投擲表現。建議練習爆發力訓練（如快速推球），或嘗試減輕球重以建立神經連結。',
             color: 'text-blue-600 bg-blue-50 border-blue-200',
             recommendedProducts: [
-                { id: 3, name: '能量營養棒', icon: '🍫', reason: '快速補充能量，提升爆發力' },
-                { id: 1, name: '專業冰壺推桿', icon: '🏑', reason: '利用槓桿原理增加推球速度' }
+                { id: 1, name: '高速壺底 (Speed Base)', icon: '🚀', reason: '減少地面摩擦力，提升投擲距離' },
+                { id: 2, name: '精準把手 (Precision Handle)', icon: '🎯', reason: '增加旋轉控制力，投擲更精準' }
             ]
         }
     }
@@ -70,8 +70,8 @@ export function getAiPrescription(metrics: any): AiPrescription {
         content: '各項指標均在標準範圍內，動作流暢穩定。請繼續保持目前的訓練強度，可嘗試提升投球精準度挑戰。',
         color: 'text-green-600 bg-green-50 border-green-200',
         recommendedProducts: [
-            { id: 4, name: '紀念毛巾', icon: '🧣', reason: '獎勵日常訓練的專屬紀念品' },
-            { id: 3, name: '能量營養棒', icon: '🍫', reason: '維持優異表現的能量補給' }
+            { id: 5, name: '黃金戰袍 (Golden Jersey)', icon: '🏆', reason: '榮耀專屬——表現優異者的象徵' },
+            { id: 6, name: '冠軍披風', icon: '🦸', reason: '真正的王者才配得上的榮譽裝備' }
         ]
     }
 }
