@@ -76,7 +76,7 @@ function calculateAngle3D(a: Point3D, b: Point3D, c: Point3D): number {
 
 /** 3D 空間傾斜角：肩膀連線相對水平面的真實夾角 */
 function calculateTilt3D(a: Point3D, b: Point3D): number {
-    // 肩膀連線的 3D 向量
+    // 肩膀連線的 3D 向量（已是真實像素座標）
     const dx = b.x - a.x
     const dy = b.y - a.y
     const dz = (b.z || 0) - (a.z || 0)
@@ -85,10 +85,25 @@ function calculateTilt3D(a: Point3D, b: Point3D): number {
     const horizontalLength = Math.sqrt(dx * dx + dz * dz)
 
     // 傾斜角 = arctan(垂直差 / 水平投影長度)
-    // 當肩膀左右同高時，dy ≈ 0，角度 ≈ 0°
-    // 即使鏡頭有角度(z軸差異)，水平投影也能正確反映真實距離
     if (horizontalLength === 0) return Math.abs(dy) > 0.01 ? 90 : 0
     return Math.abs(Math.atan2(dy, horizontalLength) * (180 / Math.PI))
+}
+
+// ============ 專利核心：長寬比感知 (Aspect-Ratio Aware) ============
+// MediaPipe 輸出正規化座標 (0.0~1.0)，但直式拍攝(9:16)時
+// X軸和Y軸的像素尺度不同，直接計算會造成角度壓縮約 0.56 倍
+// 此函式將正規化座標還原為真實像素座標，徹底消除長寬比干擾
+function toRealPixels(
+    landmark: { x: number; y: number; z: number; visibility?: number },
+    imageWidth: number,
+    imageHeight: number
+): Point3D {
+    return {
+        x: landmark.x * imageWidth,
+        y: landmark.y * imageHeight,
+        // MediaPipe 文檔：z 與 x 同尺度，故乘以 imageWidth
+        z: (landmark.z || 0) * imageWidth,
+    }
 }
 
 const UPPER_BODY_CONNECTIONS: [number, number][] = [
@@ -154,34 +169,47 @@ export default function BocciaCam({
 
         const landmarks = results.poseLandmarks
         const now = Date.now()
+        const W = video.videoWidth || 640  // 像素寬度
+        const H = video.videoHeight || 480  // 像素高度
+
+        // 專利核心：長寬比感知轉換 (Aspect-Ratio Aware)
+        // 將 MediaPipe 正規化座標 (0~1) 還原為真實像素座標
+        // 直式 9:16 時 W=480, H=640，若不還原會導致角度壓縮 ~56%
 
         // 1. A. Elbow ROM (Shoulder-Elbow-Wrist)
-        const shoulder = landmarks[LANDMARKS.RIGHT_SHOULDER]
-        const elbow = landmarks[LANDMARKS.RIGHT_ELBOW]
-        const wrist = landmarks[LANDMARKS.RIGHT_WRIST]
+        const shoulder = toRealPixels(landmarks[LANDMARKS.RIGHT_SHOULDER], W, H)
+        const elbow = toRealPixels(landmarks[LANDMARKS.RIGHT_ELBOW], W, H)
+        const wrist = toRealPixels(landmarks[LANDMARKS.RIGHT_WRIST], W, H)
         const elbowROM = calculateAngle3D(shoulder, elbow, wrist)
 
-        // 2. B. Trunk Stability (3D Shoulder Tilt - 排除視角干擾)
-        const leftShoulder = landmarks[LANDMARKS.LEFT_SHOULDER]
-        const rightShoulder = landmarks[LANDMARKS.RIGHT_SHOULDER]
+        // 2. B. Trunk Stability (3D Shoulder Tilt - 排除視角+長寬比干擾)
+        const leftShoulder = toRealPixels(landmarks[LANDMARKS.LEFT_SHOULDER], W, H)
+        const rightShoulder = toRealPixels(landmarks[LANDMARKS.RIGHT_SHOULDER], W, H)
         const trunkTilt = calculateTilt3D(leftShoulder, rightShoulder)
 
-        // 3. C. Velocity (Wrist Speed) - Normalized
+        // 3. C. Velocity (Wrist Speed) - Aspect-Ratio Aware
         let velocity = 0
-        if (wrist && wrist.visibility > 0.5) {
+        const rawWristLandmark = landmarks[LANDMARKS.RIGHT_WRIST]
+        if (rawWristLandmark && rawWristLandmark.visibility > 0.5) {
             if (prevWristRef.current) {
                 const dt = (now - prevWristRef.current.time) / 1000
                 if (dt > 0) {
-                    const dx = wrist.x - prevWristRef.current.x
-                    const dy = wrist.y - prevWristRef.current.y
-                    const dz = (wrist.z || 0) - prevWristRef.current.z
-                    // 3D 歐式距離：包含深度方向的運動
+                    // 使用真實像素座標計算速度
+                    const rawWrist = landmarks[LANDMARKS.RIGHT_WRIST]
+                    const realWrist = toRealPixels(rawWrist, W, H)
+                    const dx = realWrist.x - prevWristRef.current.x
+                    const dy = realWrist.y - prevWristRef.current.y
+                    const dz = realWrist.z - prevWristRef.current.z
+                    // 3D 歐式距離（像素級）
                     const dist = Math.sqrt(dx * dx + dy * dy + dz * dz)
-                    // Normalize speed roughly to screens/sec
-                    velocity = Math.round((dist / dt) * 100)
+                    // 歸一化速度：除以對角線長度來消除解析度差異
+                    const diagonal = Math.sqrt(W * W + H * H)
+                    velocity = Math.round((dist / diagonal / dt) * 100)
                 }
             }
-            prevWristRef.current = { x: wrist.x, y: wrist.y, z: wrist.z || 0, time: now }
+            const rawWristForRef = landmarks[LANDMARKS.RIGHT_WRIST]
+            const realWristForRef = toRealPixels(rawWristForRef, W, H)
+            prevWristRef.current = { x: realWristForRef.x, y: realWristForRef.y, z: realWristForRef.z, time: now }
         }
 
         const isArmExtended = elbowROM >= 160
@@ -270,17 +298,18 @@ export default function BocciaCam({
             }
         }
 
-        if (elbow && elbow.visibility > 0.5) {
+        const rawElbow = landmarks[LANDMARKS.RIGHT_ELBOW]
+        if (rawElbow && rawElbow.visibility > 0.5) {
             ctx.font = 'bold 16px sans-serif'
             ctx.fillStyle = isArmExtended ? sideColors.primary : '#EF4444'
-            ctx.fillText(`${Math.round(elbowROM)}°`, elbow.x * canvas.width + 10, elbow.y * canvas.height - 10)
+            ctx.fillText(`${Math.round(elbowROM)}°`, rawElbow.x * canvas.width + 10, rawElbow.y * canvas.height - 10)
         }
 
         // Draw Velocity
-        if (wrist && wrist.visibility > 0.5 && velocity > 10) {
+        if (rawWristLandmark && rawWristLandmark.visibility > 0.5 && velocity > 10) {
             ctx.font = 'bold 14px monospace'
             ctx.fillStyle = '#10B981'
-            ctx.fillText(`V: ${velocity}`, wrist.x * canvas.width + 10, wrist.y * canvas.height + 20)
+            ctx.fillText(`↑${velocity}`, rawWristLandmark.x * canvas.width + 10, rawWristLandmark.y * canvas.height + 20)
         }
 
         const newMetrics: BocciaMetrics = {
