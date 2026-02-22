@@ -3,6 +3,7 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react'
 import Webcam from 'react-webcam'
 import { saveRehabSession } from '@/app/actions/rehab'
+import { getAiPrescription } from '@/lib/ai-diagnosis'
 
 /**
  * BocciaCam - AI 視覺分析組件
@@ -294,7 +295,7 @@ export default function BocciaCam({
     }, [onMetricsUpdate, sideColors.primary])
 
     // Session Report State
-    const [sessionReport, setSessionReport] = useState<{ metrics: any; prescription: { title: string; content: string; color: string } } | null>(null)
+    const [sessionReport, setSessionReport] = useState<{ metrics: any; prescription: any } | null>(null)
 
     // Remove Live Prescription (User requested post-session only)
     /* 
@@ -332,29 +333,8 @@ export default function BocciaCam({
                     : 0,
             }
 
-            // Generate Prescription for Report
-            // Simple logic here to match "The Brain"
-            let reportPrescription = { title: '✅ 動作表現優異', content: '各項指標均在標準範圍內，動作流暢穩定。', color: 'text-green-600 bg-green-50 border-green-200' }
-
-            if (avgTilt > 15) {
-                reportPrescription = {
-                    title: '⚠️ 核心穩定度警示',
-                    content: `偵測到平均軀幹傾斜 ${avgTilt}° (>15°)，建議加強核心肌群訓練。`,
-                    color: 'text-red-600 bg-red-50 border-red-200'
-                }
-            } else if (avgRom < 160) {
-                reportPrescription = {
-                    title: '💪 上肢伸展受限',
-                    content: `平均手肘伸展僅 ${avgRom}° (<160°)，可能是肌肉張力過高。`,
-                    color: 'text-orange-600 bg-orange-50 border-orange-200'
-                }
-            } else if (avgVelocity < 30) {
-                reportPrescription = {
-                    title: '⚡ 發力速度偏慢',
-                    content: '投球速度較慢，建議練習爆發力訓練。',
-                    color: 'text-blue-600 bg-blue-50 border-blue-200'
-                }
-            }
+            // 使用共享的 AI 處方引擎（與長者詳情頁一致）
+            const aiPrescription = getAiPrescription(metricsPayload)
 
             const result = await saveRehabSession({
                 elderId,
@@ -369,7 +349,7 @@ export default function BocciaCam({
                 // Show Report instead of closing immediately
                 setSessionReport({
                     metrics: metricsPayload,
-                    prescription: reportPrescription
+                    prescription: aiPrescription
                 })
             } else {
                 setError(result.error || '儲存失敗')
@@ -442,40 +422,75 @@ export default function BocciaCam({
     // Render Report View if sessionReport exists
     if (sessionReport) {
         return (
-            <div className={`relative bg-gray-900 flex flex-col items-center justify-center p-6 h-full ${className}`}>
-                <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-6 animate-fade-in-up">
+            <div className={`relative bg-gray-900 flex flex-col items-center justify-start p-4 pt-8 h-full overflow-y-auto ${className}`}>
+                <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-5 animate-fade-in-up">
                     <div className="text-center border-b pb-4 border-gray-100">
                         <h3 className="text-2xl font-black text-gray-900">📊 AI 檢測報告</h3>
-                        <p className="text-sm text-gray-500 mt-1">Detection Complete</p>
+                        <p className="text-sm text-gray-500 mt-1">Detection Complete — 3D 空間向量分析</p>
                     </div>
 
                     {/* 3 Metrics Grid */}
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-3 gap-3">
                         <div className="text-center p-3 bg-gray-50 rounded-xl">
-                            <p className="text-xs text-gray-500 mb-1">平均 ROM</p>
+                            <p className="text-xs text-gray-500 mb-1">手肘 ROM</p>
                             <p className={`text-2xl font-black ${sessionReport.metrics.avg_rom < 160 ? 'text-orange-500' : 'text-gray-900'}`}>
                                 {sessionReport.metrics.avg_rom}°
                             </p>
                         </div>
                         <div className="text-center p-3 bg-gray-50 rounded-xl">
-                            <p className="text-xs text-gray-500 mb-1">平均傾斜</p>
+                            <p className="text-xs text-gray-500 mb-1">軀幹傾斜</p>
                             <p className={`text-2xl font-black ${sessionReport.metrics.avg_trunk_tilt > 15 ? 'text-red-500' : 'text-gray-900'}`}>
                                 {sessionReport.metrics.avg_trunk_tilt}°
                             </p>
                         </div>
                         <div className="text-center p-3 bg-gray-50 rounded-xl">
-                            <p className="text-xs text-gray-500 mb-1">平均速度</p>
+                            <p className="text-xs text-gray-500 mb-1">出手速度</p>
                             <p className="text-2xl font-black text-emerald-600">
                                 {sessionReport.metrics.avg_velocity}
                             </p>
                         </div>
                     </div>
 
-                    {/* Prescription Card */}
+                    {/* 穩定率 */}
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                        <span className="text-sm font-bold text-gray-600">動作穩定率</span>
+                        <div className="flex items-center gap-2">
+                            <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                <div
+                                    className={`h-full rounded-full transition-all ${(sessionReport.metrics.stable_ratio || 0) >= 70 ? 'bg-green-500' : (sessionReport.metrics.stable_ratio || 0) >= 40 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                                    style={{ width: `${sessionReport.metrics.stable_ratio || 0}%` }}
+                                />
+                            </div>
+                            <span className="text-lg font-black text-gray-900">{sessionReport.metrics.stable_ratio || 0}%</span>
+                        </div>
+                    </div>
+
+                    {/* AI 處方卡片 */}
                     <div className={`p-5 rounded-xl border-l-4 ${sessionReport.prescription.color}`}>
                         <h4 className="font-bold text-lg mb-2">{sessionReport.prescription.title}</h4>
                         <p className="text-sm opacity-90">{sessionReport.prescription.content}</p>
                     </div>
+
+                    {/* AI 智能推薦 - 與長者詳情頁一致 */}
+                    {sessionReport.prescription.recommendedProducts && sessionReport.prescription.recommendedProducts.length > 0 && (
+                        <div className="p-5 rounded-xl border border-indigo-100 bg-gradient-to-br from-indigo-50 to-purple-50 shadow-sm relative overflow-hidden">
+                            <div className="absolute -top-4 -right-4 text-7xl opacity-5">💡</div>
+                            <h4 className="font-bold text-base text-indigo-900 mb-3 flex items-center gap-2 relative z-10">
+                                <span>✨</span> AI 智能推薦
+                            </h4>
+                            <div className="space-y-2 relative z-10">
+                                {sessionReport.prescription.recommendedProducts.map((product: any, idx: number) => (
+                                    <div key={idx} className="bg-white/90 backdrop-blur-sm p-3 rounded-xl flex items-center gap-3 shadow-sm border border-indigo-50">
+                                        <div className="text-2xl bg-indigo-50/50 w-10 h-10 flex items-center justify-center rounded-lg flex-shrink-0">{product.icon}</div>
+                                        <div className="min-w-0">
+                                            <p className="font-bold text-gray-900 text-sm">{product.name}</p>
+                                            <p className="text-xs text-gray-600 mt-0.5">{product.reason}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
                     <button
                         onClick={onClose}
