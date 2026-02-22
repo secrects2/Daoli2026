@@ -114,14 +114,14 @@ export async function GET(request: Request) {
         process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
 
-    // Fetch wallet data (dual points)
+    // Fetch wallet data (dual points - 兩種運動積分合併)
     const { data: wallet } = await supabase
         .from('wallets')
         .select('global_points, local_points')
         .eq('user_id', id)
         .single()
 
-    // Fetch recent matches for this elder
+    // Fetch recent matches for this elder (ALL sports combined)
     const startOfWeek = new Date()
     startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay())
 
@@ -141,15 +141,45 @@ export async function GET(request: Request) {
         }
     })
 
-    // Fetch recent matches with results
-    const { data: recentMatchesData } = await supabase
+    // ============ 地壺球 (Curling) 比賽 ============
+    const { data: curlingMatchesData } = await supabase
         .from('matches')
-        .select('created_at, winner_color, red_team_elder_id, yellow_team_elder_id')
+        .select('created_at, winner_color, red_team_elder_id, yellow_team_elder_id, sport_type')
+        .or(`red_team_elder_id.eq.${id},yellow_team_elder_id.eq.${id}`)
+        .or('sport_type.eq.curling,sport_type.is.null')
+        .order('created_at', { ascending: false })
+        .limit(5)
+
+    // Filter to curling only (sport_type is null or 'curling')
+    const curlingOnly = (curlingMatchesData || []).filter(m => !m.sport_type || m.sport_type === 'curling')
+
+    const recentMatches = curlingOnly.map(m => {
+        const isRed = m.red_team_elder_id === id
+        let result: string
+        if (!m.winner_color) {
+            result = 'draw'
+        } else if ((isRed && m.winner_color === 'red') || (!isRed && m.winner_color === 'yellow')) {
+            result = 'win'
+        } else {
+            result = 'loss'
+        }
+        return {
+            date: new Date(m.created_at).toLocaleDateString('zh-TW', { month: 'numeric', day: 'numeric' }),
+            result,
+            points: result === 'win' ? 100 : result === 'draw' ? 50 : 10
+        }
+    })
+
+    // ============ 地板滾球 (Boccia) 比賽 ============
+    const { data: bocciaMatchesData } = await supabase
+        .from('matches')
+        .select('created_at, winner_color, red_team_elder_id, yellow_team_elder_id, sport_type')
+        .eq('sport_type', 'boccia')
         .or(`red_team_elder_id.eq.${id},yellow_team_elder_id.eq.${id}`)
         .order('created_at', { ascending: false })
         .limit(5)
 
-    const recentMatches = (recentMatchesData || []).map(m => {
+    const recentBocciaMatches = (bocciaMatchesData || []).map(m => {
         const isRed = m.red_team_elder_id === id
         let result: string
         if (!m.winner_color) {
@@ -174,7 +204,8 @@ export async function GET(request: Request) {
         globalPoints: wallet?.global_points || 0,
         localPoints: wallet?.local_points || 0,
         history,
-        recentMatches,
+        recentMatches,        // 地壺球
+        recentBocciaMatches,  // 地板滾球
         healthMetrics,
     })
 }

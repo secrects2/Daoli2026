@@ -194,7 +194,7 @@ export default function HealthClient({ elderId, elderName }: HealthClientProps) 
                 {/* Section Divider */}
                 <div className="flex items-center gap-2 px-2">
                     <span className="w-1.5 h-6 bg-blue-500 rounded-full"></span>
-                    <h3 className="font-bold text-gray-900 text-xl tracking-tight">地壺球賽事表現</h3>
+                    <h3 className="font-bold text-gray-900 text-xl tracking-tight">🥌 地壺球賽事表現</h3>
                 </div>
 
                 {/* Summary Cards */}
@@ -256,6 +256,47 @@ export default function HealthClient({ elderId, elderName }: HealthClientProps) 
                                                 <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${match.result === 'win' ? 'bg-yellow-100 text-yellow-800' : match.result === 'loss' ? 'bg-gray-100 text-gray-600' : 'bg-blue-100 text-blue-800'}`}>
                                                     {match.result === 'win' ? '勝利' : match.result === 'loss' ? '完賽' : '平局'}
                                                 </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="font-black text-lg text-gray-900">+{match.points}</p>
+                                        <p className="text-xs font-medium text-gray-500">積分</p>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+
+                {/* ============ 地板滾球 (Boccia) Section ============ */}
+                <div className="flex items-center gap-2 px-2 mt-2">
+                    <span className="w-1.5 h-6 bg-orange-500 rounded-full"></span>
+                    <h3 className="font-bold text-gray-900 text-xl tracking-tight">🎯 地板滾球賽事表現</h3>
+                </div>
+
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div className="p-5 border-b border-gray-100 flex items-center gap-2 bg-orange-50/50">
+                        <span>🎯</span>
+                        <h3 className="font-bold text-gray-900">最新滾球賽事紀錄</h3>
+                    </div>
+                    <div className="divide-y divide-gray-100">
+                        {!stats?.recentBocciaMatches || stats.recentBocciaMatches.length === 0 ? (
+                            <div className="p-8 text-center text-gray-500">尚未有地板滾球比賽紀錄</div>
+                        ) : (
+                            stats.recentBocciaMatches.map((match: any, index: number) => (
+                                <div key={index} className="p-5 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                                    <div className="flex items-center gap-4">
+                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl shadow-sm ${match.result === 'win' ? 'bg-gradient-to-br from-yellow-100 to-amber-200 text-yellow-700' : match.result === 'loss' ? 'bg-gradient-to-br from-gray-100 to-gray-200 text-gray-600' : 'bg-gradient-to-br from-blue-100 to-blue-200 text-blue-700'}`}>
+                                            {match.result === 'win' ? '🏆' : match.result === 'loss' ? '💪' : '🤝'}
+                                        </div>
+                                        <div>
+                                            <p className="font-bold text-gray-900">{match.date}</p>
+                                            <div className="flex items-center gap-1.5 mt-0.5">
+                                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${match.result === 'win' ? 'bg-yellow-100 text-yellow-800' : match.result === 'loss' ? 'bg-gray-100 text-gray-600' : 'bg-blue-100 text-blue-800'}`}>
+                                                    {match.result === 'win' ? '勝利' : match.result === 'loss' ? '完賽' : '平局'}
+                                                </span>
+                                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-100 text-orange-700">滾球</span>
                                             </div>
                                         </div>
                                     </div>

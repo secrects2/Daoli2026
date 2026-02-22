@@ -149,7 +149,7 @@ export default function ElderStatsPage() {
                 {/* Section Divider */}
                 <div className="flex items-center gap-2 px-2">
                     <span className="w-1.5 h-6 bg-blue-500 rounded-full"></span>
-                    <h3 className="font-bold text-gray-900 text-lg">地壺球賽事表現</h3>
+                    <h3 className="font-bold text-gray-900 text-lg">🥌 地壺球賽事表現</h3>
                 </div>
 
                 {/* Summary Cards */}
@@ -207,6 +207,44 @@ export default function ElderStatsPage() {
                                 </div>
                             </div>
                         ))}
+                    </div>
+                </div>
+
+                {/* ============ 地板滾球 Section ============ */}
+                <div className="flex items-center gap-2 px-2 mt-2">
+                    <span className="w-1.5 h-6 bg-orange-500 rounded-full"></span>
+                    <h3 className="font-bold text-gray-900 text-lg">🎯 地板滾球賽事表現</h3>
+                </div>
+
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div className="p-4 border-b border-gray-100">
+                        <h3 className="font-bold text-gray-900">詳細紀錄</h3>
+                    </div>
+                    <div className="divide-y divide-gray-100">
+                        {!stats?.recentBocciaMatches || stats.recentBocciaMatches.length === 0 ? (
+                            <div className="p-8 text-center text-gray-500">尚未有地板滾球比賽紀錄</div>
+                        ) : (
+                            stats.recentBocciaMatches.map((match: any, index: number) => (
+                                <div key={index} className="p-4 flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg ${match.result === 'win' ? 'bg-yellow-100 text-yellow-600' : match.result === 'loss' ? 'bg-gray-100 text-gray-500' : 'bg-blue-50 text-blue-500'}`}>
+                                            {match.result === 'win' ? '🏆' : match.result === 'loss' ? '💪' : '🤝'}
+                                        </div>
+                                        <div>
+                                            <p className="font-medium text-gray-900">{match.date}</p>
+                                            <p className="text-xs text-gray-500">
+                                                {match.result === 'win' ? '勝利' : match.result === 'loss' ? '完賽' : '平局'}
+                                                <span className="ml-1 text-orange-500 font-bold">滾球</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="font-bold text-gray-900">+{match.points}</p>
+                                        <p className="text-xs text-gray-500">積分</p>
+                                    </div>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </div>
             </div>
