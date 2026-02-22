@@ -47,24 +47,47 @@ const LANDMARKS = {
     RIGHT_HIP: 24,
 }
 
-function calculateAngle(
-    a: { x: number; y: number },
-    b: { x: number; y: number },
-    c: { x: number; y: number }
-): number {
-    const radians = Math.atan2(c.y - b.y, c.x - b.x) - Math.atan2(a.y - b.y, a.x - b.x)
-    let angle = Math.abs((radians * 180) / Math.PI)
-    if (angle > 180) angle = 360 - angle
-    return angle
+// ============ 專利核心：3D 空間向量運算（排除視角干擾）============
+// 使用 MediaPipe 的 3D 座標 (x, y, z) 進行真實空間角度計算
+// 無論鏡頭角度為 0° 或 60°，系統都能計算出真實的關節角度與軀幹傾斜
+
+type Point3D = { x: number; y: number; z: number }
+
+/** 3D 向量點積法計算關節角度 (Shoulder-Elbow-Wrist) */
+function calculateAngle3D(a: Point3D, b: Point3D, c: Point3D): number {
+    // 向量 BA = A - B
+    const ba = { x: a.x - b.x, y: a.y - b.y, z: (a.z || 0) - (b.z || 0) }
+    // 向量 BC = C - B
+    const bc = { x: c.x - b.x, y: c.y - b.y, z: (c.z || 0) - (b.z || 0) }
+
+    // 點積 BA · BC
+    const dot = ba.x * bc.x + ba.y * bc.y + ba.z * bc.z
+    // 向量長度 |BA| 和 |BC|
+    const magBA = Math.sqrt(ba.x ** 2 + ba.y ** 2 + ba.z ** 2)
+    const magBC = Math.sqrt(bc.x ** 2 + bc.y ** 2 + bc.z ** 2)
+
+    if (magBA === 0 || magBC === 0) return 0
+
+    // cos(θ) = (BA · BC) / (|BA| × |BC|)
+    const cosTheta = Math.max(-1, Math.min(1, dot / (magBA * magBC)))
+    return Math.acos(cosTheta) * (180 / Math.PI)
 }
 
-function calculateTilt(
-    a: { x: number; y: number },
-    b: { x: number; y: number }
-): number {
+/** 3D 空間傾斜角：肩膀連線相對水平面的真實夾角 */
+function calculateTilt3D(a: Point3D, b: Point3D): number {
+    // 肩膀連線的 3D 向量
     const dx = b.x - a.x
     const dy = b.y - a.y
-    return Math.abs(Math.atan2(dy, dx) * (180 / Math.PI))
+    const dz = (b.z || 0) - (a.z || 0)
+
+    // 水平面上的投影長度 (x-z 平面)
+    const horizontalLength = Math.sqrt(dx * dx + dz * dz)
+
+    // 傾斜角 = arctan(垂直差 / 水平投影長度)
+    // 當肩膀左右同高時，dy ≈ 0，角度 ≈ 0°
+    // 即使鏡頭有角度(z軸差異)，水平投影也能正確反映真實距離
+    if (horizontalLength === 0) return Math.abs(dy) > 0.01 ? 90 : 0
+    return Math.abs(Math.atan2(dy, horizontalLength) * (180 / Math.PI))
 }
 
 const UPPER_BODY_CONNECTIONS: [number, number][] = [
@@ -92,7 +115,7 @@ export default function BocciaCam({
     const metricsHistoryRef = useRef<{ rom: number; tilt: number; velocity: number }[]>([])
 
     // Velocity Tracking
-    const prevWristRef = useRef<{ x: number, y: number, time: number } | null>(null)
+    const prevWristRef = useRef<{ x: number, y: number, z: number, time: number } | null>(null)
 
     const [metrics, setMetrics] = useState<BocciaMetrics>({
         elbowROM: null, trunkStability: null, velocity: null,
@@ -135,12 +158,12 @@ export default function BocciaCam({
         const shoulder = landmarks[LANDMARKS.RIGHT_SHOULDER]
         const elbow = landmarks[LANDMARKS.RIGHT_ELBOW]
         const wrist = landmarks[LANDMARKS.RIGHT_WRIST]
-        const elbowROM = calculateAngle(shoulder, elbow, wrist)
+        const elbowROM = calculateAngle3D(shoulder, elbow, wrist)
 
-        // 2. B. Trunk Stability (Shoulder Tilt)
+        // 2. B. Trunk Stability (3D Shoulder Tilt - 排除視角干擾)
         const leftShoulder = landmarks[LANDMARKS.LEFT_SHOULDER]
         const rightShoulder = landmarks[LANDMARKS.RIGHT_SHOULDER]
-        const trunkTilt = calculateTilt(leftShoulder, rightShoulder)
+        const trunkTilt = calculateTilt3D(leftShoulder, rightShoulder)
 
         // 3. C. Velocity (Wrist Speed) - Normalized
         let velocity = 0
@@ -150,12 +173,14 @@ export default function BocciaCam({
                 if (dt > 0) {
                     const dx = wrist.x - prevWristRef.current.x
                     const dy = wrist.y - prevWristRef.current.y
-                    const dist = Math.sqrt(dx * dx + dy * dy)
+                    const dz = (wrist.z || 0) - prevWristRef.current.z
+                    // 3D 歐式距離：包含深度方向的運動
+                    const dist = Math.sqrt(dx * dx + dy * dy + dz * dz)
                     // Normalize speed roughly to screens/sec
                     velocity = Math.round((dist / dt) * 100)
                 }
             }
-            prevWristRef.current = { x: wrist.x, y: wrist.y, time: now }
+            prevWristRef.current = { x: wrist.x, y: wrist.y, z: wrist.z || 0, time: now }
         }
 
         const isArmExtended = elbowROM >= 160
