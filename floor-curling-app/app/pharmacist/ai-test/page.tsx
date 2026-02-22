@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClientComponentClient } from '@/lib/supabase'
 import { QRScanModal } from '@/components/QRScanModal'
 import BocciaCam, { BocciaMetrics } from '@/components/ai/BocciaCam'
+import { getAiPrescription } from '@/lib/ai-diagnosis'
 import toast from 'react-hot-toast'
 import Link from 'next/link'
 import AISetupGuideModal from '@/components/ai/AISetupGuideModal'
@@ -240,26 +241,66 @@ export default function AITestPage() {
                                 </button>
 
                                 {lastMetrics && (
-                                    <div className="bg-white rounded-3xl p-6 border border-gray-100">
-                                        <h4 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                            <span>📊 上次檢測結果</span>
-                                            <span className="text-xs font-normal text-gray-400 bg-gray-100 px-2 py-1 rounded-full">剛剛</span>
-                                        </h4>
-                                        <div className="grid grid-cols-3 gap-3">
-                                            <div className="p-3 bg-gray-50 rounded-xl text-center">
-                                                <p className="text-xs text-gray-400">ROM</p>
-                                                <p className="text-xl font-black text-gray-900">{lastMetrics.elbowROM}°</p>
-                                            </div>
-                                            <div className="p-3 bg-gray-50 rounded-xl text-center">
-                                                <p className="text-xs text-gray-400">穩定度</p>
-                                                <p className="text-xl font-black text-gray-900">{lastMetrics.trunkStability}°</p>
-                                            </div>
-                                            <div className="p-3 bg-gray-50 rounded-xl text-center">
-                                                <p className="text-xs text-gray-400">速度</p>
-                                                <p className="text-xl font-black text-gray-900">{lastMetrics.velocity}</p>
+                                    <>
+                                        <div className="bg-white rounded-3xl p-6 border border-gray-100">
+                                            <h4 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                                <span>📊 上次檢測結果</span>
+                                                <span className="text-xs font-normal text-gray-400 bg-gray-100 px-2 py-1 rounded-full">剛剛</span>
+                                            </h4>
+                                            <div className="grid grid-cols-3 gap-3">
+                                                <div className="p-3 bg-gray-50 rounded-xl text-center">
+                                                    <p className="text-xs text-gray-400">ROM</p>
+                                                    <p className="text-xl font-black text-gray-900">{lastMetrics.elbowROM}°</p>
+                                                </div>
+                                                <div className="p-3 bg-gray-50 rounded-xl text-center">
+                                                    <p className="text-xs text-gray-400">穩定度</p>
+                                                    <p className="text-xl font-black text-gray-900">{lastMetrics.trunkStability}°</p>
+                                                </div>
+                                                <div className="p-3 bg-gray-50 rounded-xl text-center">
+                                                    <p className="text-xs text-gray-400">速度</p>
+                                                    <p className="text-xl font-black text-gray-900">{lastMetrics.velocity}</p>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
+
+                                        {/* AI 處方建議 */}
+                                        {(() => {
+                                            const prescription = getAiPrescription({
+                                                elbowROM: lastMetrics.elbowROM,
+                                                trunkStability: lastMetrics.trunkStability,
+                                                velocity: lastMetrics.velocity,
+                                            })
+                                            return (
+                                                <div className="space-y-4">
+                                                    <div className={`rounded-2xl p-5 border ${prescription.color}`}>
+                                                        <h4 className="text-lg font-black mb-2">{prescription.title}</h4>
+                                                        <p className="text-sm leading-relaxed">{prescription.content}</p>
+                                                    </div>
+
+                                                    <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+                                                        <div className="p-4 border-b border-gray-100 bg-gray-50">
+                                                            <h4 className="font-bold text-gray-900 flex items-center gap-2">
+                                                                <span>🛒</span> AI 推薦解決方案
+                                                            </h4>
+                                                        </div>
+                                                        <div className="divide-y divide-gray-50">
+                                                            {prescription.recommendedProducts.map((product) => (
+                                                                <div key={product.id} className="p-4 flex items-center gap-3 hover:bg-gray-50 transition-colors">
+                                                                    <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-xl flex-shrink-0">
+                                                                        {product.icon}
+                                                                    </div>
+                                                                    <div className="flex-1 min-w-0">
+                                                                        <p className="font-bold text-gray-900 text-sm">{product.name}</p>
+                                                                        <p className="text-xs text-gray-500 mt-0.5">{product.reason}</p>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )
+                                        })()}
+                                    </>
                                 )}
                             </div>
                         )}
