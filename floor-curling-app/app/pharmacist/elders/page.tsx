@@ -15,6 +15,7 @@ interface Elder {
     email?: string
     full_name?: string
     nickname?: string
+    avatar_url?: string
 }
 
 interface Wallet {
@@ -129,10 +130,26 @@ export default function EldersPage() {
 
             setElders(eldersData || [])
 
-            // 獲取錢包數據 (限制為前 50 個)
+            // 獲取錢包數據和比賽統計
             if (eldersData && eldersData.length > 0) {
-                const elderIds = eldersData.slice(0, 50).map(e => e.id)
+                const elderIds = eldersData.map(e => e.id)
 
+                // Split into batches of 100 for large lists to avoid URL length limits
+                const mapWalletsAndStats = async (ids: string[]) => {
+                    const { data: walletsData } = await supabase
+                        .from('wallets')
+                        .select('user_id, global_points, local_points')
+                        .in('user_id', ids)
+
+                    const { data: matchesData } = await supabase
+                        .from('matches')
+                        .select('id, red_team_elder_id, yellow_team_elder_id, winner_color')
+                        .or(ids.map(id => `red_team_elder_id.eq.${id},yellow_team_elder_id.eq.${id}`).join(','))
+
+                    return { walletsData, matchesData }
+                }
+
+                // Instead of chunking, simplest approach for now since limit is 200
                 const { data: walletsData, error: walletsError } = await supabase
                     .from('wallets')
                     .select('user_id, global_points, local_points')
@@ -321,11 +338,19 @@ export default function EldersPage() {
                                     {/* 頭部 */}
                                     <div className="flex items-start justify-between mb-4">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
-                                                <span className="text-white text-lg font-bold">
-                                                    👴
-                                                </span>
-                                            </div>
+                                            {elder.avatar_url ? (
+                                                <img
+                                                    src={elder.avatar_url}
+                                                    alt="Avatar"
+                                                    className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm"
+                                                />
+                                            ) : (
+                                                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center shadow-sm border-2 border-white">
+                                                    <span className="text-white text-lg font-bold">
+                                                        👴
+                                                    </span>
+                                                </div>
+                                            )}
                                             <div>
                                                 <p className="text-sm font-medium text-gray-900 truncate max-w-[150px]" title={elder.full_name || elder.nickname || elder.id}>
                                                     {elder.full_name || elder.nickname || `長輩 ${elder.id.slice(0, 4)}`}
