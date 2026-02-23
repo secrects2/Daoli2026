@@ -92,7 +92,7 @@ export default function GenericElderDetailPage() {
 
             // 4. Fetch Equipment (Simulated via Point Transactions)
             const allProducts = [
-                { id: 1, name: '專業冰壺推桿', icon: '🏑', price: 500 },
+                { id: 1, name: '專業滾球輔具', icon: '🎯', price: 500 },
                 { id: 2, name: '防滑運動手套', icon: '🧤', price: 200 },
                 { id: 3, name: '能量營養棒', icon: '🍫', price: 150 },
                 { id: 4, name: '紀念毛巾', icon: '🧣', price: 300 },
@@ -464,7 +464,7 @@ export default function GenericElderDetailPage() {
                         </div>
                     </div>
 
-                    {/* Stats Summary */}
+                    {/* 暫時隱藏地壺球生涯戰績
                     <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                         <h3 className="font-bold text-gray-900 mb-4">生涯戰績</h3>
                         <div className="space-y-4">
@@ -484,6 +484,7 @@ export default function GenericElderDetailPage() {
                             </div>
                         </div>
                     </div>
+                    */}
                 </div>
 
                 {/* Health Metrics Dashboard */}

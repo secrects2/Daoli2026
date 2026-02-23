@@ -241,10 +241,10 @@ export default function HealthClient({ elderId, elderName }: HealthClientProps) 
                         <h3 className="font-bold text-gray-900">最新賽事紀錄</h3>
                     </div>
                     <div className="divide-y divide-gray-100">
-                        {!stats?.recentMatches || stats.recentMatches.length === 0 ? (
-                            <div className="p-8 text-center text-gray-500">尚未有比賽紀錄</div>
+                        {!stats?.recentBocciaMatches || stats.recentBocciaMatches.length === 0 ? (
+                            <div className="p-8 text-center text-gray-500">尚未有地板滾球比賽紀錄</div>
                         ) : (
-                            stats.recentMatches.map((match: any, index: number) => (
+                            stats.recentBocciaMatches.map((match: any, index: number) => (
                                 <div key={index} className="p-5 flex items-center justify-between hover:bg-gray-50 transition-colors">
                                     <div className="flex items-center gap-4">
                                         <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl shadow-sm ${match.result === 'win' ? 'bg-gradient-to-br from-yellow-100 to-amber-200 text-yellow-700' : match.result === 'loss' ? 'bg-gradient-to-br from-gray-100 to-gray-200 text-gray-600' : 'bg-gradient-to-br from-blue-100 to-blue-200 text-blue-700'}`}>

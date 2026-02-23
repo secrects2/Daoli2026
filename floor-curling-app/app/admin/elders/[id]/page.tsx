@@ -78,7 +78,7 @@ export default function ElderDetailPage() {
             // 4. Fetch Equipment (Simulated via Point Transactions)
             // Get all products first (mock list reused from shop API)
             const allProducts = [
-                { id: 1, name: '專業冰壺推桿', icon: '🏑', price: 500 },
+                { id: 1, name: '專業滾球輔具', icon: '🎯', price: 500 },
                 { id: 2, name: '防滑運動手套', icon: '🧤', price: 200 },
                 { id: 3, name: '能量營養棒', icon: '🍫', price: 150 },
                 { id: 4, name: '紀念毛巾', icon: '🧣', price: 300 },
@@ -220,6 +220,8 @@ export default function ElderDetailPage() {
                                     <img
                                         src={f.avatar_url || 'https://api.dicebear.com/7.x/avataaars/svg?seed=fam'}
                                         className="w-12 h-12 rounded-full bg-gray-100"
+                                        alt={`${f.full_name} 的頭像`}
+                                        title={`${f.full_name} 的頭像`}
                                     />
                                     <div>
                                         <p className="font-bold text-gray-900">{f.full_name}</p>

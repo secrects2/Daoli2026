@@ -98,6 +98,7 @@ export default function PharmacistDashboardClient({ profile, stats, chartData }:
                 <div>
                     <h3 className="ml-1 mb-3 text-xs font-bold text-gray-400 uppercase tracking-widest">選擇運動項目</h3>
                     <div className="grid grid-cols-2 gap-4">
+                        {/* 暫時隱藏地壺球
                         <Link href="/pharmacist/match/new" className="group relative bg-gradient-to-br from-blue-500 to-blue-700 rounded-3xl p-6 shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] overflow-hidden">
                             <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-8 translate-x-8" />
                             <div className="relative z-10">
@@ -110,6 +111,7 @@ export default function PharmacistDashboardClient({ profile, stats, chartData }:
                                 </div>
                             </div>
                         </Link>
+                        */}
                         <Link href="/pharmacist/match/boccia" className="group relative bg-gradient-to-br from-orange-500 to-red-600 rounded-3xl p-6 shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] overflow-hidden">
                             <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-8 translate-x-8" />
                             <div className="relative z-10">
@@ -151,6 +153,7 @@ export default function PharmacistDashboardClient({ profile, stats, chartData }:
                 <div>
                     <h3 className="ml-1 mb-3 text-xs font-bold text-gray-400 uppercase tracking-widest">快速操作</h3>
                     <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 divide-y divide-gray-100">
+                        {/* 暫時隱藏創建地壺球比賽
                         <Link href="/pharmacist/match/new" className="p-4 flex items-center gap-4 hover:bg-gray-50 transition-colors group">
                             <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
@@ -161,6 +164,7 @@ export default function PharmacistDashboardClient({ profile, stats, chartData }:
                             </div>
                             <svg className="w-5 h-5 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
                         </Link>
+                        */}
 
                         <Link href="/pharmacist/match/history" className="p-4 flex items-center gap-4 hover:bg-gray-50 transition-colors group">
                             <div className="w-10 h-10 bg-green-100 text-green-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">

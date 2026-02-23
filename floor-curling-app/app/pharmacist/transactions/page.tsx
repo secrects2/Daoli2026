@@ -210,8 +210,8 @@ export default function TransactionsPage() {
                                 <button
                                     onClick={() => setFilter('all')}
                                     className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${filter === 'all'
-                                            ? 'bg-blue-600 text-white'
-                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                        ? 'bg-blue-600 text-white'
+                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                         }`}
                                 >
                                     全部
@@ -221,8 +221,8 @@ export default function TransactionsPage() {
                                         key={key}
                                         onClick={() => setFilter(key)}
                                         className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${filter === key
-                                                ? 'bg-blue-600 text-white'
-                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                            ? 'bg-blue-600 text-white'
+                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                             }`}
                                     >
                                         {icon} {label}
@@ -245,8 +245,8 @@ export default function TransactionsPage() {
                                         key={item.key}
                                         onClick={() => setDateRange(item.key as any)}
                                         className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${dateRange === item.key
-                                                ? 'bg-green-600 text-white'
-                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                            ? 'bg-green-600 text-white'
+                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                             }`}
                                     >
                                         {item.label}

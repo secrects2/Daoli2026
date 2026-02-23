@@ -30,6 +30,10 @@ export default function FamilyShopClient({ user, elder, products, aiSessions = [
     const [showNoteModal, setShowNoteModal] = useState(false)
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
 
+    // 暫時隱藏地壺球相關裝備
+    const floorCurlingKeywords = ['壺', '底座', '把手', '藍衫', '戰袍', '披風', '徽章']
+    const displayProducts = products.filter(p => !floorCurlingKeywords.some(kw => p.name.includes(kw)))
+
     const handleBuyClick = (product: Product) => {
         if (!elder) {
             toast.error('請先綁定長輩帳號')
@@ -148,13 +152,13 @@ export default function FamilyShopClient({ user, elder, products, aiSessions = [
                     </div>
                 )}
 
-                {products.length === 0 ? (
+                {displayProducts.length === 0 ? (
                     <div className="text-center py-16">
                         <p className="text-gray-500">目前沒有可購買的商品</p>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {products.map(product => (
+                        {displayProducts.map(product => (
                             <div key={product.id} className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-all border border-transparent hover:border-blue-200">
                                 <div className="aspect-video bg-gray-100 p-6 flex items-center justify-center">
                                     <img src={product.image_url} alt={product.name} className="w-full h-full object-contain mix-blend-multiply" />

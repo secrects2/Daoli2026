@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -45,6 +45,25 @@ export default function PortalClient({ user, profile, elders, wallet }: PortalCl
     // Get current elder
     const currentElder = elders[selectedElderIndex]?.elder
     const hasElders = elders.length > 0
+
+    const [stats, setStats] = useState<any>(null)
+
+    useEffect(() => {
+        if (!currentElder?.id) return
+
+        const fetchStats = async () => {
+            try {
+                const res = await fetch(`/api/elder/stats?id=${currentElder.id}`)
+                if (res.ok) {
+                    const data = await res.json()
+                    setStats(data)
+                }
+            } catch (err) {
+                console.error("Failed to fetch elder stats:", err)
+            }
+        }
+        fetchStats()
+    }, [currentElder?.id])
 
     const handleLogout = async () => {
         if (await confirm({ message: '確定要登出嗎？', confirmLabel: '登出', variant: 'danger' })) {
@@ -182,9 +201,10 @@ export default function PortalClient({ user, profile, elders, wallet }: PortalCl
                                 </div>
 
                                 <div className="flex flex-col gap-2">
+                                    {/* 地板滾球相關本週比賽 */}
                                     <div className="flex items-baseline gap-2 bg-black/10 rounded-xl px-4 py-2 backdrop-blur-sm self-start md:self-auto">
-                                        <span className="text-xs text-white/70 font-medium uppercase tracking-wider">本週比賽</span>
-                                        <span className="text-xl font-bold">0 場</span>
+                                        <span className="text-xs text-white/70 font-medium uppercase tracking-wider">本週地板滾球</span>
+                                        <span className="text-xl font-bold">{stats?.recentBocciaMatches?.length || 0} 場</span>
                                     </div>
                                     <div className="flex items-center gap-2 text-indigo-100 text-xs font-medium">
                                         <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
@@ -261,14 +281,14 @@ export default function PortalClient({ user, profile, elders, wallet }: PortalCl
                             </div>
                         </Link>
 
-                        {/* Matches */}
-                        <Link href="/family/matches" className="group bg-white rounded-3xl p-6 shadow-sm border border-gray-100 hover:shadow-md hover:border-blue-200 transition-all flex flex-col justify-between h-40">
+                        {/* 地板滾球比賽記錄入口 */}
+                        <Link href="/family/health" className="group bg-white rounded-3xl p-6 shadow-sm border border-gray-100 hover:shadow-md hover:border-blue-200 transition-all flex flex-col justify-between h-40">
                             <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform duration-300">
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
                             </div>
                             <div>
-                                <h4 className="text-lg font-bold text-gray-900">比賽紀錄</h4>
-                                <p className="text-xs text-gray-500 mt-1">查看詳細數據</p>
+                                <h4 className="text-lg font-bold text-gray-900">地板滾球紀錄</h4>
+                                <p className="text-xs text-gray-500 mt-1">查看滾球賽事數據</p>
                             </div>
                         </Link>
 
