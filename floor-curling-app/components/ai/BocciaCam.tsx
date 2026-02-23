@@ -535,7 +535,7 @@ export default function BocciaCam({
     return (
         <div className={`relative bg-black overflow-hidden flex flex-col ${className}`}>
             {/* Top Bar - Transparent Overlay */}
-            <div className={`absolute top-0 left-0 right-0 z-20 p-4 flex justify-between items-start bg-gradient-to-b from-black/80 to-transparent pointer-events-none`}>
+            <div className={`absolute top-0 left-0 right-0 z-20 p-4 flex justify-end items-start bg-gradient-to-b from-black/80 to-transparent pointer-events-none`}>
                 {/* Team Badge - Move to right */}
                 <div className={`px-3 py-1 bg-black/50 backdrop-blur rounded-full border border-white/10 flex items-center gap-2`}>
                     <div className={`w-2 h-2 rounded-full ${side === 'red' ? 'bg-red-500' : 'bg-blue-500'}`} />
