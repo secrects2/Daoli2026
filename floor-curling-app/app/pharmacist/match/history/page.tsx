@@ -156,6 +156,8 @@ export default function MatchHistoryPage() {
                             <button
                                 onClick={() => router.push('/pharmacist/dashboard')}
                                 className="mr-4 text-gray-600 hover:text-gray-900"
+                                title="返回"
+                                aria-label="返回"
                             >
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -281,8 +283,8 @@ export default function MatchHistoryPage() {
                                             }`}>
                                             <p className="text-sm text-red-600 font-medium mb-1">{t('matchHistory.red')}</p> {/* Updated */}
                                             <p className="text-3xl font-bold text-red-700">{scores.red}</p>
-                                            <p className="text-xs text-gray-500 mt-1 truncate" title={match.red_team_elder_id}>
-                                                {match.red_team_elder_id.slice(0, 8)}...
+                                            <p className="text-xs text-gray-500 mt-1 truncate" title={match.red_team_elder_id || ''}>
+                                                {match.red_team_elder_id?.slice(0, 8) || ''}...
                                             </p>
                                         </div>
                                         <div className="flex items-center justify-center">
@@ -294,8 +296,8 @@ export default function MatchHistoryPage() {
                                             }`}>
                                             <p className="text-sm text-yellow-600 font-medium mb-1">{t('matchHistory.yellow')}</p> {/* Updated */}
                                             <p className="text-3xl font-bold text-yellow-700">{scores.yellow}</p>
-                                            <p className="text-xs text-gray-500 mt-1 truncate" title={match.yellow_team_elder_id}>
-                                                {match.yellow_team_elder_id.slice(0, 8)}...
+                                            <p className="text-xs text-gray-500 mt-1 truncate" title={match.yellow_team_elder_id || ''}>
+                                                {match.yellow_team_elder_id?.slice(0, 8) || ''}...
                                             </p>
                                         </div>
                                     </div>

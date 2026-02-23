@@ -26,6 +26,12 @@ export default function ElderShopClient({ user, points: initialPoints, products 
     const [points, setPoints] = useState(initialPoints)
     const [purchasing, setPurchasing] = useState<string | null>(null)
 
+    // 暫時隱藏地壺球相關商品
+    const hideKeywords = ['壺', '底座', '把手', '藍衫', '戰袍', '披風', '徽章']
+    const filteredProducts = products.filter(product => {
+        return !hideKeywords.some(keyword => product.name.includes(keyword))
+    })
+
     const handleBuy = async (product: Product) => {
         if (!await confirm({ message: `確定要花費 ${product.price_points} 積分購買「${product.name}」嗎？`, confirmLabel: '購買' })) return
 
@@ -71,7 +77,7 @@ export default function ElderShopClient({ user, points: initialPoints, products 
             <div className="p-4 space-y-6">
                 {/* Categories - Simplified for now */}
                 <div className="space-y-4">
-                    {products.map(product => (
+                    {filteredProducts.map(product => (
                         <div key={product.id} className="bg-white rounded-2xl p-4 shadow-sm flex gap-4 items-center">
                             <div className="w-24 h-24 bg-gray-50 rounded-xl flex-shrink-0 p-2">
                                 <img src={product.image_url} alt={product.name} className="w-full h-full object-contain" />
