@@ -33,8 +33,8 @@ export function getAiPrescription(metrics: any): AiPrescription {
             content: `偵測到投球時軀幹傾斜 ${Math.round(stability)}° (>15°)，這可能增加跌倒風險。建議加強核心肌群訓練（如坐姿轉體），並檢查輪椅擺位是否穩固。`,
             color: 'text-red-600 bg-red-50 border-red-200',
             recommendedProducts: [
-                { id: 1, name: '特製高背支撐座椅', icon: '🪑', reason: '含骨盆固定帶，維持投擲重心穩定' },
-                { id: 4, name: 'UC-II 膠原蛋白 + 鈣', icon: '💊', reason: '強化關節軟骨與骨質結構穩定度' }
+                { id: 1, name: '銀髮族核心強化基礎班', icon: '🧘‍♀️', reason: '改善軀幹控制，預防跌倒風險' },
+                { id: 2, name: '輪椅擺位與姿勢評估諮詢', icon: '📋', reason: '專業物理治療師一對一穩定度評估' }
             ]
         }
     }
@@ -46,8 +46,8 @@ export function getAiPrescription(metrics: any): AiPrescription {
             content: `手肘伸展角度僅 ${Math.round(rom)}° (<160°)，未達完全伸展標準。可能是肌肉張力過高。建議投球前進行被動伸展按摩。`,
             color: 'text-orange-600 bg-orange-50 border-orange-200',
             recommendedProducts: [
-                { id: 2, name: '輔助投擲軌道 (Boccia Ramp)', icon: '🎯', reason: '符合 IPC BC3 標準，免持球伸展設計' },
-                { id: 5, name: '高濃度 Omega-3 魚油', icon: '🐟', reason: '降低發炎反應，緩解關節不適' }
+                { id: 3, name: '上肢關節活動度(ROM)伸展課程', icon: '🙆', reason: '透過指導伸展降低肌肉張力' },
+                { id: 4, name: '筋膜放鬆與按摩舒緩療程', icon: '💆', reason: '緩解長時間不動造成的肌肉緊繃' }
             ]
         }
     }
@@ -59,8 +59,8 @@ export function getAiPrescription(metrics: any): AiPrescription {
             content: '投球速度較慢，可能影響遠距離投擲表現。建議練習爆發力訓練（如快速推球），或嘗試減輕球重以建立神經連結。',
             color: 'text-blue-600 bg-blue-50 border-blue-200',
             recommendedProducts: [
-                { id: 3, name: '高硬度規格地板滾球', icon: '🔴', reason: '低動能損耗，小力量即達高球速' },
-                { id: 6, name: 'BCAA 乳清蛋白', icon: '💪', reason: '促進肌肉合成，提升出球肌耐力' }
+                { id: 5, name: '彈力帶上肢爆發力訓練營', icon: '💪', reason: '建立肌肉神經連結，提升投擲動能' },
+                { id: 6, name: '營養師增肌飲食指導規劃', icon: '🍎', reason: '配合訓練，有效提升出球肌耐力' }
             ]
         }
     }
@@ -70,8 +70,8 @@ export function getAiPrescription(metrics: any): AiPrescription {
         content: '各項指標均在標準範圍內，動作流暢穩定。請繼續保持目前的訓練強度，可嘗試提升投球精準度挑戰。',
         color: 'text-green-600 bg-green-50 border-green-200',
         recommendedProducts: [
-            { id: 3, name: '高硬度規格地板滾球', icon: '🔴', reason: '進階挑戰用球，提升精準度' },
-            { id: 6, name: 'BCAA 乳清蛋白', icon: '💪', reason: '維持優異狀態的營養補給' }
+            { id: 7, name: '進階地板滾球戰術與精準度專班', icon: '🎯', reason: '挑戰極限，提升實戰對抗能力' },
+            { id: 8, name: '常態社區地板滾球俱樂部會籍', icon: '🏆', reason: '保持訓練頻率與社交互動' }
         ]
     }
 }

@@ -35,6 +35,7 @@ graph TD
     
     L --> M[數據存檔與閉環<br>Training Session DB]
     M --> N[長期趨勢分析<br>Long-term Analysis]
+    M --> RX_AI[AI 智慧配套推薦<br>客製化課程與服務]
 
     subgraph Optimize [坐姿優化識別 Sitting Optimization]
     O[排除下肢雜訊] --> P[專注上半身 Up-Body ROI]
@@ -132,5 +133,5 @@ graph LR
 *   **具體實施方式**：
     *   **輸入**：影像數據 (RGB Frames)。
     *   **處理**：長寬比感知與下擺拋球降噪、骨架節點座標轉換、幾何角度計算、物理速度推導。
-    *   **輸出**：量化指標數據 (ROM 角度、穩定度警示)。
+    *   **輸出**：量化指標數據 (ROM 角度、穩定度警示)、客製化智慧配套課程推薦。
 *   **進步性 (Inventive Step)**：強調本發明與既有技術之差異（例如：針對「亞健康長輩坐姿」的優化演算法、即時視覺回饋機制）。
