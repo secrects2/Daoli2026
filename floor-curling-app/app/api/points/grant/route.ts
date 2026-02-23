@@ -2,6 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { z } from 'zod'
 
+const grantPointsSchema = z.object({
+    elderId: z.string(),
+    localPoints: z.number().int().positive(),
+    description: z.string().optional(),
+    storeId: z.string()
+})
+
 export async function POST(req: NextRequest) {
     // 使用 Service Role Key 繞過 RLS
     const supabaseAdmin = createClient(

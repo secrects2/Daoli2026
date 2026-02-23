@@ -112,8 +112,8 @@ export default function MetricDetailModal({
                                     <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
                                     <YAxis hide />
                                     <Tooltip
-                                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', fontSize: 12 }}
-                                        formatter={(value: number) => [`${value.toLocaleString()} ${unit}`, title]}
+                                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', fontSize: '12px' }}
+                                        formatter={(value: any) => [`${Number(value || 0).toLocaleString()} ${unit}`, title]}
                                     />
                                     <Bar dataKey="value" fill={color} radius={[6, 6, 0, 0]} />
                                 </BarChart>
@@ -123,8 +123,8 @@ export default function MetricDetailModal({
                                     <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
                                     <YAxis hide />
                                     <Tooltip
-                                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', fontSize: 12 }}
-                                        formatter={(value: number) => [`${value.toLocaleString()} ${unit}`, title]}
+                                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', fontSize: '12px' }}
+                                        formatter={(value: any) => [`${Number(value || 0).toLocaleString()} ${unit}`, title]}
                                     />
                                     <Line type="monotone" dataKey="value" stroke={color} strokeWidth={3} dot={{ r: 4, fill: color, strokeWidth: 0 }} activeDot={{ r: 7, stroke: '#fff', strokeWidth: 3 }} />
                                 </LineChart>
