@@ -199,7 +199,7 @@ export default function AITestPage() {
 
                         {/* Camera Section */}
                         {isCamOpen ? (
-                            <div className="fixed inset-0 z-50 bg-black flex flex-col justify-center">
+                            <div className="fixed inset-0 z-[100] bg-black flex flex-col justify-center">
                                 <BocciaCam
                                     elderId={elderId}
                                     side="blue" // Default to blue/neutral for test

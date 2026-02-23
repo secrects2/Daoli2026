@@ -338,7 +338,7 @@ export default function EvidencePage() {
             {/* 媒體預覽模態框 */}
             {viewingMedia && (
                 <div
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
+                    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90"
                     onClick={() => setViewingMedia(null)}
                 >
                     <button

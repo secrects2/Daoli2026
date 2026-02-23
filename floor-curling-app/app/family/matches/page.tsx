@@ -289,7 +289,7 @@ export default function FamilyMatchesPage() {
             {/* 照片預覽 */}
             {viewingPhoto && (
                 <div
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
+                    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90"
                     onClick={() => setViewingPhoto(null)}
                 >
                     <button

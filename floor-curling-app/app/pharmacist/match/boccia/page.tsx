@@ -302,7 +302,7 @@ export default function BocciaMatchPage() {
 
             {/* AI Analysis Modal */}
             {aiTarget && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
                     <div className="w-full max-w-lg h-[80vh] bg-gray-900 rounded-3xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
                         <BocciaCam
                             elderId={aiTarget.elderId}

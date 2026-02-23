@@ -642,7 +642,7 @@ export default function NewMatchPage() {
                 </form>
 
                 {loading && uploadProgress && (
-                    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center">
+                    <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center">
                         <div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl animate-scale-in">
                             <div className="w-16 h-16 border-4 border-blue-100 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
                             <h3 className="text-xl font-bold text-gray-900 mb-2">{t('matchNew.processing')}</h3>

@@ -117,7 +117,7 @@ export default function FamilyPhotosPage() {
             {/* Lightbox for Photos */}
             {viewingPhoto && (
                 <div
-                    className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4 backdrop-blur-sm"
+                    className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4 backdrop-blur-sm"
                     onClick={() => setViewingPhoto(null)}
                 >
                     <button className="absolute top-4 right-4 text-white p-2">

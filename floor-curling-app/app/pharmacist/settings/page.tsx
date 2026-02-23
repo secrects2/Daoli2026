@@ -49,14 +49,21 @@ export default function SettingsPage() {
                 if (store) {
                     setStoreInfo({
                         id: store.id,
-                        name: store.name,
+                        name: store.name || '',
                         address: store.address || '',
                         phone: store.phone || '',
                         contact_name: store.contact_name || ''
                     })
                 }
-
-
+            } else {
+                // Create a placeholder if no store id is linked (useful for admins/pharmacists without an assigned store yet)
+                setStoreInfo({
+                    id: '',
+                    name: '',
+                    address: '',
+                    phone: '',
+                    contact_name: ''
+                })
             }
             setLoading(false)
         }
@@ -128,10 +135,16 @@ export default function SettingsPage() {
                                 <input
                                     type="text"
                                     value={storeInfo.name}
-                                    readOnly
-                                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-600 focus:outline-none"
+                                    readOnly={!!storeInfo.id}
+                                    onChange={(e) => !storeInfo.id && setStoreInfo({ ...storeInfo, name: e.target.value })}
+                                    placeholder={!storeInfo.id ? "尚未綁定店舖" : ""}
+                                    className={`w-full border rounded-lg px-3 py-2 ${storeInfo.id ? 'bg-gray-50 border-gray-200 text-gray-600 focus:outline-none' : 'bg-white border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'}`}
                                 />
-                                <p className="text-[10px] text-gray-400 mt-1">店名已固定，若需修改請聯繫總部</p>
+                                {storeInfo.id ? (
+                                    <p className="text-[10px] text-gray-400 mt-1">店名已固定，若需修改請聯繫總部</p>
+                                ) : (
+                                    <p className="text-[10px] text-orange-500 mt-1">目前為自由身份，尚未綁定店舖資訊</p>
+                                )}
                             </div>
 
                             <div>
@@ -169,7 +182,7 @@ export default function SettingsPage() {
 
                             <button
                                 onClick={handleSaveStoreInfo}
-                                disabled={saving}
+                                disabled={saving || !storeInfo.id}
                                 className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-bold py-3 rounded-xl transition-colors mt-2"
                             >
                                 {saving ? "儲存中..." : "儲存資料"}

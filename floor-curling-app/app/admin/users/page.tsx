@@ -315,7 +315,7 @@ export default function AdminUsersPage() {
 
             {/* Modal */}
             {showModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm">
                     <div className="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 p-6">
                         <h3 className="text-xl font-bold text-gray-900 mb-4">
                             {editingUser ? '編輯用戶' : '新增用戶'}

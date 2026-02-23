@@ -322,7 +322,7 @@ export default function AdminProductsPage() {
 
             {/* 新增/編輯彈窗 */}
             {showModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
                     <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6">
                         <h3 className="text-xl font-bold text-gray-900 mb-4">
                             {editingProduct ? '編輯商品' : '新增商品'}
