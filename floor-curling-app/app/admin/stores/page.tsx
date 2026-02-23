@@ -32,6 +32,10 @@ export default async function AdminStoresPage() {
         name: string
         status: string
         created_at: string
+        contact_name?: string
+        phone?: string
+        address?: string
+        profiles?: { count: number }[]
     }
 
     let stores: Store[] = []
@@ -108,6 +112,12 @@ export default async function AdminStoresPage() {
                                         狀態 (Status)
                                     </th>
                                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        聯絡人 / 電話
+                                    </th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        地址
+                                    </th>
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         成員數
                                     </th>
                                     <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -136,6 +146,13 @@ export default async function AdminStoresPage() {
                                                     }`}>
                                                     {store.status.toUpperCase()}
                                                 </span>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="text-sm text-gray-900">{store.contact_name || '-'}</div>
+                                                <div className="text-sm text-gray-500">{store.phone || '-'}</div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap max-w-[200px] truncate text-sm text-gray-500" title={store.address}>
+                                                {store.address || '-'}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 {store.profiles && store.profiles[0] ? store.profiles[0].count : '-'}
