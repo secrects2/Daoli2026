@@ -13,7 +13,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     try {
         const { params } = context
         const id = (await params).id // Await params here
-        const { nickname, notes } = await request.json()
+        const { nickname, notes, emergency_contact_name, emergency_contact_phone, health_notes } = await request.json()
         const cookieStore = await cookies()
 
         const supabase = createServerClient(
@@ -38,7 +38,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
         // Update
         const { error } = await supabaseAdmin
             .from('profiles')
-            .update({ nickname, notes }) // Ensure 'notes' column exists or ignore if not
+            .update({ nickname, notes, emergency_contact_name, emergency_contact_phone, health_notes }) // Ensure 'notes' column exists or ignore if not
             .eq('id', id)
 
         if (error) throw error

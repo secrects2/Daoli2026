@@ -31,7 +31,7 @@ export default function GenericElderDetailPage() {
     // UI States
     const [isEditing, setIsEditing] = useState(false)
     const [showBindingQR, setShowBindingQR] = useState(false)
-    const [editData, setEditData] = useState({ nickname: '', notes: '' })
+    const [editData, setEditData] = useState({ nickname: '', notes: '', emergency_contact_name: '', emergency_contact_phone: '', health_notes: '' })
 
     const supabase = createBrowserClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -243,7 +243,7 @@ export default function GenericElderDetailPage() {
             if (!res.ok) throw new Error(result.error)
 
             // Update local state
-            setElder((prev: any) => ({ ...prev, nickname: editData.nickname, notes: editData.notes })) // notes might be missing in schema but let's assume
+            setElder((prev: any) => ({ ...prev, ...editData }))
             setIsEditing(false)
             toast.success('更新成功')
         } catch (err: any) {
@@ -265,7 +265,7 @@ export default function GenericElderDetailPage() {
                     <div className="flex gap-2">
                         {/* Binding QR Modal */}
                         {showBindingQR && (
-                            <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" onClick={() => setShowBindingQR(false)}>
+                            <div className="fixed inset-0 z-50 bg-black/80 flex items-start justify-center pt-20 px-4 pb-10 overflow-y-auto" onClick={() => setShowBindingQR(false)}>
                                 <div className="bg-white rounded-2xl p-8 max-w-sm w-full text-center space-y-6" onClick={e => e.stopPropagation()}>
                                     <h3 className="text-xl font-bold text-gray-900">家屬綁定 QR Code</h3>
                                     <div className="flex justify-center">
@@ -317,7 +317,13 @@ export default function GenericElderDetailPage() {
                         </button>
                         <button
                             onClick={() => {
-                                setEditData({ nickname: elder.nickname || '', notes: elder.notes || '' })
+                                setEditData({
+                                    nickname: elder.nickname || '',
+                                    notes: elder.notes || '',
+                                    emergency_contact_name: elder.emergency_contact_name || '',
+                                    emergency_contact_phone: elder.emergency_contact_phone || '',
+                                    health_notes: elder.health_notes || ''
+                                })
                                 setIsEditing(true)
                             }}
                             className="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg font-medium transition-colors"
@@ -340,15 +346,54 @@ export default function GenericElderDetailPage() {
                 <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col md:flex-row gap-6 items-center md:items-start relative">
                     {/* Edit Modal / Overlay */}
                     {isEditing && (
-                        <div className="absolute inset-0 z-20 bg-white/95 backdrop-blur-sm rounded-2xl p-6 flex flex-col justify-center items-center">
-                            <h3 className="font-bold text-lg mb-4">編輯資料</h3>
-                            <div className="w-full max-w-sm space-y-4">
+                        <div className="absolute inset-x-0 inset-y-0 z-20 bg-white/95 backdrop-blur-sm rounded-2xl p-4 md:p-6 flex flex-col justify-start items-center overflow-y-auto">
+                            <h3 className="font-bold text-lg mb-4 mt-2">編輯資料</h3>
+                            <div className="w-full md:w-[400px] space-y-4 pb-16 text-left">
                                 <div>
                                     <label className="text-xs text-gray-500 block mb-1">暱稱</label>
                                     <input
                                         type="text"
                                         value={editData.nickname}
                                         onChange={e => setEditData(prev => ({ ...prev, nickname: e.target.value }))}
+                                        className="w-full px-3 py-2 border rounded-lg"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-xs text-gray-500 block mb-1">緊急聯絡人姓名</label>
+                                    <input
+                                        type="text"
+                                        value={editData.emergency_contact_name}
+                                        onChange={e => setEditData(prev => ({ ...prev, emergency_contact_name: e.target.value }))}
+                                        className="w-full px-3 py-2 border rounded-lg"
+                                        placeholder="例如：王曉明 (兒子)"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-xs text-gray-500 block mb-1">緊急聯絡人電話</label>
+                                    <input
+                                        type="text"
+                                        value={editData.emergency_contact_phone}
+                                        onChange={e => setEditData(prev => ({ ...prev, emergency_contact_phone: e.target.value }))}
+                                        className="w-full px-3 py-2 border rounded-lg"
+                                        placeholder="例如：0912-345-678"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-xs text-gray-500 block mb-1">健康注意事項</label>
+                                    <input
+                                        type="text"
+                                        value={editData.health_notes}
+                                        onChange={e => setEditData(prev => ({ ...prev, health_notes: e.target.value }))}
+                                        className="w-full px-3 py-2 border rounded-lg"
+                                        placeholder="例如：高血壓、糖尿病"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-xs text-gray-500 block mb-1">一般備註</label>
+                                    <input
+                                        type="text"
+                                        value={editData.notes}
+                                        onChange={e => setEditData(prev => ({ ...prev, notes: e.target.value }))}
                                         className="w-full px-3 py-2 border rounded-lg"
                                     />
                                 </div>
@@ -400,19 +445,19 @@ export default function GenericElderDetailPage() {
                             <span>📋</span> 健康與備註
                         </h3>
                         <div className="space-y-4">
-                            {/* Static health info (mocked for now) */}
+                            {/* Dynamic health info from database */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="p-3 bg-gray-50 rounded-lg">
                                     <p className="text-xs text-gray-500 mb-1">緊急聯絡人</p>
-                                    <p className="font-medium">王曉明 (兒子)</p>
-                                    <p className="text-sm text-blue-600">0988-888-888</p>
+                                    <p className="font-medium">{elder.emergency_contact_name || '無'}</p>
+                                    <p className="text-sm text-blue-600">{elder.emergency_contact_phone || '無電話資料'}</p>
                                 </div>
                                 <div className="p-3 bg-gray-50 rounded-lg">
                                     <p className="text-xs text-gray-500 mb-1">健康注意事項</p>
-                                    <p className="font-medium text-red-600">高血壓、膝蓋舊傷</p>
+                                    <p className="font-medium text-red-600">{elder.health_notes || '無'}</p>
                                 </div>
                             </div>
-                            {/* Notes from Profile or Mocked */}
+                            {/* Notes from Profile */}
                             <div className="p-3 bg-blue-50 text-blue-800 text-sm rounded-lg">
                                 💡 備註：{elder.notes || '尚無備註'}
                             </div>

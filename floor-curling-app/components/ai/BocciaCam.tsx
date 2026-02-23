@@ -56,10 +56,13 @@ type Point3D = { x: number; y: number; z: number }
 
 /** 3D 向量點積法計算關節角度 (Shoulder-Elbow-Wrist) */
 function calculateAngle3D(a: Point3D, b: Point3D, c: Point3D): number {
-    // 向量 BA = A - B
-    const ba = { x: a.x - b.x, y: a.y - b.y, z: (a.z || 0) - (b.z || 0) }
-    // 向量 BC = C - B
-    const bc = { x: c.x - b.x, y: c.y - b.y, z: (c.z || 0) - (b.z || 0) }
+    // 專利下擺拋球優化 (Underhand Throw Optimization)：
+    // 當手臂往正前方伸直時，相機深度的 Z 軸變化會被 MediaPipe 放縮導致 90 度的誤判。
+    // 這裡我們針對 ROM 角度的計算，將 Z 軸的權重降低到 0.2 (20%)，
+    // 讓系統更專注在正面的 X/Y 軸伸展度，同時保留一部分深度資訊。
+    const zWeight = 0.2;
+    const ba = { x: a.x - b.x, y: a.y - b.y, z: ((a.z || 0) - (b.z || 0)) * zWeight }
+    const bc = { x: c.x - b.x, y: c.y - b.y, z: ((c.z || 0) - (b.z || 0)) * zWeight }
 
     // 點積 BA · BC
     const dot = ba.x * bc.x + ba.y * bc.y + ba.z * bc.z
@@ -495,7 +498,7 @@ export default function BocciaCam({
                     </div>
 
                     {/* AI 處方卡片 */}
-                    <div className={`p-5 rounded-xl border-l-4 ${sessionReport.prescription.color}`}>
+                    <div className={`p-5 rounded-xl border-l-4 ${sessionReport.prescription.color} bg-white shadow-sm`}>
                         <h4 className="font-bold text-lg mb-2">{sessionReport.prescription.title}</h4>
                         <p className="text-sm opacity-90">{sessionReport.prescription.content}</p>
                     </div>

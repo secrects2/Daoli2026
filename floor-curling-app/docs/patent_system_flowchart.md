@@ -1,4 +1,4 @@
-# 系統流程圖 — AI 3D 骨架追蹤復健分析系統
+# 系統流程圖 — AI 3D 骨架追蹤分析系統
 
 > 本文件供專利事務所撰寫說明書使用
 
@@ -18,9 +18,14 @@ graph TB
 
     subgraph PATENT_CORE["⚙️ 專利核心：3D 空間向量運算"]
         direction TB
+        PRE["🔧 座標降噪與還原<br/>(長寬比感知 & 深度 Z 軸下擺優化)"]
         ROM["指標 A：手肘伸展度 ROM<br/>3D 點積法"]
         TRUNK["指標 B：軀幹穩定度<br/>3D 水平面投影法"]
         VEL["指標 C：出手速度<br/>3D 歐式距離"]
+        
+        PRE --> ROM
+        PRE --> TRUNK
+        PRE --> VEL
     end
 
     subgraph BRAIN["🧬 The Brain — 專利診斷邏輯"]
@@ -41,9 +46,7 @@ graph TB
     CAM --> FRAME
     FRAME --> MP
     MP --> LM
-    LM --> ROM
-    LM --> TRUNK
-    LM --> VEL
+    LM --> PRE
     ROM --> R1
     TRUNK --> R1
     VEL --> R1
@@ -74,6 +77,8 @@ sequenceDiagram
         Camera->>MP: 傳送影像幀
         MP->>MP: 深度學習推論
         MP->>Calc: 輸出 33 個 3D 節點 (x, y, z)
+        
+        Calc->>Calc: 🔧 座標前置處理 (比例還原 & 下擺 Z 軸降噪)
         
         par 三項指標平行計算
             Calc->>Calc: A. 手肘 ROM (節點 12→14→16)

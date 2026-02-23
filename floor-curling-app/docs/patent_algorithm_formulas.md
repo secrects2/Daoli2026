@@ -1,4 +1,4 @@
-# 關鍵演算法公式 — AI 3D 骨架追蹤復健分析系統
+# 關鍵演算法公式 — AI 3D 骨架追蹤分析系統
 
 > 本文件供專利事務所撰寫說明書使用
 > 原始碼位置：[BocciaCam.tsx](file:///c:/Users/secre/.gemini/antigravity/scratch/floor-curling-app/components/ai/BocciaCam.tsx)
@@ -112,12 +112,18 @@ $$
 
 **步驟 1**：建立 3D 向量（使用還原後像素座標）
 
+**步驟 1**：建立 3D 向量（使用還原後像素座標）
+
+> 💡 **專利創新點：下擺拋球優化 (Underhand Throw Optimization)**
+> 針對地板滾球 (Boccia) 往前下擺拋球的動作，手臂會正對相機。MediaPipe 在估計 Z 軸深度時，易將透視形變（手腕大、肩膀小）誤判為巨大的深度差異，導致伸直的手臂被計算為 90 度彎曲。
+> **解決方案**：引入深度權重係數 $W_z = 0.2$，在保有 3D 空間意識的同時，大幅降低正前方投擲時的深度雜訊干擾。
+
 $$
-\vec{BA} = A_{real} - B_{real} = (A_x - B_x,\ A_y - B_y,\ A_z - B_z)
+\vec{BA} = A_{real} - B_{real} = (A_x - B_x,\ A_y - B_y,\ (A_z - B_z) \times W_z)
 $$
 
 $$
-\vec{BC} = C_{real} - B_{real} = (C_x - B_x,\ C_y - B_y,\ C_z - B_z)
+\vec{BC} = C_{real} - B_{real} = (C_x - B_x,\ C_y - B_y,\ (C_z - B_z) \times W_z)
 $$
 
 **步驟 2**：計算點積與向量長度
