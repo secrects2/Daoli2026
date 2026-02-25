@@ -31,11 +31,12 @@ export async function middleware(request: NextRequest) {
     // 刷新 session（重要！）
     const { data: { user } } = await supabase.auth.getUser()
 
-    console.log(`🔍 [Middleware] Path: ${request.nextUrl.pathname}`)
+    // 僅在開發環境輸出偵錯日誌，避免生產環境洩露使用者資訊
+    const isDev = process.env.NODE_ENV === 'development'
 
     // 如果未登錄，重定向到登錄頁
     if (!user) {
-        console.log('❌ [Middleware] Use NOT found. Redirecting to /login')
+        if (isDev) console.log('❌ [Middleware] User NOT found. Redirecting to /login')
 
         // Avoid redirect loop if already on login
         if (request.nextUrl.pathname === '/login') {
@@ -44,7 +45,7 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL('/login', request.url))
     }
 
-    console.log(`✅ [Middleware] User logged in: ${user.email} (${user.id})`)
+    if (isDev) console.log(`✅ [Middleware] User logged in: ${user.email}`)
 
     // Fetach user role (Use Service Role Key to bypass RLS and Network Protection)
     let userRole: string | undefined = undefined
@@ -70,7 +71,7 @@ export async function middleware(request: NextRequest) {
 
         if (profile && !error) {
             userRole = profile.role
-            console.log('📋 用戶角色:', userRole)
+            if (isDev) console.log('📋 用戶角色:', userRole)
         } else {
             console.error('❌ 無法讀取用戶角色:', error)
         }
@@ -81,7 +82,7 @@ export async function middleware(request: NextRequest) {
     // 保護 /pharmacist 路由
     if (request.nextUrl.pathname.startsWith('/pharmacist')) {
         if (userRole !== 'pharmacist' && userRole !== 'admin') {
-            console.log('⛔ 無權訪問藥師頁面，角色:', userRole)
+            if (isDev) console.log('⛔ 無權訪問藥師頁面，角色:', userRole)
             return NextResponse.redirect(new URL('/login', request.url))
         }
     }
@@ -89,7 +90,7 @@ export async function middleware(request: NextRequest) {
     // 保護 /admin 路由
     if (request.nextUrl.pathname.startsWith('/admin')) {
         if (userRole !== 'admin') {
-            console.log('⛔ 無權訪問管理員頁面，角色:', userRole)
+            if (isDev) console.log('⛔ 無權訪問管理員頁面，角色:', userRole)
             return NextResponse.redirect(new URL('/login', request.url))
         }
     }
@@ -97,7 +98,7 @@ export async function middleware(request: NextRequest) {
     // 保護 /family 路由
     if (request.nextUrl.pathname.startsWith('/family')) {
         if (userRole !== 'family' && userRole !== 'admin') {
-            console.log('⛔ 無權訪問家屬頁面，角色:', userRole)
+            if (isDev) console.log('⛔ 無權訪問家屬頁面，角色:', userRole)
             return NextResponse.redirect(new URL('/login', request.url))
         }
     }
@@ -105,7 +106,7 @@ export async function middleware(request: NextRequest) {
     // 保護 /elder 路由
     if (request.nextUrl.pathname.startsWith('/elder')) {
         if (userRole !== 'elder' && userRole !== 'admin') {
-            console.log('⛔ 無權訪問長輩頁面，角色:', userRole)
+            if (isDev) console.log('⛔ 無權訪問長輩頁面，角色:', userRole)
             return NextResponse.redirect(new URL('/login', request.url))
         }
     }

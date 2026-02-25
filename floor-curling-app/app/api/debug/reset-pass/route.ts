@@ -21,8 +21,12 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: '缺少必要參數' }, { status: 400 })
         }
 
-        if (newPassword.length < 6) {
-            return NextResponse.json({ error: '密碼至少需要 6 個字符' }, { status: 400 })
+        if (newPassword.length < 8) {
+            return NextResponse.json({ error: '密碼至少需要 8 個字符' }, { status: 400 })
+        }
+
+        if (!/[a-zA-Z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
+            return NextResponse.json({ error: '密碼需包含英文字母與數字' }, { status: 400 })
         }
 
         const supabaseAdmin = getSupabaseAdmin()

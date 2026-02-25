@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { z } from 'zod'
+import { verifyPharmacistOrAdmin, unauthorizedResponse } from '@/lib/auth-utils'
 
 const grantPointsSchema = z.object({
     elderId: z.string(),
@@ -9,7 +10,18 @@ const grantPointsSchema = z.object({
     storeId: z.string()
 })
 
+/**
+ * 積分發放 API
+ *
+ * ⚠️ 安全控制：僅藥師或管理員可用，且藥師只能為自己店舖的長輩發放
+ */
 export async function POST(req: NextRequest) {
+    // 1. 驗證呼叫者身份：必須是藥師或管理員
+    const auth = await verifyPharmacistOrAdmin()
+    if (!auth.isAuthorized) {
+        return unauthorizedResponse(auth.error || '未授權：僅限藥師或管理員使用')
+    }
+
     // 使用 Service Role Key 繞過 RLS
     const supabaseAdmin = createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -33,15 +45,15 @@ export async function POST(req: NextRequest) {
 
         const { elderId, localPoints, description, storeId } = validationResult.data
 
-        // 獲取操作者資訊 (從 Authorization header)
-        const authHeader = req.headers.get('Authorization')
-        let operatorId: string | null = null
-
-        if (authHeader?.startsWith('Bearer ')) {
-            const token = authHeader.substring(7)
-            const { data: { user } } = await supabaseAdmin.auth.getUser(token)
-            operatorId = user?.id || null
+        // 2. 驗證藥師只能為自己店舖發放積分（管理員不受此限制）
+        if (auth.role === 'pharmacist' && auth.storeId !== storeId) {
+            return NextResponse.json(
+                { success: false, error: '無權為其他店舖發放積分' },
+                { status: 403 }
+            )
         }
+
+        const operatorId: string | null = auth.userId || null
 
         // 驗證長輩是否存在且屬於該店鋪
         const { data: elder, error: elderError } = await supabaseAdmin
