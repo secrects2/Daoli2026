@@ -25,6 +25,44 @@ export function getAiPrescription(metrics: any): AiPrescription {
     const rom = metrics.elbow_rom || metrics.elbowROM || 0
     const stability = metrics.trunk_stability || metrics.trunkStability || 0
     const velocity = metrics.avg_velocity || metrics.velocity || 0
+    // Phase 2 指标
+    const tremorRatio = metrics.tremor_detected_ratio || 0
+    const tremorFreq = metrics.tremor_avg_frequency || metrics.tremorFrequency || 0
+    const compensationType = metrics.compensation_types?.[0] || metrics.compensationType || null
+    const compensationRatio = metrics.compensation_detected_ratio || 0
+
+    // 優先級 0: 神經系統警示 (震顫檢測) - Phase 2
+    if (tremorRatio > 20 || (metrics.tremorDetected && tremorFreq > 0)) {
+        const freqText = tremorFreq ? `${tremorFreq} Hz` : '偵測中'
+        return {
+            title: '🫨 肢體震顫警示 (Tremor Alert)',
+            content: `AI 動作分析偵測到規律性震顫信號（頻率 ${freqText}，影響幀占比 ${tremorRatio}%）。依據 MDS-UPDRS 運動評估量表，3-6 Hz 靜息震顫為帕金森氏症核心特徵；5-12 Hz 動作震顫對應本態性震顫 (Essential Tremor)。建議轉介神經內科做進一步評估。`,
+            color: 'text-purple-600 bg-purple-50 border-purple-200',
+            recommendedProducts: [
+                { id: 9, name: '神經內科轉介評估', icon: '🧠', reason: '臨床處方：MDS-UPDRS 動作評估 + DaTSCAN 多巴胺影像' },
+                { id: 10, name: '維生素 B6 + 鎂離子複方', icon: '💊', reason: '營養處方：支持神經傳導穩定，緩解肌肉細微抽搐' }
+            ]
+        }
+    }
+
+    // 優先級 0.5: 代償動作警示 - Phase 2
+    if (compensationType && compensationRatio > 15) {
+        const compLabels: Record<string, string> = {
+            'head_throw': '甩頭代償',
+            'side_lean': '側身代償',
+            'shoulder_hike': '聳肩代償',
+        }
+        const compName = compLabels[compensationType] || '代償動作'
+        return {
+            title: `⚠️ ${compName} (Compensation Pattern)`,
+            content: `系統偵測到投球時出現${compName}慣性（出現率 ${compensationRatio}%），學術對應肩袖肌群 (Rotator Cuff) 功能不足或核心力量代償。依 ACSM 指南，長期代償可能導致二次損傷，需針對性訓練矯正。`,
+            color: 'text-amber-600 bg-amber-50 border-amber-200',
+            recommendedProducts: [
+                { id: 11, name: '肩袖穩定與核心整合訓練', icon: '🏋️', reason: '運動處方：肩胛骨穩定訓練 + 動力鏈矯正' },
+                { id: 12, name: '膠原蛋白 + 維生素 C 修復配方', icon: '💊', reason: '營養處方：支持肌腱修復與關節潤滑' }
+            ]
+        }
+    }
 
     // 優先級 1: 安全性 (指標 B：軀幹穩定度差 / 傾斜角過大) - Threshold: > 15 degrees
     if (stability > 15) {

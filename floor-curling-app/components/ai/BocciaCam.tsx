@@ -4,6 +4,7 @@ import React, { useRef, useEffect, useState, useCallback } from 'react'
 import Webcam from 'react-webcam'
 import { saveRehabSession } from '@/app/actions/rehab'
 import { getAiPrescription } from '@/lib/ai-diagnosis'
+import { BiomechanicsEngine, type BiomechanicsMetrics } from '@/lib/biomechanics-engine'
 
 /**
  * BocciaCam - AI 視覺分析組件
@@ -30,6 +31,18 @@ export interface BocciaMetrics {
     elbowROM: number | null
     trunkStability: number | null
     velocity: number | null
+    // === Phase 2: 核心数据指标 ===
+    coreStabilityAngle: number | null
+    shoulderAngularVel: number | null
+    elbowAngularVel: number | null
+    wristAngularVel: number | null
+    tremorDetected: boolean
+    tremorFrequency: number | null
+    compensationType: string | null
+    compensationSeverity: number
+    // === Phase 2: 场域信息 ===
+    subjectLocked: boolean
+    postureCorrection: number
     isArmExtended: boolean
     isTrunkStable: boolean
     isReadyToThrow: boolean
@@ -130,14 +143,27 @@ export default function BocciaCam({
     const lastStableRef = useRef<boolean>(false)
     const startTimeRef = useRef<number>(Date.now())
 
+    // Phase 2: 生物力学引擎
+    const engineRef = useRef<BiomechanicsEngine>(new BiomechanicsEngine())
+
     // 追蹤整個 session 的指標歷史
     const metricsHistoryRef = useRef<{ rom: number; tilt: number; velocity: number }[]>([])
+
+    // Phase 2: 进阶指标展开/折叠
+    const [showAdvanced, setShowAdvanced] = useState(false)
+    // Phase 2: 生物力学指标状态
+    const [bioMetrics, setBioMetrics] = useState<BiomechanicsMetrics | null>(null)
 
     // Velocity Tracking
     const prevWristRef = useRef<{ x: number, y: number, z: number, time: number } | null>(null)
 
     const [metrics, setMetrics] = useState<BocciaMetrics>({
         elbowROM: null, trunkStability: null, velocity: null,
+        coreStabilityAngle: null, shoulderAngularVel: null,
+        elbowAngularVel: null, wristAngularVel: null,
+        tremorDetected: false, tremorFrequency: null,
+        compensationType: null, compensationSeverity: 0,
+        subjectLocked: false, postureCorrection: 0,
         isArmExtended: true, isTrunkStable: true,
         isReadyToThrow: false, stableSeconds: 0,
     })
@@ -245,6 +271,13 @@ export default function BocciaCam({
         setDiagnosticMsg(diagText ? { text: diagText, color: diagColor } : null)
         // --------------------------------------------------
 
+        // Phase 2: 运行生物力学引擎
+        const bio = engineRef.current.processFrame(landmarks, W, H, now)
+        bio.elbowROM = Math.round(elbowROM)
+        bio.trunkStability = Math.round(trunkTilt)
+        bio.velocity = velocity
+        setBioMetrics(bio)
+
         // Record history
         metricsHistoryRef.current.push({
             rom: Math.round(elbowROM),
@@ -319,6 +352,16 @@ export default function BocciaCam({
             elbowROM: Math.round(elbowROM),
             trunkStability: Math.round(trunkTilt),
             velocity: velocity,
+            coreStabilityAngle: bio.coreStabilityAngle,
+            shoulderAngularVel: bio.shoulderAngularVel,
+            elbowAngularVel: bio.elbowAngularVel,
+            wristAngularVel: bio.wristAngularVel,
+            tremorDetected: bio.tremorDetected,
+            tremorFrequency: bio.tremorFrequency,
+            compensationType: bio.compensationType,
+            compensationSeverity: bio.compensationSeverity,
+            subjectLocked: bio.subjectLocked,
+            postureCorrection: bio.postureCorrection,
             isArmExtended, isTrunkStable, isReadyToThrow,
             stableSeconds: Math.round(stableSeconds * 10) / 10,
         }
@@ -351,6 +394,11 @@ export default function BocciaCam({
             const avgTilt = tiltValues.length > 0 ? Math.round(tiltValues.reduce((a, b) => a + b, 0) / tiltValues.length) : (metrics.trunkStability || 0)
             const avgVelocity = velocityValues.length > 0 ? Math.round(velocityValues.reduce((a, b) => a + b, 0) / velocityValues.length) : (metrics.velocity || 0)
 
+            // Phase 2: 获取生物力学引擎的帧历史
+            const bioHistory = engineRef.current.getFrameHistory()
+            const tremorFrames = bioHistory.filter(b => b.tremorDetected)
+            const compFrames = bioHistory.filter(b => b.compensationType !== null)
+
             const metricsPayload = {
                 elbow_rom: avgRom,
                 trunk_stability: avgTilt,
@@ -362,6 +410,32 @@ export default function BocciaCam({
                 throw_count: romValues.length,
                 stable_ratio: history.length > 0
                     ? Math.round((history.filter(h => h.rom >= 160 && h.tilt <= 15).length / history.length) * 100)
+                    : 0,
+                // Phase 2: 进阶指标
+                core_stability_angle: bioHistory.length > 0
+                    ? Math.round(bioHistory.reduce((s, b) => s + (b.coreStabilityAngle || 0), 0) / bioHistory.length * 10) / 10
+                    : null,
+                avg_shoulder_angular_vel: bioHistory.length > 0
+                    ? Math.round(bioHistory.reduce((s, b) => s + (b.shoulderAngularVel || 0), 0) / bioHistory.length)
+                    : null,
+                avg_elbow_angular_vel: bioHistory.length > 0
+                    ? Math.round(bioHistory.reduce((s, b) => s + (b.elbowAngularVel || 0), 0) / bioHistory.length)
+                    : null,
+                avg_wrist_angular_vel: bioHistory.length > 0
+                    ? Math.round(bioHistory.reduce((s, b) => s + (b.wristAngularVel || 0), 0) / bioHistory.length)
+                    : null,
+                tremor_detected_ratio: bioHistory.length > 0
+                    ? Math.round((tremorFrames.length / bioHistory.length) * 100)
+                    : 0,
+                tremor_avg_frequency: tremorFrames.length > 0
+                    ? Math.round(tremorFrames.reduce((s, b) => s + (b.tremorFrequency || 0), 0) / tremorFrames.length * 10) / 10
+                    : null,
+                compensation_detected_ratio: bioHistory.length > 0
+                    ? Math.round((compFrames.length / bioHistory.length) * 100)
+                    : 0,
+                compensation_types: [...new Set(compFrames.map(b => b.compensationType).filter(Boolean))],
+                posture_correction_avg: bioHistory.length > 0
+                    ? Math.round(bioHistory.reduce((s, b) => s + (b.postureCorrection || 0), 0) / bioHistory.length * 10) / 10
                     : 0,
             }
 
@@ -605,7 +679,22 @@ export default function BocciaCam({
 
             {/* Metrics Dashboard */}
             <div className="p-4 bg-gray-800 space-y-3">
-                <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Medical Rehab Data (即時醫療數據)</p>
+                {/* Phase 2: 主体锁定 & 坐姿状态指示器 */}
+                <div className="flex items-center justify-between">
+                    <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Medical Rehab Data (即時醫療數據)</p>
+                    <div className="flex items-center gap-2">
+                        {metrics.subjectLocked && (
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-900/50 text-green-400 border border-green-800 flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />锁定中
+                            </span>
+                        )}
+                        {metrics.postureCorrection > 0 && (
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-yellow-900/50 text-yellow-400 border border-yellow-800">
+                                坐姿修正 {metrics.postureCorrection}°
+                            </span>
+                        )}
+                    </div>
+                </div>
                 <div className="grid grid-cols-3 gap-3">
                     <div className={`rounded-xl p-3 text-center ${metrics.isArmExtended ? sideColors.bg : 'bg-red-900/50'}`}>
                         <p className="text-xs text-gray-400 mb-1">肘部 ROM</p>
@@ -628,6 +717,62 @@ export default function BocciaCam({
                         </p>
                     </div>
                 </div>
+
+                {/* Phase 2: 可折叠进阶指标面板 */}
+                <button
+                    onClick={() => setShowAdvanced(!showAdvanced)}
+                    className="w-full flex items-center justify-between py-2 px-3 rounded-lg bg-gray-700/30 hover:bg-gray-700/50 transition-colors"
+                >
+                    <span className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Advanced Bio-metrics (进阶指标)</span>
+                    <span className="text-gray-500 text-xs">{showAdvanced ? '▲' : '▼'}</span>
+                </button>
+
+                {showAdvanced && bioMetrics && (
+                    <div className="space-y-2 animate-fade-in">
+                        {/* 中轴稳定度 */}
+                        <div className="grid grid-cols-2 gap-2">
+                            <div className="rounded-lg p-2 bg-gray-700/30 text-center">
+                                <p className="text-[10px] text-gray-500">中轴偏移</p>
+                                <p className={`text-lg font-bold ${(bioMetrics.coreStabilityAngle || 0) > 15 ? 'text-red-400' : 'text-cyan-400'}`}>
+                                    {bioMetrics.coreStabilityAngle ?? '--'}°
+                                </p>
+                            </div>
+                            <div className="rounded-lg p-2 bg-gray-700/30 text-center">
+                                <p className="text-[10px] text-gray-500">震颤</p>
+                                <p className={`text-lg font-bold ${bioMetrics.tremorDetected ? 'text-red-400' : 'text-green-400'}`}>
+                                    {bioMetrics.tremorDetected ? `${bioMetrics.tremorFrequency} Hz` : '无'}
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* 角速度 */}
+                        <div className="grid grid-cols-3 gap-2">
+                            <div className="rounded-lg p-2 bg-gray-700/30 text-center">
+                                <p className="text-[10px] text-gray-500">肩角速</p>
+                                <p className="text-sm font-bold text-purple-400">{bioMetrics.shoulderAngularVel ?? '--'}°/s</p>
+                            </div>
+                            <div className="rounded-lg p-2 bg-gray-700/30 text-center">
+                                <p className="text-[10px] text-gray-500">肘角速</p>
+                                <p className="text-sm font-bold text-purple-400">{bioMetrics.elbowAngularVel ?? '--'}°/s</p>
+                            </div>
+                            <div className="rounded-lg p-2 bg-gray-700/30 text-center">
+                                <p className="text-[10px] text-gray-500">腕角速</p>
+                                <p className="text-sm font-bold text-purple-400">{bioMetrics.wristAngularVel ?? '--'}°/s</p>
+                            </div>
+                        </div>
+
+                        {/* 代偿动作 */}
+                        {bioMetrics.compensationType && (
+                            <div className="rounded-lg p-2 bg-orange-900/30 border border-orange-800/50 flex items-center gap-2">
+                                <span className="text-orange-400 text-lg">⚠️</span>
+                                <div>
+                                    <p className="text-xs text-orange-300 font-bold">代偿动作</p>
+                                    <p className="text-[10px] text-orange-400/70">{bioMetrics.compensationDescription}</p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
 
                 {/* Action Buttons */}
                 <div className="flex gap-3">
