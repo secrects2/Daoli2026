@@ -370,7 +370,7 @@ export default function BocciaCam({
     }, [onMetricsUpdate, sideColors.primary])
 
     // Session Report State
-    const [sessionReport, setSessionReport] = useState<{ metrics: any; prescription: any } | null>(null)
+    const [sessionReport, setSessionReport] = useState<{ session_id: string; metrics: any; prescription: any } | null>(null)
 
     // Remove Live Prescription (User requested post-session only)
     /* 
@@ -450,10 +450,11 @@ export default function BocciaCam({
                 metrics: metricsPayload,
             })
 
-            if (result.success) {
+            if (result.success && result.sessionId) {
                 setSaved(true)
                 // Show Report instead of closing immediately
                 setSessionReport({
+                    session_id: result.sessionId,
                     metrics: metricsPayload,
                     prescription: aiPrescription
                 })
@@ -598,9 +599,37 @@ export default function BocciaCam({
                         </div>
                     )}
 
+                    {/* Export Action Buttons */}
+                    <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-gray-100">
+                        <p className="text-xs font-bold text-gray-500 mb-1 text-center">下載檢測數據</p>
+                        <div className="grid grid-cols-2 gap-2">
+                            <a
+                                href={`/api/export/session?id=${sessionReport.session_id}&format=csv&type=summary`}
+                                className="py-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm font-bold text-center transition-colors border border-gray-200 flex items-center justify-center gap-2"
+                                download
+                            >
+                                <span>📄</span> 摘要 (CSV)
+                            </a>
+                            <a
+                                href={`/api/export/session?id=${sessionReport.session_id}&format=csv&type=frames`}
+                                className="py-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm font-bold text-center transition-colors border border-gray-200 flex items-center justify-center gap-2"
+                                download
+                            >
+                                <span>📈</span> 逐幀 (CSV)
+                            </a>
+                        </div>
+                        <a
+                            href={`/api/export/session?id=${sessionReport.session_id}&format=excel`}
+                            className="w-full py-2.5 rounded-xl bg-green-50 hover:bg-green-100 text-green-700 text-sm font-bold text-center transition-colors border border-green-200 flex items-center justify-center gap-2"
+                            download
+                        >
+                            <span>📊</span> 下載完整報告 (Excel)
+                        </a>
+                    </div>
+
                     <button
                         onClick={onClose}
-                        className="w-full py-4 rounded-xl bg-gray-900 text-white font-bold text-lg hover:bg-black transition-colors shadow-lg"
+                        className="w-full py-4 rounded-xl bg-gray-900 text-white font-bold text-lg hover:bg-black transition-colors shadow-lg mt-2"
                     >
                         關閉並返回
                     </button>

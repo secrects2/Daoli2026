@@ -627,8 +627,18 @@ export default function GenericElderDetailPage() {
                             </div>
 
                             {/* History List */}
-                            <div className="space-y-2">
-                                <h5 className="text-sm font-bold text-gray-500">歷史檢測紀錄</h5>
+                            <div className="space-y-3">
+                                <div className="flex justify-between items-center">
+                                    <h5 className="text-sm font-bold text-gray-500">歷史檢測紀錄</h5>
+                                    <div className="flex gap-2">
+                                        <a href={`/api/export/session?elderId=${params.id}&format=csv&type=summary`} className="text-xs bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-600 px-2 py-1 rounded flex items-center gap-1 transition-colors" download>
+                                            批次下載 CSV
+                                        </a>
+                                        <a href={`/api/export/session?elderId=${params.id}&format=excel`} className="text-xs bg-green-50 hover:bg-green-100 border border-green-200 text-green-700 px-2 py-1 rounded flex items-center gap-1 transition-colors" download>
+                                            批次下載 Excel
+                                        </a>
+                                    </div>
+                                </div>
                                 {aiSessions.slice(1, 4).map(session => (
                                     <div key={session.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                                         <div>
