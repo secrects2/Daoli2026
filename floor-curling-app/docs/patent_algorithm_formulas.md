@@ -15,7 +15,7 @@
 | **14** | 右肘 (RIGHT_ELBOW) | ROM 頂點（角度量測中心）|
 | **15** | 左腕 (LEFT_WRIST) | — |
 | **16** | 右腕 (RIGHT_WRIST) | ROM 終點 + 速度追蹤 |
-| **23** | 左髖 (LEFT_HIP) | 骨架繪製 |
+| **23** | 左髖 (LEFT_HIP) | 骨架繪製 | 
 | **24** | 右髖 (RIGHT_HIP) | 骨架繪製 |
 
 每個節點由 MediaPipe 輸出 **四維資料**：

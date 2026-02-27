@@ -5,6 +5,7 @@ import Webcam from 'react-webcam'
 import { saveRehabSession } from '@/app/actions/rehab'
 import { getAiPrescription } from '@/lib/ai-diagnosis'
 import { BiomechanicsEngine, type BiomechanicsMetrics } from '@/lib/biomechanics-engine'
+import { downloadFramesCSV, downloadSummaryCSV, downloadExcel, type SessionSummary } from '@/lib/data-export'
 
 /**
  * BocciaCam - AI 視覺分析組件
@@ -603,28 +604,52 @@ export default function BocciaCam({
                     <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-gray-100">
                         <p className="text-xs font-bold text-gray-500 mb-1 text-center">下載檢測數據</p>
                         <div className="grid grid-cols-2 gap-2">
-                            <a
-                                href={`/api/export/session?id=${sessionReport.session_id}&format=csv&type=summary`}
-                                className="py-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm font-bold text-center transition-colors border border-gray-200 flex items-center justify-center gap-2"
-                                download
+                            <button
+                                onClick={() => {
+                                    if (!sessionReport) return
+                                    const summary: SessionSummary = {
+                                        sessionId: sessionReport.session_id,
+                                        elderId: elderId,
+                                        elderName: elderId,
+                                        sessionDate: new Date().toISOString(),
+                                        durationSeconds: Math.round((Date.now() - startTimeRef.current) / 1000),
+                                        metrics: sessionReport.metrics,
+                                        frameCount: sessionReport.metrics.throw_count || 0
+                                    }
+                                    downloadSummaryCSV(summary)
+                                }}
+                                className="w-full py-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm font-bold text-center transition-colors border border-gray-200 flex items-center justify-center gap-2"
                             >
                                 <span>📄</span> 摘要 (CSV)
-                            </a>
-                            <a
-                                href={`/api/export/session?id=${sessionReport.session_id}&format=csv&type=frames`}
-                                className="py-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm font-bold text-center transition-colors border border-gray-200 flex items-center justify-center gap-2"
-                                download
+                            </button>
+                            <button
+                                onClick={() => {
+                                    if (!sessionReport) return
+                                    downloadFramesCSV(engineRef.current.getFrameHistory(), sessionReport.session_id)
+                                }}
+                                className="w-full py-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm font-bold text-center transition-colors border border-gray-200 flex items-center justify-center gap-2"
                             >
                                 <span>📈</span> 逐幀 (CSV)
-                            </a>
+                            </button>
                         </div>
-                        <a
-                            href={`/api/export/session?id=${sessionReport.session_id}&format=excel`}
+                        <button
+                            onClick={() => {
+                                if (!sessionReport) return
+                                const summary: SessionSummary = {
+                                    sessionId: sessionReport.session_id,
+                                    elderId: elderId,
+                                    elderName: elderId,
+                                    sessionDate: new Date().toISOString(),
+                                    durationSeconds: Math.round((Date.now() - startTimeRef.current) / 1000),
+                                    metrics: sessionReport.metrics,
+                                    frameCount: sessionReport.metrics.throw_count || 0
+                                }
+                                downloadExcel(summary, engineRef.current.getFrameHistory())
+                            }}
                             className="w-full py-2.5 rounded-xl bg-green-50 hover:bg-green-100 text-green-700 text-sm font-bold text-center transition-colors border border-green-200 flex items-center justify-center gap-2"
-                            download
                         >
                             <span>📊</span> 下載完整報告 (Excel)
-                        </a>
+                        </button>
                     </div>
 
                     <button

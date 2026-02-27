@@ -2,6 +2,14 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { exportFramesToCSV, exportSessionSummaryToCSV, exportSessionToExcelXML, exportBatchSummaryToCSV, type SessionSummary } from '@/lib/data-export'
 
+function jsonError(body: any, status: number = 400) {
+    return new Response(JSON.stringify(body), {
+        status,
+        headers: {
+            'Content-Type': 'application/json; charset=utf-8'
+        }
+    })
+}
 /**
  * GET /api/export/session
  *
@@ -29,7 +37,7 @@ export async function GET(request: Request) {
         const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
         const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
         if (!supabaseUrl || !supabaseKey) {
-            return NextResponse.json({ error: '数据库配置缺失' }, { status: 500 })
+            return jsonError({ error: '数据库配置缺失' }, 500)
         }
         const supabase = createClient(supabaseUrl, supabaseKey)
 
@@ -42,7 +50,7 @@ export async function GET(request: Request) {
                 .single()
 
             if (error || !session) {
-                return NextResponse.json({ error: '找不到该训练记录' }, { status: 404 })
+                return jsonError({ error: '找不到该训练记录' }, 404)
             }
 
             const summary: SessionSummary = {
@@ -67,6 +75,9 @@ export async function GET(request: Request) {
             }
 
             // CSV 格式
+            if (type === 'frames') {
+                return jsonError({ error: '逐帧数据未存储于云端数据库（仅存放于前端设备内存），无法通过此接口进行历史导出。' }, 400)
+            }
             const csv = exportSessionSummaryToCSV(summary)
             return new Response(csv, {
                 headers: {
@@ -90,7 +101,7 @@ export async function GET(request: Request) {
             const { data: sessions, error } = await query
 
             if (error || !sessions?.length) {
-                return NextResponse.json({ error: '找不到训练记录' }, { status: 404 })
+                return jsonError({ error: '找不到训练记录' }, 404)
             }
 
             const summaries: SessionSummary[] = sessions.map(s => ({
@@ -113,16 +124,16 @@ export async function GET(request: Request) {
             })
         }
 
-        return NextResponse.json({
+        return jsonError({
             error: '请提供 id 或 elderId 参数',
             usage: {
                 single: '/api/export/session?id=<session_id>&format=csv|excel',
                 batch: '/api/export/session?elderId=<elder_id>&from=2024-01-01&to=2024-12-31&format=csv',
             }
-        }, { status: 400 })
+        }, 400)
 
     } catch (err: any) {
         console.error('Export API error:', err)
-        return NextResponse.json({ error: err.message || '导出失败' }, { status: 500 })
+        return jsonError({ error: err.message || '导出失败' }, 500)
     }
 }
