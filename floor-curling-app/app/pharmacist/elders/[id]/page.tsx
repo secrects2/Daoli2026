@@ -211,9 +211,15 @@ export default function GenericElderDetailPage() {
         }
     }
 
-    // Unbind Handler
+    // Unbind Handler — 需二次輸入長者姓名確認
     const handleUnbind = async () => {
-        if (!await confirm({ message: '確定要將此長輩從您的店鋪移除嗎？\n此操作無法復原。', confirmLabel: '移除', variant: 'danger' })) return
+        const elderName = elder.nickname || elder.full_name || ''
+        const input = window.prompt(`⚠️ 危險操作！此操作無法復原。\n\n請輸入此長輩的姓名「${elderName}」以確認移除：`)
+        if (input === null) return // 使用者按取消
+        if (input.trim() !== elderName.trim()) {
+            toast.error('姓名不符，取消移除')
+            return
+        }
 
         try {
             const res = await fetch(`/api/pharmacist/elders/${params.id}`, {
