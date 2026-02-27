@@ -628,15 +628,58 @@ export default function GenericElderDetailPage() {
 
                             {/* History List */}
                             <div className="space-y-3">
-                                <div className="flex justify-between items-center">
+                                <div className="flex justify-between items-center flex-wrap gap-2">
                                     <h5 className="text-sm font-bold text-gray-500">歷史檢測紀錄</h5>
-                                    <div className="flex gap-2">
-                                        <a href={`/api/export/session?elderId=${params.id}&format=csv&type=summary`} className="text-xs bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-600 px-2 py-1 rounded flex items-center gap-1 transition-colors" download>
-                                            批次下載 CSV
-                                        </a>
-                                        <a href={`/api/export/session?elderId=${params.id}&format=excel`} className="text-xs bg-green-50 hover:bg-green-100 border border-green-200 text-green-700 px-2 py-1 rounded flex items-center gap-1 transition-colors" download>
-                                            批次下載 Excel
-                                        </a>
+                                    <div className="flex gap-2 flex-wrap">
+                                        <button
+                                            onClick={() => {
+                                                // 純前端產生 CSV — 不經過 API
+                                                const headers = ['日期', '手肘ROM(°)', '軀幹穩定(°)', '速度', '穩定率(%)', '中軸偏移(°)', '震顫率(%)', '代償率(%)']
+                                                const rows = aiSessions.map((s: any) => {
+                                                    const m = s.metrics || {}
+                                                    return [
+                                                        new Date(s.created_at).toLocaleDateString(),
+                                                        m.avg_rom ?? m.elbow_rom ?? '',
+                                                        m.avg_trunk_tilt ?? m.trunk_stability ?? '',
+                                                        m.avg_velocity ?? '',
+                                                        m.stable_ratio ?? '',
+                                                        m.core_stability_angle ?? '',
+                                                        m.tremor_detected_ratio ?? '',
+                                                        m.compensation_detected_ratio ?? '',
+                                                    ].join(',')
+                                                })
+                                                const csv = '\uFEFF' + headers.join(',') + '\n' + rows.join('\n')
+                                                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+                                                const url = URL.createObjectURL(blob)
+                                                const a = document.createElement('a')
+                                                a.href = url
+                                                a.download = `boccia_batch_${(params.id as string).slice(0, 8)}_${new Date().toISOString().slice(0, 10)}.csv`
+                                                a.click()
+                                                URL.revokeObjectURL(url)
+                                                toast.success('CSV 下載成功')
+                                            }}
+                                            className="text-xs bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-600 px-2 py-1 rounded flex items-center gap-1 transition-colors"
+                                        >
+                                            📄 批次下載 CSV
+                                        </button>
+                                        <button
+                                            onClick={async () => {
+                                                if (!await confirm({ message: `確定要清除此長輩的所有 ${aiSessions.length} 筆 AI 檢測紀錄嗎？\n此操作無法復原。`, confirmLabel: '清除', variant: 'danger' })) return
+                                                try {
+                                                    // 逐一刪除
+                                                    for (const s of aiSessions) {
+                                                        await supabase.from('training_sessions').delete().eq('id', s.id)
+                                                    }
+                                                    setAiSessions([])
+                                                    toast.success('已清除所有檢測紀錄')
+                                                } catch (err: any) {
+                                                    toast.error('清除失敗: ' + err.message)
+                                                }
+                                            }}
+                                            className="text-xs bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 px-2 py-1 rounded flex items-center gap-1 transition-colors"
+                                        >
+                                            🗑️ 清除紀錄
+                                        </button>
                                     </div>
                                 </div>
                                 {aiSessions.slice(1, 4).map(session => (
