@@ -156,6 +156,10 @@ export default function BocciaCam({
     const autoSavingRef = useRef<boolean>(false)
     const [autoSaveToast, setAutoSaveToast] = useState<string | null>(null)
 
+    // UI 節流：每 500ms 才更新一次顯示值，讓人眼可以清楚閱讀
+    const lastUIUpdateRef = useRef<number>(0)
+    const UI_THROTTLE_MS = 500
+
     // Phase 2: 进阶指标展开/折叠
     const [showAdvanced, setShowAdvanced] = useState(false)
     // Phase 2: 生物力学指标状态
@@ -271,8 +275,6 @@ export default function BocciaCam({
         bio.velocity = Math.round(velocity)
         bio.velocity_raw = Math.round(rawVelocity)
         bio.isReleaseFrame = isRelease
-
-        setBioMetrics(bio)
 
         // --- PATENT LOGIC: "The Brain" Diagnostic Rules ---
         let diagText = null
@@ -448,8 +450,18 @@ export default function BocciaCam({
             isArmExtended, isTrunkStable, isReadyToThrow,
             stableSeconds: Math.round(stableSeconds * 10) / 10,
         }
-        setMetrics(newMetrics)
-        onMetricsUpdate?.(newMetrics)
+        // ─── UI 節流：每 500ms 才推送到 React state ───
+        // 內部計算仍以 30fps 運行，但畫面數值每秒只刷新 2 次
+        const shouldUpdateUI = (now - lastUIUpdateRef.current) >= UI_THROTTLE_MS
+        // 出手偵測等重要事件跳過節流立即顯示
+        const isImportantEvent = bio.isReleaseFrame || bio.tremorDetected || bio.compensationType !== null
+
+        if (shouldUpdateUI || isImportantEvent) {
+            lastUIUpdateRef.current = now
+            setMetrics(newMetrics)
+            setBioMetrics(bio)
+            onMetricsUpdate?.(newMetrics)
+        }
     }, [onMetricsUpdate, sideColors.primary])
 
     // Session Report State
