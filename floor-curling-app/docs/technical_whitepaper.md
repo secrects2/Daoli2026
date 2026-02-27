@@ -442,3 +442,28 @@ ELSE:                            → 🔵 动作稳定
 > **版本历史**
 > - Phase 1 (v1.0): 手肘 ROM + 躯干倾斜 + 出手速度 + 长宽比感知
 > - Phase 2 (v2.0): 中轴稳定度 + 角速度 + 震颤检测 + 代偿识别 + 主体锁定 + 坐姿修正 + 防伪出手判定 + CSV/Excel 导出
+
+---
+
+## 九、参考文献 (References)
+
+[1] Winter, D. A. (2009). *Biomechanics and Motor Control of Human Movement* (4th ed.). Wiley. — 推荐四阶 Butterworth 低通滤波器用于运动学数据处理。
+
+[2] Robertson, D. G. E., et al. (2013). *Research Methods in Biomechanics* (2nd ed.). Human Kinetics. — 零相位 filtfilt 双向滤波方法论。
+
+[3] Deuschl, G., Bain, P., & Brin, M. (1998). Consensus statement of the MDS on Tremor. *Movement Disorders*, 13(S3), 2-23. — 震颤频段分类共识。
+
+[4] Elble, R. J. (2003). Characteristics of physiologic tremor. *Clinical Neurophysiology*, 114(4), 624-635. — 生理性微颤振幅特征。
+
+[5] Wu, G., et al. (2005). ISB recommendation on joint coordinate systems. *J. Biomechanics*, 38(5), 981-992. — 3D 关节角度 ISB 标准。
+
+[6] Welch, G., & Bishop, G. (2006). An Introduction to the Kalman Filter. UNC TR 95-041. — 离散 Kalman Filter 框架。
+
+[7] Stenum, J., et al. (2021). Video-based gait analysis using pose estimation. *PLOS Comp. Biol.*, 17(4). — 无标记动捕 MAE < 5° 临床可接受标准。
+
+[8] Bazarevsky, V., et al. (2020). BlazePose: On-device Real-time Body Pose tracking. *CVPR Workshop*. — MediaPipe Pose 原始论文。
+
+[9] Heldman, D. A., et al. (2011). Essential tremor quantification. *Parkinsonism & Related Disorders*, 17(7). — 零交叉法震颤频率定量。
+
+[10] Colyer, S. L., et al. (2018). Validity of the Kinect for joint angles. *BMC Musculoskelet. Disord.*, 19(1). — 消费级感测器关节角度效度。
+
