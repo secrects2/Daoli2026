@@ -640,11 +640,19 @@ export default function GenericElderDetailPage() {
                                         <button
                                             onClick={() => {
                                                 // 純前端產生 CSV — 不經過 API
-                                                const headers = ['日期', '手肘ROM(°)', '軀幹穩定(°)', '速度', '穩定率(%)', '中軸偏移(°)', '震顫率(%)', '代償率(%)']
+                                                const headers = ['長者ID', '長者姓名', '店家', '日期時間', '手肘ROM(°)', '軀幹穩定(°)', '速度', '穩定率(%)', '中軸偏移(°)', '震顫率(%)', '代償率(%)']
+                                                const elderName = elder.nickname || elder.full_name || '未知'
+                                                const storeName = elder.store_id || '未知'
+                                                const elderId = (params.id as string).slice(0, 8)
                                                 const rows = aiSessions.map((s: any) => {
                                                     const m = s.metrics || {}
+                                                    const dt = new Date(s.created_at)
+                                                    const dateStr = `${dt.getFullYear()}/${String(dt.getMonth() + 1).padStart(2, '0')}/${String(dt.getDate()).padStart(2, '0')} ${String(dt.getHours()).padStart(2, '0')}:${String(dt.getMinutes()).padStart(2, '0')}:${String(dt.getSeconds()).padStart(2, '0')}`
                                                     return [
-                                                        new Date(s.created_at).toLocaleDateString(),
+                                                        elderId,
+                                                        elderName,
+                                                        storeName,
+                                                        dateStr,
                                                         m.avg_rom ?? m.elbow_rom ?? '',
                                                         m.avg_trunk_tilt ?? m.trunk_stability ?? '',
                                                         m.avg_velocity ?? '',
