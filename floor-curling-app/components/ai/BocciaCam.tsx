@@ -161,7 +161,7 @@ export default function BocciaCam({
     const UI_THROTTLE_MS = 500
 
     // Phase 2: 进阶指标展开/折叠
-    const [showAdvanced, setShowAdvanced] = useState(false)
+    const [showAdvanced, setShowAdvanced] = useState(true)
     // Phase 2: 生物力学指标状态
     const [bioMetrics, setBioMetrics] = useState<BiomechanicsMetrics | null>(null)
 

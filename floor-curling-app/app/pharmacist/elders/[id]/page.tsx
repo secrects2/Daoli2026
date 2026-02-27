@@ -271,7 +271,7 @@ export default function GenericElderDetailPage() {
                     <div className="flex gap-2">
                         {/* Binding QR Modal */}
                         {showBindingQR && (
-                            <div className="fixed inset-0 z-[100] bg-black/80 flex items-start justify-center pt-20 px-4 pb-10 overflow-y-auto" onClick={() => setShowBindingQR(false)}>
+                            <div className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center px-4" onClick={() => setShowBindingQR(false)}>
                                 <div className="bg-white rounded-2xl p-8 max-w-sm w-full text-center space-y-6" onClick={e => e.stopPropagation()}>
                                     <h3 className="text-xl font-bold text-gray-900">家屬綁定 QR Code</h3>
                                     <div className="flex justify-center">
