@@ -210,15 +210,17 @@ export default function BocciaCam({
         const shoulder = toRealPixels(landmarks[LANDMARKS.RIGHT_SHOULDER], W, H)
         const elbow = toRealPixels(landmarks[LANDMARKS.RIGHT_ELBOW], W, H)
         const wrist = toRealPixels(landmarks[LANDMARKS.RIGHT_WRIST], W, H)
-        const elbowROM = calculateAngle3D(shoulder, elbow, wrist)
+        const rawElbowROM = calculateAngle3D(shoulder, elbow, wrist)
+        const elbowROM = engineRef.current.applyFilter('elbowROM', rawElbowROM)
 
-        // 2. B. Trunk Stability (3D Shoulder Tilt - 排除視角+長寬比干擾)
+        // 2. B. Trunk Stability (3D Shoulder Tilt - 排除視角+长宽比干扰)
         const leftShoulder = toRealPixels(landmarks[LANDMARKS.LEFT_SHOULDER], W, H)
         const rightShoulder = toRealPixels(landmarks[LANDMARKS.RIGHT_SHOULDER], W, H)
-        const trunkTilt = calculateTilt3D(leftShoulder, rightShoulder)
+        const rawTrunkTilt = calculateTilt3D(leftShoulder, rightShoulder)
+        const trunkTilt = engineRef.current.applyFilter('trunkStability', rawTrunkTilt)
 
         // 3. C. Velocity (Wrist Speed) - Aspect-Ratio Aware
-        let velocity = 0
+        let rawVelocity = 0
         const rawWristLandmark = landmarks[LANDMARKS.RIGHT_WRIST]
         if (rawWristLandmark && rawWristLandmark.visibility > 0.5) {
             if (prevWristRef.current) {
@@ -232,15 +234,16 @@ export default function BocciaCam({
                     const dz = realWrist.z - prevWristRef.current.z
                     // 3D 歐式距離（像素級）
                     const dist = Math.sqrt(dx * dx + dy * dy + dz * dz)
-                    // 歸一化速度：除以對角線長度來消除解析度差異
+                    // 归一化速度：除以对角线长度来消除分辨率差异
                     const diagonal = Math.sqrt(W * W + H * H)
-                    velocity = Math.round((dist / diagonal / dt) * 100)
+                    rawVelocity = Math.round((dist / diagonal / dt) * 100)
                 }
             }
             const rawWristForRef = landmarks[LANDMARKS.RIGHT_WRIST]
             const realWristForRef = toRealPixels(rawWristForRef, W, H)
             prevWristRef.current = { x: realWristForRef.x, y: realWristForRef.y, z: realWristForRef.z, time: now }
         }
+        const velocity = engineRef.current.applyFilter('velocity', rawVelocity)
 
         const isArmExtended = elbowROM >= 160
         const isTrunkStable = trunkTilt <= 15
@@ -275,15 +278,18 @@ export default function BocciaCam({
         // Phase 2: 运行生物力学引擎
         const bio = engineRef.current.processFrame(landmarks, W, H, now)
         bio.elbowROM = Math.round(elbowROM)
+        bio.elbowROM_raw = Math.round(rawElbowROM)
         bio.trunkStability = Math.round(trunkTilt)
-        bio.velocity = velocity
+        bio.trunkStability_raw = Math.round(rawTrunkTilt)
+        bio.velocity = Math.round(velocity)
+        bio.velocity_raw = Math.round(rawVelocity)
         setBioMetrics(bio)
 
         // Record history
         metricsHistoryRef.current.push({
             rom: Math.round(elbowROM),
             tilt: Math.round(trunkTilt),
-            velocity: velocity
+            velocity: Math.round(velocity)
         })
 
         // Stability Check

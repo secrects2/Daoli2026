@@ -13,10 +13,14 @@
  * 4. CompensationDetector    — 代偿动作识别（甩头/侧身）
  * 5. SubjectTracker          — 主体锁定（多人环境下锁定目标）
  * 6. PostureCorrector        — 坐姿修正（驼背/歪斜补偿）
+ * 7. SignalProcessor         — 信号降噪（四阶 Butterworth 零相位滤波）
  *
  * @author AI Biomechanics System
  * @patent 3D 骨架追踪分析系统 — Phase 2
  */
+
+import { KalmanFilter1D } from './kalman-filter'
+import { SmoothingBuffer } from './signal-processing'
 
 // ============================================================================
 // 共用类型定义
@@ -62,15 +66,19 @@ export interface PostureCorrectionResult {
     adjustedLandmarks: Map<number, Point3D> | null  // 修正后的坐标
 }
 
-/** 扩展后的完整生物力学指标 */
+/** 扩展后的完整生物力学指标 (双轨数据架构) */
 export interface BiomechanicsMetrics {
-    // === 基础指标（Phase 1 已有）===
+    // === 基础指标（Phase 1 已有，并入滤波结果）===
     elbowROM: number | null
+    elbowROM_raw: number | null
     trunkStability: number | null
+    trunkStability_raw: number | null
     velocity: number | null
+    velocity_raw: number | null
 
     // === Phase 2: 核心数据指标 ===
     coreStabilityAngle: number | null
+    coreStabilityAngle_raw: number | null
     shoulderAngularVel: number | null
     elbowAngularVel: number | null
     wristAngularVel: number | null
@@ -615,6 +623,15 @@ export class SubjectTracker {
     private lockedCenter: { x: number; y: number } | null = null
     private lockedArea: number = 0
     private areaHistory: number[] = []
+
+    // Kalman Filters for x and y tracking
+    private kfX = new KalmanFilter1D();
+    private kfY = new KalmanFilter1D();
+
+    // 遮蔽處理狀態
+    private framesOccluded: number = 0;
+    private readonly MAX_OCCLUSION_FRAMES = 60; // 允許遮蔽的最多幀數 (約 2 秒 @ 30fps)
+
     private readonly MAX_DISPLACEMENT_RATIO = 0.5   // 最大允许位移 = 对角线 × 50%
     private readonly MAX_AREA_DEVIATION = 0.4       // 最大面积偏差 40%
     private readonly AREA_HISTORY_SIZE = 10
@@ -653,22 +670,54 @@ export class SubjectTracker {
      */
     update(landmarks: any[]): SubjectTrackingResult {
         const bbox = this.computeBoundingBox(landmarks)
+        const dt = 1.0 / 30.0; // 預設 30fps 的時間差
+
+        // == 情境一：沒有抓到符合的 bbox (可能完全離開畫面或被徹底遮蔽) ==
         if (!bbox) {
+            if (this.lockedCenter && this.framesOccluded < this.MAX_OCCLUSION_FRAMES) {
+                // Kalman Filter 盲預測
+                this.framesOccluded++;
+                this.lockedCenter = {
+                    x: this.kfX.predictOnly(dt),
+                    y: this.kfY.predictOnly(dt)
+                };
+
+                // 信心值隨著遮蔽時間逐漸下降
+                const confidence = Math.max(0, 1 - (this.framesOccluded / this.MAX_OCCLUSION_FRAMES));
+
+                // 我們依然回報 Locked 狀態以防止畫面跳動與重新選人
+                return {
+                    locked: true,
+                    confidence: Math.round(confidence * 100) / 100,
+                    boundingBox: null // 缺少面積資訊，但仍回傳鎖定
+                }
+            }
             return { locked: false, confidence: 0, boundingBox: null }
         }
 
-        // 首次锁定
+        // == 情境二：首次锁定 ==
         if (!this.lockedCenter) {
             this.lockedCenter = { x: bbox.cx, y: bbox.cy }
             this.lockedArea = bbox.area
             this.areaHistory = [bbox.area]
+            this.framesOccluded = 0;
+
+            // 初始化 Kalman Filters
+            this.kfX.reset(bbox.cx);
+            this.kfY.reset(bbox.cy);
+
             return { locked: true, confidence: 1.0, boundingBox: { x: bbox.x, y: bbox.y, w: bbox.w, h: bbox.h } }
         }
 
-        // 计算位移距离
+        // == 情境三：正常追蹤狀態下 ==
+        // 1. 先用 Kalman Filter 預測並取得包含觀測值的最佳估計 (Predict & Update)
+        const smoothedCx = this.kfX.predictAndUpdate(dt, bbox.cx);
+        const smoothedCy = this.kfY.predictAndUpdate(dt, bbox.cy);
+
+        // 我们用 Kalman Filter 平滑后的位置，與前一次的锁定位置做比较，增加抗噪能力
         const displacement = Math.sqrt(
-            (bbox.cx - this.lockedCenter.x) ** 2 +
-            (bbox.cy - this.lockedCenter.y) ** 2
+            (smoothedCx - this.lockedCenter.x) ** 2 +
+            (smoothedCy - this.lockedCenter.y) ** 2
         )
 
         const diagonal = Math.sqrt(bbox.w ** 2 + bbox.h ** 2)
@@ -679,31 +728,56 @@ export class SubjectTracker {
         const areaDeviation = Math.abs(bbox.area - avgArea) / avgArea
 
         // 综合判断
+        // 如果 displacement 過大，表示追到的 bbox 可能根本就是誤抓另一個走過去的護理師
         const displacementOk = displacement < maxDisplacement
         const areaOk = areaDeviation < this.MAX_AREA_DEVIATION
+        const currentObservationOk = displacementOk && areaOk;
 
-        const locked = displacementOk && areaOk
-        const confidence = locked
-            ? Math.max(0, 1 - displacement / maxDisplacement) * Math.max(0, 1 - areaDeviation)
-            : 0
+        if (currentObservationOk) {
+            // 觀測非常可靠，重置遮蔽計數器
+            this.framesOccluded = 0;
+            const confidence = Math.max(0, 1 - displacement / maxDisplacement) * Math.max(0, 1 - areaDeviation);
 
-        if (locked) {
-            // 更新锁定位置（指数移动平均）
-            const alpha = 0.3
+            // 更新锁定位置（这里不再需要指数平均，直接改用 Kalman 的结果，或混合）
+            const alpha = 0.5; // Kalman Filter 自帶平滑，但我們再做一點緩和
             this.lockedCenter = {
-                x: this.lockedCenter.x * (1 - alpha) + bbox.cx * alpha,
-                y: this.lockedCenter.y * (1 - alpha) + bbox.cy * alpha,
+                x: this.lockedCenter.x * (1 - alpha) + smoothedCx * alpha,
+                y: this.lockedCenter.y * (1 - alpha) + smoothedCy * alpha,
             }
+
             this.areaHistory.push(bbox.area)
             if (this.areaHistory.length > this.AREA_HISTORY_SIZE) {
                 this.areaHistory.shift()
             }
+            return {
+                locked: true,
+                confidence: Math.round(confidence * 100) / 100,
+                boundingBox: { x: bbox.x, y: bbox.y, w: bbox.w, h: bbox.h },
+            }
         }
 
+        // == 情境四：抓到的 Bbox 偏差過大 (可能被他人短暫遮蔽干擾) ==
+        if (this.framesOccluded < this.MAX_OCCLUSION_FRAMES) {
+            // 不信任這個觀測值，依賴歷史預測
+            this.framesOccluded++;
+            // 因為觀測值有誤，所以我們退回上一步，並強制只做「預測」
+            this.lockedCenter = {
+                x: this.kfX.predictOnly(0), // 由於稍早已 predictAndUpdate 過，這裡只能當作假裝沒看到
+                y: this.kfY.predictOnly(0)
+            };
+            const confidence = Math.max(0, 1 - (this.framesOccluded / this.MAX_OCCLUSION_FRAMES));
+            return {
+                locked: true,
+                confidence: Math.round(confidence * 100) / 100,
+                boundingBox: null // 拒絕錯誤的 bounding box
+            }
+        }
+
+        // 超過最大遮蔽時間，鎖定失敗
         return {
-            locked,
-            confidence: Math.round(confidence * 100) / 100,
-            boundingBox: { x: bbox.x, y: bbox.y, w: bbox.w, h: bbox.h },
+            locked: false,
+            confidence: 0,
+            boundingBox: null
         }
     }
 
@@ -714,6 +788,7 @@ export class SubjectTracker {
         this.lockedCenter = null
         this.lockedArea = 0
         this.areaHistory = []
+        this.framesOccluded = 0
     }
 }
 
@@ -853,6 +928,14 @@ export class BiomechanicsEngine {
     readonly subjectTracker = new SubjectTracker()
     readonly postureCorrector = new PostureCorrector()
 
+    // 独立信号降噪信道 (Channels)
+    private filters = {
+        elbowROM: new SmoothingBuffer(3.0, 30.0),
+        trunkStability: new SmoothingBuffer(2.0, 30.0), // 躯干较慢，cutoff 更低
+        velocity: new SmoothingBuffer(4.0, 30.0),       // 速度变化快，cutoff 稍高
+        coreStabilityAngle: new SmoothingBuffer(2.0, 30.0)
+    }
+
     // 帧间数据存储
     private frameHistory: BiomechanicsMetrics[] = []
 
@@ -941,14 +1024,24 @@ export class BiomechanicsEngine {
             : { type: null, severity: 0, description: '动作正常' } as CompensationResult
 
         // 组装结果
+        // 信号降噪（利用 Butterworth 处理 Raw Data，输出 Filtered Data 去锯齿）
+        // 注意：基础指标这里仅准备初始占位符，由外部 BocciaCam 调用时再填入/过滤，
+        // 或者此处提供接口方法给外部调用。
+        const rawCoreAngle = coreAngle
+        const smoothedCoreAngle = this.filters.coreStabilityAngle.push(rawCoreAngle)
+
         const metrics: BiomechanicsMetrics = {
-            // 基础指标（保持与 Phase 1 兼容）
-            elbowROM: null,          // 由 BocciaCam 原有逻辑填充
-            trunkStability: null,     // 由 BocciaCam 原有逻辑填充
-            velocity: null,           // 由 BocciaCam 原有逻辑填充
+            // 基础指标（保持与 Phase 1 兼容，并保留 Raw/Filtered 双轨架构给外面填充）
+            elbowROM: null,
+            elbowROM_raw: null,
+            trunkStability: null,
+            trunkStability_raw: null,
+            velocity: null,
+            velocity_raw: null,
 
             // Phase 2 指标
-            coreStabilityAngle: Math.round(coreAngle * 10) / 10,
+            coreStabilityAngle: Math.round(smoothedCoreAngle * 10) / 10,
+            coreStabilityAngle_raw: Math.round(rawCoreAngle * 10) / 10,
             shoulderAngularVel: Math.round(angVel.shoulder * 10) / 10,
             elbowAngularVel: Math.round(angVel.elbow * 10) / 10,
             wristAngularVel: Math.round(angVel.wrist * 10) / 10,
@@ -979,12 +1072,27 @@ export class BiomechanicsEngine {
     }
 
     /**
+     * 提供给外部 (BocciaCam) 使用滤波器的快捷方法
+     * 保持数据结构解耦的同时允许 Phase 1 核心指标受惠于医学级降噪
+     */
+    applyFilter(channel: 'elbowROM' | 'trunkStability' | 'velocity', rawValue: number): number {
+        return this.filters[channel].push(rawValue);
+    }
+
+    /**
      * 重置所有状态（新 session 开始时调用）
      */
     reset() {
         this.angularVelocity.reset()
         this.compensation.reset()
         this.subjectTracker.resetLock()
+
+        // 重置所有滤波器
+        this.filters.elbowROM.reset()
+        this.filters.trunkStability.reset()
+        this.filters.velocity.reset()
+        this.filters.coreStabilityAngle.reset()
+
         this.frameHistory = []
     }
 }

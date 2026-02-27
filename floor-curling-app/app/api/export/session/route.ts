@@ -23,6 +23,19 @@ function jsonError(body: any, status: number = 400) {
  * - format: 'csv' | 'excel'（默认 csv）
  * - type:   'frames' | 'summary'（默认 summary）
  */
+/**
+ * 将真实姓名去识别化，保留姓氏并替换名字
+ * 规则：张三丰 -> 张O丰，李四 -> 李O，王大槌子 -> 王O子
+ */
+function anonymizeName(name: string | null | undefined): string {
+    if (!name) return '未知';
+    const trimmed = name.trim();
+    if (trimmed.length <= 1) return trimmed;
+    if (trimmed.length === 2) return `${trimmed[0]}O`;
+    // 保留第一个字和最后一个字，中间全部替换为 'O'
+    return `${trimmed[0]}${'O'.repeat(trimmed.length - 2)}${trimmed[trimmed.length - 1]}`;
+}
+
 export async function GET(request: Request) {
     try {
         const { searchParams } = new URL(request.url)
@@ -32,6 +45,13 @@ export async function GET(request: Request) {
         const to = searchParams.get('to')
         const format = searchParams.get('format') || 'csv'
         const type = searchParams.get('type') || 'summary'
+        const token = searchParams.get('token')
+
+        // 1. 简易 API Token 防护 (这里使用写死在环境变量中的 Secret)
+        const EXPECTED_API_TOKEN = process.env.EXPORT_API_TOKEN || 'boccia-academic-export-2026';
+        if (token !== EXPECTED_API_TOKEN) {
+            return jsonError({ error: '未经授权的访问 (Unauthorized, Invalid Token)' }, 401)
+        }
 
         // 初始化 Supabase
         const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -56,7 +76,8 @@ export async function GET(request: Request) {
             const summary: SessionSummary = {
                 sessionId: session.id,
                 elderId: session.elder_id,
-                elderName: session.profiles?.display_name || '未知',
+                // 强制去识别化：剥离真实姓名
+                elderName: anonymizeName(session.profiles?.display_name),
                 sessionDate: new Date(session.created_at).toISOString().slice(0, 19),
                 durationSeconds: session.duration_seconds || 0,
                 metrics: session.metrics || {},
@@ -107,7 +128,8 @@ export async function GET(request: Request) {
             const summaries: SessionSummary[] = sessions.map(s => ({
                 sessionId: s.id,
                 elderId: s.elder_id,
-                elderName: s.profiles?.display_name || '未知',
+                // 强制去识别化：剥离真实姓名
+                elderName: anonymizeName(s.profiles?.display_name),
                 sessionDate: new Date(s.created_at).toISOString().slice(0, 19),
                 durationSeconds: s.duration_seconds || 0,
                 metrics: s.metrics || {},

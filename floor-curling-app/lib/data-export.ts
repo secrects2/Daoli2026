@@ -20,28 +20,31 @@ import type { BiomechanicsMetrics } from './biomechanics-engine'
 
 /** 逐帧 CSV 表头 */
 const FRAME_CSV_HEADERS = [
-    'frame_index',
-    'timestamp_ms',
-    // Phase 1 基础指标
-    'elbow_rom_deg',
-    'trunk_stability_deg',
-    'velocity',
-    // Phase 2 核心指标
-    'core_stability_angle_deg',
-    'shoulder_angular_vel_deg_s',
-    'elbow_angular_vel_deg_s',
-    'wrist_angular_vel_deg_s',
-    'tremor_detected',
-    'tremor_frequency_hz',
-    'tremor_severity',
-    'compensation_type',
-    'compensation_severity',
-    // 场域信息
-    'subject_locked',
-    'subject_confidence',
-    'posture_correction_deg',
-    'is_hunched',
-    'is_tilted',
+  'frame_index',
+  'timestamp_ms',
+  // Phase 1 基础指标 (医疗级双轨数据: Filtered & Raw)
+  'elbow_rom_deg',
+  'elbow_rom_raw',
+  'trunk_stability_deg',
+  'trunk_stability_raw',
+  'velocity',
+  'velocity_raw',
+  // Phase 2 核心指标
+  'core_stability_angle_deg',
+  'shoulder_angular_vel_deg_s',
+  'elbow_angular_vel_deg_s',
+  'wrist_angular_vel_deg_s',
+  'tremor_detected',
+  'tremor_frequency_hz',
+  'tremor_severity',
+  'compensation_type',
+  'compensation_severity',
+  // 场域信息
+  'subject_locked',
+  'subject_confidence',
+  'posture_correction_deg',
+  'is_hunched',
+  'is_tilted',
 ]
 
 /**
@@ -51,38 +54,42 @@ const FRAME_CSV_HEADERS = [
  * @returns CSV 格式字符串
  */
 export function exportFramesToCSV(
-    frames: BiomechanicsMetrics[],
-    startTimestamp: number = 0
+  frames: BiomechanicsMetrics[],
+  startTimestamp: number = 0
 ): string {
-    const rows: string[] = [FRAME_CSV_HEADERS.join(',')]
+  const rows: string[] = [FRAME_CSV_HEADERS.join(',')]
 
-    frames.forEach((frame, index) => {
-        const row = [
-            index,
-            startTimestamp > 0 ? startTimestamp + Math.round(index * (1000 / 30)) : index * 33, // ~30fps
-            frame.elbowROM ?? '',
-            frame.trunkStability ?? '',
-            frame.velocity ?? '',
-            frame.coreStabilityAngle ?? '',
-            frame.shoulderAngularVel ?? '',
-            frame.elbowAngularVel ?? '',
-            frame.wristAngularVel ?? '',
-            frame.tremorDetected ? 1 : 0,
-            frame.tremorFrequency ?? '',
-            frame.tremorSeverity ?? '',
-            frame.compensationType ?? '',
-            frame.compensationSeverity ?? 0,
-            frame.subjectLocked ? 1 : 0,
-            frame.subjectConfidence ?? '',
-            frame.postureCorrection ?? 0,
-            frame.isHunched ? 1 : 0,
-            frame.isTilted ? 1 : 0,
-        ]
-        rows.push(row.map(v => `"${v}"`).join(','))
-    })
+  frames.forEach((frame, index) => {
+    const row = [
+      index,
+      startTimestamp > 0 ? startTimestamp + Math.round(index * (1000 / 30)) : index * 33, // ~30fps
+      frame.elbowROM ?? '',
+      frame.elbowROM_raw ?? '',
+      frame.trunkStability ?? '',
+      frame.trunkStability_raw ?? '',
+      frame.velocity ?? '',
+      frame.velocity_raw ?? '',
+      frame.coreStabilityAngle ?? '',
+      frame.coreStabilityAngle_raw ?? '',
+      frame.shoulderAngularVel ?? '',
+      frame.elbowAngularVel ?? '',
+      frame.wristAngularVel ?? '',
+      frame.tremorDetected ? 1 : 0,
+      frame.tremorFrequency ?? '',
+      frame.tremorSeverity ?? '',
+      frame.compensationType ?? '',
+      frame.compensationSeverity ?? 0,
+      frame.subjectLocked ? 1 : 0,
+      frame.subjectConfidence ?? '',
+      frame.postureCorrection ?? 0,
+      frame.isHunched ? 1 : 0,
+      frame.isTilted ? 1 : 0,
+    ]
+    rows.push(row.map(v => `"${v}"`).join(','))
+  })
 
-    // 添加 BOM 以便 Excel 正确识别 UTF-8 编码
-    return '\uFEFF' + rows.join('\n')
+  // 添加 BOM 以便 Excel 正确识别 UTF-8 编码
+  return '\uFEFF' + rows.join('\n')
 }
 
 
@@ -92,74 +99,74 @@ export function exportFramesToCSV(
 
 /** 摘要 CSV 表头 */
 const SUMMARY_CSV_HEADERS = [
-    'session_id',
-    'elder_id',
-    'elder_name',
-    'session_date',
-    'duration_seconds',
-    'total_frames',
-    // Phase 1
-    'avg_elbow_rom',
-    'max_elbow_rom',
-    'min_elbow_rom',
-    'avg_trunk_stability',
-    'avg_velocity',
-    'stable_ratio_pct',
-    // Phase 2
-    'avg_core_stability_angle',
-    'avg_shoulder_angular_vel',
-    'avg_elbow_angular_vel',
-    'avg_wrist_angular_vel',
-    'tremor_detected_ratio_pct',
-    'tremor_avg_frequency_hz',
-    'compensation_detected_ratio_pct',
-    'compensation_types',
-    'posture_correction_avg_deg',
+  'session_id',
+  'elder_id',
+  'elder_name',
+  'session_date',
+  'duration_seconds',
+  'total_frames',
+  // Phase 1
+  'avg_elbow_rom',
+  'max_elbow_rom',
+  'min_elbow_rom',
+  'avg_trunk_stability',
+  'avg_velocity',
+  'stable_ratio_pct',
+  // Phase 2
+  'avg_core_stability_angle',
+  'avg_shoulder_angular_vel',
+  'avg_elbow_angular_vel',
+  'avg_wrist_angular_vel',
+  'tremor_detected_ratio_pct',
+  'tremor_avg_frequency_hz',
+  'compensation_detected_ratio_pct',
+  'compensation_types',
+  'posture_correction_avg_deg',
 ]
 
 export interface SessionSummary {
-    sessionId: string
-    elderId: string
-    elderName: string
-    sessionDate: string
-    durationSeconds: number
-    metrics: any // metricsPayload from BocciaCam
-    frameCount: number
+  sessionId: string
+  elderId: string
+  elderName: string
+  sessionDate: string
+  durationSeconds: number
+  metrics: any // metricsPayload from BocciaCam
+  frameCount: number
 }
 
 /**
  * 将训练摘要导出为 CSV 字符串
  */
 export function exportSessionSummaryToCSV(session: SessionSummary): string {
-    const m = session.metrics
-    const rows: string[] = [SUMMARY_CSV_HEADERS.join(',')]
+  const m = session.metrics
+  const rows: string[] = [SUMMARY_CSV_HEADERS.join(',')]
 
-    const row = [
-        session.sessionId,
-        session.elderId,
-        session.elderName,
-        session.sessionDate,
-        session.durationSeconds,
-        session.frameCount,
-        m.avg_rom ?? m.elbow_rom ?? '',
-        m.max_rom ?? '',
-        m.min_rom ?? '',
-        m.avg_trunk_tilt ?? m.trunk_stability ?? '',
-        m.avg_velocity ?? '',
-        m.stable_ratio ?? '',
-        m.core_stability_angle ?? '',
-        m.avg_shoulder_angular_vel ?? '',
-        m.avg_elbow_angular_vel ?? '',
-        m.avg_wrist_angular_vel ?? '',
-        m.tremor_detected_ratio ?? '',
-        m.tremor_avg_frequency ?? '',
-        m.compensation_detected_ratio ?? '',
-        Array.isArray(m.compensation_types) ? m.compensation_types.join(';') : '',
-        m.posture_correction_avg ?? '',
-    ]
+  const row = [
+    session.sessionId,
+    session.elderId,
+    session.elderName,
+    session.sessionDate,
+    session.durationSeconds,
+    session.frameCount,
+    m.avg_rom ?? m.elbow_rom ?? '',
+    m.max_rom ?? '',
+    m.min_rom ?? '',
+    m.avg_trunk_tilt ?? m.trunk_stability ?? '',
+    m.avg_velocity ?? '',
+    m.stable_ratio ?? '',
+    m.core_stability_angle ?? '',
+    m.avg_shoulder_angular_vel ?? '',
+    m.avg_elbow_angular_vel ?? '',
+    m.avg_wrist_angular_vel ?? '',
+    m.tremor_detected_ratio ?? '',
+    m.tremor_avg_frequency ?? '',
+    m.compensation_detected_ratio ?? '',
+    Array.isArray(m.compensation_types) ? m.compensation_types.join(';') : '',
+    m.posture_correction_avg ?? '',
+  ]
 
-    rows.push(row.map(v => `"${v}"`).join(','))
-    return '\uFEFF' + rows.join('\n')
+  rows.push(row.map(v => `"${v}"`).join(','))
+  return '\uFEFF' + rows.join('\n')
 }
 
 
@@ -167,37 +174,37 @@ export function exportSessionSummaryToCSV(session: SessionSummary): string {
  * 批量导出多个训练摘要
  */
 export function exportBatchSummaryToCSV(sessions: SessionSummary[]): string {
-    const rows: string[] = [SUMMARY_CSV_HEADERS.join(',')]
+  const rows: string[] = [SUMMARY_CSV_HEADERS.join(',')]
 
-    for (const session of sessions) {
-        const m = session.metrics
-        const row = [
-            session.sessionId,
-            session.elderId,
-            session.elderName,
-            session.sessionDate,
-            session.durationSeconds,
-            session.frameCount,
-            m.avg_rom ?? m.elbow_rom ?? '',
-            m.max_rom ?? '',
-            m.min_rom ?? '',
-            m.avg_trunk_tilt ?? m.trunk_stability ?? '',
-            m.avg_velocity ?? '',
-            m.stable_ratio ?? '',
-            m.core_stability_angle ?? '',
-            m.avg_shoulder_angular_vel ?? '',
-            m.avg_elbow_angular_vel ?? '',
-            m.avg_wrist_angular_vel ?? '',
-            m.tremor_detected_ratio ?? '',
-            m.tremor_avg_frequency ?? '',
-            m.compensation_detected_ratio ?? '',
-            Array.isArray(m.compensation_types) ? m.compensation_types.join(';') : '',
-            m.posture_correction_avg ?? '',
-        ]
-        rows.push(row.map(v => `"${v}"`).join(','))
-    }
+  for (const session of sessions) {
+    const m = session.metrics
+    const row = [
+      session.sessionId,
+      session.elderId,
+      session.elderName,
+      session.sessionDate,
+      session.durationSeconds,
+      session.frameCount,
+      m.avg_rom ?? m.elbow_rom ?? '',
+      m.max_rom ?? '',
+      m.min_rom ?? '',
+      m.avg_trunk_tilt ?? m.trunk_stability ?? '',
+      m.avg_velocity ?? '',
+      m.stable_ratio ?? '',
+      m.core_stability_angle ?? '',
+      m.avg_shoulder_angular_vel ?? '',
+      m.avg_elbow_angular_vel ?? '',
+      m.avg_wrist_angular_vel ?? '',
+      m.tremor_detected_ratio ?? '',
+      m.tremor_avg_frequency ?? '',
+      m.compensation_detected_ratio ?? '',
+      Array.isArray(m.compensation_types) ? m.compensation_types.join(';') : '',
+      m.posture_correction_avg ?? '',
+    ]
+    rows.push(row.map(v => `"${v}"`).join(','))
+  }
 
-    return '\uFEFF' + rows.join('\n')
+  return '\uFEFF' + rows.join('\n')
 }
 
 
@@ -210,13 +217,13 @@ export function exportBatchSummaryToCSV(sessions: SessionSummary[]): string {
  * 由于不引入外部依赖，此处生成符合 Excel 的 XML Spreadsheet 2003 格式
  */
 export function exportSessionToExcelXML(
-    session: SessionSummary,
-    frames: BiomechanicsMetrics[]
+  session: SessionSummary,
+  frames: BiomechanicsMetrics[]
 ): string {
-    const m = session.metrics
+  const m = session.metrics
 
-    // XML Spreadsheet 2003 格式 — Excel 可直接打开
-    let xml = `<?xml version="1.0" encoding="UTF-8"?>
+  // XML Spreadsheet 2003 格式 — Excel 可直接打开
+  let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <?mso-application progid="Excel.Sheet"?>
 <Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
   xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
@@ -335,7 +342,7 @@ ${frames.map((frame, i) => `    <Row>
 
 </Workbook>`
 
-    return xml
+  return xml
 }
 
 
@@ -347,40 +354,40 @@ ${frames.map((frame, i) => `    <Row>
  * 在浏览器中触发文件下载
  */
 export function downloadFile(content: string, filename: string, mimeType: string = 'text/csv') {
-    const blob = new Blob([content], { type: `${mimeType};charset=utf-8` })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = filename
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
+  const blob = new Blob([content], { type: `${mimeType};charset=utf-8` })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
 }
 
 /**
  * 一键导出训练数据（逐帧 CSV）
  */
 export function downloadFramesCSV(frames: BiomechanicsMetrics[], sessionId: string) {
-    const csv = exportFramesToCSV(frames)
-    const date = new Date().toISOString().slice(0, 10)
-    downloadFile(csv, `boccia_frames_${sessionId}_${date}.csv`)
+  const csv = exportFramesToCSV(frames)
+  const date = new Date().toISOString().slice(0, 10)
+  downloadFile(csv, `boccia_frames_${sessionId}_${date}.csv`)
 }
 
 /**
  * 一键导出训练摘要（CSV）
  */
 export function downloadSummaryCSV(session: SessionSummary) {
-    const csv = exportSessionSummaryToCSV(session)
-    const date = new Date().toISOString().slice(0, 10)
-    downloadFile(csv, `boccia_summary_${session.elderId}_${date}.csv`)
+  const csv = exportSessionSummaryToCSV(session)
+  const date = new Date().toISOString().slice(0, 10)
+  downloadFile(csv, `boccia_summary_${session.elderId}_${date}.csv`)
 }
 
 /**
  * 一键导出 Excel 格式
  */
 export function downloadExcel(session: SessionSummary, frames: BiomechanicsMetrics[]) {
-    const xml = exportSessionToExcelXML(session, frames)
-    const date = new Date().toISOString().slice(0, 10)
-    downloadFile(xml, `boccia_report_${session.elderId}_${date}.xml`, 'application/vnd.ms-excel')
+  const xml = exportSessionToExcelXML(session, frames)
+  const date = new Date().toISOString().slice(0, 10)
+  downloadFile(xml, `boccia_report_${session.elderId}_${date}.xml`, 'application/vnd.ms-excel')
 }
