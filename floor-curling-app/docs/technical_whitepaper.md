@@ -405,7 +405,37 @@ ELSE:                            → 🔵 动作稳定
 
 ---
 
-## 六、场域抗干扰技术规格
+### 5.4 AI 處方引擎 (AI Prescription Engine)
+
+系統根據生物力學分析結果，自動產生個人化處方建議。每項處方均有國際指南或同行評審文獻佐證：
+
+| 處方等級 | 觸發條件 | 學術依據 |
+|---------|---------|---------|
+| 🫨 震顫警示 | tremor_ratio > 20% or tremorFreq > 0 Hz | MDS-UPDRS [R1], MDS Tremor Consensus [R2] |
+| ⚠️ 代償動作 | compensation_ratio > 15% | The Janda Approach [R7], ACSM Guidelines [R3] |
+| ⚠️ 軀幹不穩 | trunk_stability > 15° | AGS/BGS Falls Prevention [R4], Granacher et al. [R5] |
+| 💪 ROM 不足 | elbow_rom < 160° | OARSI Non-Surgical Guidelines [R6], Janda Approach [R7] |
+| ⚡ 速度偏低 | velocity < 0.8 m/s | EWGSOP2 Sarcopenia Consensus [R8], ICFSR Frailty [R9], PROT-AGE [R11] |
+| ✅ 優異 | 所有指標正常 | ACSM Maintenance Guidelines [R3] |
+
+**AI 處方引擎學術引用清單**：
+
+| 編號 | 引用 |
+|-----|-----|
+| R1 | Goetz CG et al. (2008). MDS-UPDRS: Clinimetric Properties. *Mov Disord*, 23(15), 2129-2170. |
+| R2 | Deuschl G et al. (1998). Consensus Statement of the MDS on Tremor. *Mov Disord*, 13(S3), 2-23. |
+| R3 | ACSM (2018). *Guidelines for Exercise Testing and Prescription*, 10th Ed. Wolters Kluwer. |
+| R4 | AGS/BGS (2011). Clinical Practice Guideline for Prevention of Falls in Older Persons. *JAGS*, 59(1), 148-157. |
+| R5 | Granacher U et al. (2013). Trunk Muscle Strength for Balance and Fall Prevention in Seniors. *Sports Med*, 43(7), 627-641. |
+| R6 | OARSI (2019). Guidelines for Non-Surgical Management of OA. *Osteoarthritis Cart*, 27(11), 1578-1589. |
+| R7 | Page P et al. (2010). *Assessment and Treatment of Muscle Imbalance: The Janda Approach*. Human Kinetics. |
+| R8 | Cruz-Jentoft AJ et al. (2019). Sarcopenia: Revised European Consensus (EWGSOP2). *Age Ageing*, 48(1), 16-31. |
+| R9 | Dent E et al. (2019). Physical Frailty: ICFSR International Clinical Practice Guidelines. *JNHA*, 23(9), 771-787. |
+| R10 | Lozano-Montoya I et al. (2017). Non-pharmacological Interventions for Frailty and Sarcopenia. *JAMDA*, 18(9), 780-786. |
+| R11 | Bauer J et al. (2013). Optimal Dietary Protein in Older People: PROT-AGE Position Paper. *JAMDA*, 14(8), 542-559. |
+
+---
+
 
 | 干扰类型 | 解决方案 | 算法核心 | 预期效果 |
 |---------|---------|---------|---------|

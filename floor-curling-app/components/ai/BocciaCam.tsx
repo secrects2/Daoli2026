@@ -671,6 +671,14 @@ export default function BocciaCam({
                     <div className={`p-5 rounded-xl border-l-4 ${sessionReport.prescription.color} bg-white shadow-sm`}>
                         <h4 className="font-bold text-lg mb-2">{sessionReport.prescription.title}</h4>
                         <p className="text-sm opacity-90">{sessionReport.prescription.content}</p>
+                        {sessionReport.prescription.references && sessionReport.prescription.references.length > 0 && (
+                            <div className="mt-3 pt-3 border-t border-gray-100">
+                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">📚 學術依據 References</p>
+                                {sessionReport.prescription.references.map((ref: string, idx: number) => (
+                                    <p key={idx} className="text-[10px] text-gray-400 leading-relaxed">[{idx + 1}] {ref}</p>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     {/* AI 智能推薦 - 與長者詳情頁一致 */}
