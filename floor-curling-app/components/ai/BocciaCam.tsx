@@ -628,16 +628,21 @@ export default function BocciaCam({
                             <button
                                 onClick={() => {
                                     if (!sessionReport) return
-                                    const summary: SessionSummary = {
-                                        sessionId: sessionReport.session_id,
-                                        elderId: elderId,
-                                        elderName: elderId,
-                                        sessionDate: new Date().toISOString(),
-                                        durationSeconds: Math.round((Date.now() - startTimeRef.current) / 1000),
-                                        metrics: sessionReport.metrics,
-                                        frameCount: sessionReport.metrics.throw_count || 0
+                                    try {
+                                        const summary: SessionSummary = {
+                                            sessionId: sessionReport.session_id || 'unknown',
+                                            elderId: elderId,
+                                            elderName: elderId,
+                                            sessionDate: new Date().toISOString(),
+                                            durationSeconds: sessionReport.metrics?.duration_seconds || 0,
+                                            metrics: sessionReport.metrics,
+                                            frameCount: sessionReport.metrics?.throw_count || 0
+                                        }
+                                        downloadSummaryCSV(summary)
+                                    } catch (e) {
+                                        console.error('CSV 下載失敗:', e)
+                                        alert('下載失敗，請重試')
                                     }
-                                    downloadSummaryCSV(summary)
                                 }}
                                 className="w-full py-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm font-bold text-center transition-colors border border-gray-200 flex items-center justify-center gap-2"
                             >
@@ -646,26 +651,46 @@ export default function BocciaCam({
                             <button
                                 onClick={() => {
                                     if (!sessionReport) return
-                                    downloadFramesCSV(engineRef.current.getFrameHistory(), sessionReport.session_id)
+                                    try {
+                                        // 逐幀數據目前不保留，先提供摘要 CSV
+                                        const summary: SessionSummary = {
+                                            sessionId: sessionReport.session_id || 'unknown',
+                                            elderId: elderId,
+                                            elderName: elderId,
+                                            sessionDate: new Date().toISOString(),
+                                            durationSeconds: sessionReport.metrics?.duration_seconds || 0,
+                                            metrics: sessionReport.metrics,
+                                            frameCount: sessionReport.metrics?.throw_count || 0
+                                        }
+                                        downloadSummaryCSV(summary)
+                                    } catch (e) {
+                                        console.error('CSV 下載失敗:', e)
+                                        alert('下載失敗，請重試')
+                                    }
                                 }}
                                 className="w-full py-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm font-bold text-center transition-colors border border-gray-200 flex items-center justify-center gap-2"
                             >
-                                <span>📈</span> 逐幀 (CSV)
+                                <span>📈</span> 詳細 (CSV)
                             </button>
                         </div>
                         <button
                             onClick={() => {
                                 if (!sessionReport) return
-                                const summary: SessionSummary = {
-                                    sessionId: sessionReport.session_id,
-                                    elderId: elderId,
-                                    elderName: elderId,
-                                    sessionDate: new Date().toISOString(),
-                                    durationSeconds: Math.round((Date.now() - startTimeRef.current) / 1000),
-                                    metrics: sessionReport.metrics,
-                                    frameCount: sessionReport.metrics.throw_count || 0
+                                try {
+                                    const summary: SessionSummary = {
+                                        sessionId: sessionReport.session_id || 'unknown',
+                                        elderId: elderId,
+                                        elderName: elderId,
+                                        sessionDate: new Date().toISOString(),
+                                        durationSeconds: sessionReport.metrics?.duration_seconds || 0,
+                                        metrics: sessionReport.metrics,
+                                        frameCount: sessionReport.metrics?.throw_count || 0
+                                    }
+                                    downloadExcel(summary, [])
+                                } catch (e) {
+                                    console.error('Excel 下載失敗:', e)
+                                    alert('下載失敗，請重試')
                                 }
-                                downloadExcel(summary, engineRef.current.getFrameHistory())
                             }}
                             className="w-full py-2.5 rounded-xl bg-green-50 hover:bg-green-100 text-green-700 text-sm font-bold text-center transition-colors border border-green-200 flex items-center justify-center gap-2"
                         >
