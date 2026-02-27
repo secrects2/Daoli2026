@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 import { exportFramesToCSV, exportSessionSummaryToCSV, exportSessionToExcelXML, exportBatchSummaryToCSV, type SessionSummary } from '@/lib/data-export'
 
 function jsonError(body: any, status: number = 400) {
@@ -45,21 +46,31 @@ export async function GET(request: Request) {
         const to = searchParams.get('to')
         const format = searchParams.get('format') || 'csv'
         const type = searchParams.get('type') || 'summary'
-        const token = searchParams.get('token')
 
-        // 1. 简易 API Token 防护 (这里使用写死在环境变量中的 Secret)
-        const EXPECTED_API_TOKEN = process.env.EXPORT_API_TOKEN || 'boccia-academic-export-2026';
-        if (token !== EXPECTED_API_TOKEN) {
-            return jsonError({ error: '未经授权的访问 (Unauthorized, Invalid Token)' }, 401)
-        }
+        // 使用带 cookie 的 SSR client，确保能通过 RLS 策略
+        const cookieStore = await cookies()
+        const supabase = createServerClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+            {
+                cookies: {
+                    getAll() { return cookieStore.getAll() },
+                    setAll(cookiesToSet) {
+                        try {
+                            cookiesToSet.forEach(({ name, value, options }) =>
+                                cookieStore.set(name, value, options)
+                            )
+                        } catch { }
+                    },
+                },
+            }
+        )
 
-        // 初始化 Supabase
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-        if (!supabaseUrl || !supabaseKey) {
-            return jsonError({ error: '数据库配置缺失' }, 500)
+        // 验证登入身份（取代 Token 验证，更安全）
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) {
+            return jsonError({ error: '请先登入后再进行数据导出' }, 401)
         }
-        const supabase = createClient(supabaseUrl, supabaseKey)
 
         // 单笔 session 导出
         if (sessionId) {

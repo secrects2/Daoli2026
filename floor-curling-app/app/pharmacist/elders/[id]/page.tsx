@@ -631,10 +631,10 @@ export default function GenericElderDetailPage() {
                                 <div className="flex justify-between items-center">
                                     <h5 className="text-sm font-bold text-gray-500">歷史檢測紀錄</h5>
                                     <div className="flex gap-2">
-                                        <a href={`/api/export/session?elderId=${params.id}&format=csv&type=summary&token=boccia-academic-export-2026`} className="text-xs bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-600 px-2 py-1 rounded flex items-center gap-1 transition-colors" download>
+                                        <a href={`/api/export/session?elderId=${params.id}&format=csv&type=summary`} className="text-xs bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-600 px-2 py-1 rounded flex items-center gap-1 transition-colors" download>
                                             批次下載 CSV
                                         </a>
-                                        <a href={`/api/export/session?elderId=${params.id}&format=excel&token=boccia-academic-export-2026`} className="text-xs bg-green-50 hover:bg-green-100 border border-green-200 text-green-700 px-2 py-1 rounded flex items-center gap-1 transition-colors" download>
+                                        <a href={`/api/export/session?elderId=${params.id}&format=excel`} className="text-xs bg-green-50 hover:bg-green-100 border border-green-200 text-green-700 px-2 py-1 rounded flex items-center gap-1 transition-colors" download>
                                             批次下載 Excel
                                         </a>
                                     </div>
