@@ -95,6 +95,9 @@ export interface BiomechanicsMetrics {
     postureCorrection: number
     isHunched: boolean
     isTilted: boolean
+
+    // === 新增: 动作检测 ===
+    isReleaseFrame: boolean   // 当前帧是否为判定出的「出手瞬间」
 }
 
 
@@ -927,6 +930,7 @@ export class BiomechanicsEngine {
     readonly compensation = new CompensationDetector()
     readonly subjectTracker = new SubjectTracker()
     readonly postureCorrector = new PostureCorrector()
+    readonly releaseDetector = new ReleaseDetector()
 
     // 独立信号降噪信道 (Channels)
     private filters = {
@@ -1058,10 +1062,35 @@ export class BiomechanicsEngine {
             postureCorrection: postureResult.correctionAngle,
             isHunched: postureResult.isHunched,
             isTilted: postureResult.isTilted,
+
+            isReleaseFrame: false, // 暫時給預設值，這將在外部使用速度輔助判定或在內部實作
         }
+
+        // 6. 出手瞬間判定 (Release Detection)
+        // 需結合外部已經算好的 smoothing 速度與手肘角度，所以這裡先透過 releaseDetector 計算
+        // 不過因為 engine.processFrame 是在 BocciaCam 外面算速度前呼叫的，
+        // 我們改在類別中保留一個 updateReleasePoint() 的公開方法讓外部調用，確保吃到濾波後的真實速度波峰。
 
         this.frameHistory.push(metrics)
         return metrics
+    }
+
+    /**
+     * 結合濾波後的參數，更新當前影格的「出手判定」
+     * 由 BocciaCam 在計算完速度與角度後呼叫，更新最後一筆 history 的狀態。
+     */
+    updateReleasePoint(
+        filteredVelocity: number,
+        filteredElbowROM: number,
+        wristY: number | null,
+        shoulderY: number | null,
+        hipY: number | null
+    ): boolean {
+        const isRelease = this.releaseDetector.detect(filteredVelocity, filteredElbowROM, wristY, shoulderY, hipY);
+        if (this.frameHistory.length > 0 && isRelease) {
+            this.frameHistory[this.frameHistory.length - 1].isReleaseFrame = true;
+        }
+        return isRelease;
     }
 
     /**
@@ -1092,7 +1121,91 @@ export class BiomechanicsEngine {
         this.filters.trunkStability.reset()
         this.filters.velocity.reset()
         this.filters.coreStabilityAngle.reset()
+        this.releaseDetector.reset()
 
         this.frameHistory = []
+    }
+}
+
+// ============================================================================
+// 8. ReleaseDetector — 出手瞬间判定
+// ============================================================================
+/**
+ * 基于「速度波峰」、「手臂伸展」以及「投球后的腕部轨迹高度下降 (Follow-through)」
+ * 结合的状态机，以防范「假装出手 (Fake Throw)」。
+ * 
+ * 条件：
+ * 1. 速度波峰 (Velocity Peak > 50)
+ * 2. 伴随手臂达到伸展状态 (Elbow ROM > 140)
+ * *** 针对假动作防范的新增条件 ***
+ * 3. 投掷瞬间，手腕高度 (Wrist Y) 必须处于相对较低的位置（接近臀部或膝盖），而非在胸前举起。
+ * 4. 设有冷却时间 (Cooldown) 避免同一次投球触发多次
+ */
+export class ReleaseDetector {
+    private lastVelocity: number = 0;
+    private isAccelerating: boolean = false;
+    private framesSinceLastRelease: number = 999;
+
+    // 门槛值
+    private readonly COOLDOWN_FRAMES = 30; // 冷却：约1秒
+    private readonly VEL_THRESHOLD = 50;   // 速度门槛
+    private readonly ROM_THRESHOLD = 140;  // 获取最大伸展
+
+    /**
+     * @param currentVelocity 当前归一化速度
+     * @param currentRom 当前手肘伸展度
+     * @param wristY 手腕的 Y 坐标 (向下为正)
+     * @param shoulderY 肩膀的 Y 坐标
+     * @param hipY 髋部的 Y 坐标
+     */
+    detect(
+        currentVelocity: number,
+        currentRom: number,
+        wristY: number | null,
+        shoulderY: number | null,
+        hipY: number | null
+    ): boolean {
+        this.framesSinceLastRelease++;
+
+        // 判定局部波峰：之前在加速，现在速度衰减
+        const isLocalPeak = this.isAccelerating && (currentVelocity < this.lastVelocity);
+
+        let isRelease = false;
+
+        // 防伪验证：确保手腕在投出时处于身体下半部 (低于肩膀，且接近或低于髋部)
+        // 在标准的滚球动作中，出手点通常是很低的。如果是「假装往前挥拳」，手腕会在较高位置。
+        let isWristPositionValid = true;
+        if (wristY !== null && shoulderY !== null && hipY !== null) {
+            // Y 轴向下为正，所以 wristY > shoulderY 代表手在肩膀下方
+            // 我们要求出手时，手至少要低过肩膀到髋部之间的一定比例 (例如 70% 偏下)
+            const torsoHeight = hipY - shoulderY;
+            const wristDepth = wristY - shoulderY;
+            if (wristDepth < torsoHeight * 0.7) {
+                isWristPositionValid = false; // 手举太高，可能是假动作
+            }
+        }
+
+        if (
+            isLocalPeak &&
+            this.lastVelocity > this.VEL_THRESHOLD &&
+            currentRom > this.ROM_THRESHOLD &&
+            isWristPositionValid &&
+            this.framesSinceLastRelease > this.COOLDOWN_FRAMES
+        ) {
+            isRelease = true;
+            this.framesSinceLastRelease = 0;
+        }
+
+        // 更新状态以供下一帧比较
+        this.isAccelerating = currentVelocity > this.lastVelocity;
+        this.lastVelocity = currentVelocity;
+
+        return isRelease;
+    }
+
+    reset() {
+        this.lastVelocity = 0;
+        this.isAccelerating = false;
+        this.framesSinceLastRelease = 999;
     }
 }

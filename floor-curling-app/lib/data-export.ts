@@ -45,6 +45,7 @@ const FRAME_CSV_HEADERS = [
   'posture_correction_deg',
   'is_hunched',
   'is_tilted',
+  'is_release_frame'
 ]
 
 /**
@@ -82,8 +83,9 @@ export function exportFramesToCSV(
       frame.subjectLocked ? 1 : 0,
       frame.subjectConfidence ?? '',
       frame.postureCorrection ?? 0,
-      frame.isHunched ? 1 : 0,
-      frame.isTilted ? 1 : 0,
+      frame.isHunched ? '1' : '0',
+      frame.isTilted ? '1' : '0',
+      frame.isReleaseFrame ? '1' : '0'
     ]
     rows.push(row.map(v => `"${v}"`).join(','))
   })

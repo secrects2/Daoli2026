@@ -248,12 +248,37 @@ export default function BocciaCam({
         const isArmExtended = elbowROM >= 160
         const isTrunkStable = trunkTilt <= 15
 
+        // Phase 2: 运行生物力学引擎
+        const bio = engineRef.current.processFrame(landmarks, W, H, now)
+
+        // 提取 y 座標供防偽出手判定使用
+        const wristY = landmarks[LANDMARKS.RIGHT_WRIST]?.visibility > 0.5 ? toRealPixels(landmarks[LANDMARKS.RIGHT_WRIST], W, H).y : null
+        const shoulderY = toRealPixels(landmarks[LANDMARKS.RIGHT_SHOULDER], W, H).y
+        const hipY = toRealPixels(landmarks[LANDMARKS.RIGHT_HIP], W, H).y
+
+        const isRelease = engineRef.current.updateReleasePoint(velocity, elbowROM, wristY, shoulderY, hipY)
+
+        bio.elbowROM = Math.round(elbowROM)
+        bio.elbowROM_raw = Math.round(rawElbowROM)
+        bio.trunkStability = Math.round(trunkTilt)
+        bio.trunkStability_raw = Math.round(rawTrunkTilt)
+        bio.velocity = Math.round(velocity)
+        bio.velocity_raw = Math.round(rawVelocity)
+        bio.isReleaseFrame = isRelease
+
+        setBioMetrics(bio)
+
         // --- PATENT LOGIC: "The Brain" Diagnostic Rules ---
         let diagText = null
         let diagColor = 'text-gray-400'
 
+        // 偵測到真實出手瞬間！(最高優先級顯示)
+        if (bio.isReleaseFrame) {
+            diagText = "🎉 成功投出！(Release Point Detected)"
+            diagColor = "text-yellow-400"
+        }
         // Rule 1: Safety/Fall Risk
-        if (!isTrunkStable) {
+        else if (!isTrunkStable) {
             diagText = `⚠️ 警告：身體明顯傾斜 (>15°，目前 ${Math.round(trunkTilt)}°)`
             diagColor = "text-red-500"
         }
@@ -274,16 +299,6 @@ export default function BocciaCam({
 
         setDiagnosticMsg(diagText ? { text: diagText, color: diagColor } : null)
         // --------------------------------------------------
-
-        // Phase 2: 运行生物力学引擎
-        const bio = engineRef.current.processFrame(landmarks, W, H, now)
-        bio.elbowROM = Math.round(elbowROM)
-        bio.elbowROM_raw = Math.round(rawElbowROM)
-        bio.trunkStability = Math.round(trunkTilt)
-        bio.trunkStability_raw = Math.round(rawTrunkTilt)
-        bio.velocity = Math.round(velocity)
-        bio.velocity_raw = Math.round(rawVelocity)
-        setBioMetrics(bio)
 
         // Record history
         metricsHistoryRef.current.push({
