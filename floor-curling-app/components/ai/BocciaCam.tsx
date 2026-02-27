@@ -694,82 +694,8 @@ export default function BocciaCam({
                         </div>
                     )}
 
-                    {/* Export Action Buttons */}
-                    <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-gray-100">
-                        <p className="text-xs font-bold text-gray-500 mb-1 text-center">下載檢測數據</p>
-                        <div className="grid grid-cols-2 gap-2">
-                            <button
-                                onClick={() => {
-                                    if (!sessionReport) return
-                                    try {
-                                        const summary: SessionSummary = {
-                                            sessionId: sessionReport.session_id || 'unknown',
-                                            elderId: elderId,
-                                            elderName: elderId,
-                                            sessionDate: new Date().toISOString(),
-                                            durationSeconds: sessionReport.metrics?.duration_seconds || 0,
-                                            metrics: sessionReport.metrics,
-                                            frameCount: sessionReport.metrics?.throw_count || 0
-                                        }
-                                        downloadSummaryCSV(summary)
-                                    } catch (e) {
-                                        console.error('CSV 下載失敗:', e)
-                                        alert('下載失敗，請重試')
-                                    }
-                                }}
-                                className="w-full py-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm font-bold text-center transition-colors border border-gray-200 flex items-center justify-center gap-2"
-                            >
-                                <span>📄</span> 摘要 (CSV)
-                            </button>
-                            <button
-                                onClick={() => {
-                                    if (!sessionReport) return
-                                    try {
-                                        // 逐幀數據目前不保留，先提供摘要 CSV
-                                        const summary: SessionSummary = {
-                                            sessionId: sessionReport.session_id || 'unknown',
-                                            elderId: elderId,
-                                            elderName: elderId,
-                                            sessionDate: new Date().toISOString(),
-                                            durationSeconds: sessionReport.metrics?.duration_seconds || 0,
-                                            metrics: sessionReport.metrics,
-                                            frameCount: sessionReport.metrics?.throw_count || 0
-                                        }
-                                        downloadSummaryCSV(summary)
-                                    } catch (e) {
-                                        console.error('CSV 下載失敗:', e)
-                                        alert('下載失敗，請重試')
-                                    }
-                                }}
-                                className="w-full py-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm font-bold text-center transition-colors border border-gray-200 flex items-center justify-center gap-2"
-                            >
-                                <span>📈</span> 詳細 (CSV)
-                            </button>
-                        </div>
-                        <button
-                            onClick={() => {
-                                if (!sessionReport) return
-                                try {
-                                    const summary: SessionSummary = {
-                                        sessionId: sessionReport.session_id || 'unknown',
-                                        elderId: elderId,
-                                        elderName: elderId,
-                                        sessionDate: new Date().toISOString(),
-                                        durationSeconds: sessionReport.metrics?.duration_seconds || 0,
-                                        metrics: sessionReport.metrics,
-                                        frameCount: sessionReport.metrics?.throw_count || 0
-                                    }
-                                    downloadExcel(summary, [])
-                                } catch (e) {
-                                    console.error('Excel 下載失敗:', e)
-                                    alert('下載失敗，請重試')
-                                }
-                            }}
-                            className="w-full py-2.5 rounded-xl bg-green-50 hover:bg-green-100 text-green-700 text-sm font-bold text-center transition-colors border border-green-200 flex items-center justify-center gap-2"
-                        >
-                            <span>📊</span> 下載完整報告 (Excel)
-                        </button>
-                    </div>
+
+
 
                     <button
                         onClick={onClose}
