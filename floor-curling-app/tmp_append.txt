@@ -1,2 +1,1 @@
-// 此為暫時借用指令修改檔案末端 (因為 multi-replace 無法處理超過範圍的 append)
-// 接下來會用 command 加入 ReleaseDetector
+// 此為暫存 append 指令檔案

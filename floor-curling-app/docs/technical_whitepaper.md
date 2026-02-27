@@ -35,11 +35,13 @@ graph TB
         ROM["指标 A：手肘 ROM"]
         TRUNK["指标 B：躯干倾斜"]
         VEL["指标 C：出手速度"]
+        REL["指标 H：出手瞬间判定<br/>(ReleaseDetector)"]
     end
 
     subgraph BRAIN["🧬 The Brain 诊断引擎"]
         R0["P0: 震颤警示"]
         R05["P0.5: 代偿警示"]
+        R08["P0.8: 出手瞬间"]
         R1["P1: 安全性检查"]
         R2["P2: ROM 检查"]
         R3["P3: 速度检查"]
@@ -56,12 +58,12 @@ graph TB
     CAM --> FRAME --> MP --> LM
     LM --> AR & ST
     AR --> PC
-    PC --> CS & AV & CD & ROM & TRUNK & VEL
+    PC --> CS & AV & CD & ROM & TRUNK & VEL & REL
     AV --> TD
-    CS & AV & TD & CD & ROM & TRUNK & VEL --> R0
-    R0 --> R05 --> R1 --> R2 --> R3 --> R4
-    R0 & R05 & R1 & R2 & R3 & R4 --> HUD
-    CS & AV & TD & CD & ROM & TRUNK & VEL --> EXPORT & DB
+    CS & AV & TD & CD & ROM & TRUNK & VEL & REL --> R0
+    R0 --> R05 --> R08 --> R1 --> R2 --> R3 --> R4
+    R0 & R05 & R08 & R1 & R2 & R3 & R4 --> HUD
+    CS & AV & TD & CD & ROM & TRUNK & VEL & REL --> EXPORT & DB
     DB --> API
 
     style CORE fill:#4F46E5,color:#fff
@@ -368,9 +370,9 @@ ELSE:                            → 🔵 动作稳定
 | trunk_stability_deg | float | ° | 躯干倾斜 |
 | velocity | float | v | 出手速度 |
 | core_stability_angle_deg | float | ° | 中轴偏移 |
-| shoulder_angular_vel_deg_s | float | °/s | 肩角速度 |
 | elbow_angular_vel_deg_s | float | °/s | 肘角速度 |
 | wrist_angular_vel_deg_s | float | °/s | 腕角速度 |
+| is_release_frame | bool | 0/1 | 是否为出手瞬间 |
 | tremor_detected | bool | 0/1 | 震颤 |
 | tremor_frequency_hz | float | Hz | 震颤频率 |
 | compensation_type | string | - | 代偿类型 |
@@ -429,4 +431,4 @@ ELSE:                            → 🔵 动作稳定
 
 > **版本历史**
 > - Phase 1 (v1.0): 手肘 ROM + 躯干倾斜 + 出手速度 + 长宽比感知
-> - Phase 2 (v2.0): 中轴稳定度 + 角速度 + 震颤检测 + 代偿识别 + 主体锁定 + 坐姿修正 + CSV/Excel 导出
+> - Phase 2 (v2.0): 中轴稳定度 + 角速度 + 震颤检测 + 代偿识别 + 主体锁定 + 坐姿修正 + 防伪出手判定 + CSV/Excel 导出
