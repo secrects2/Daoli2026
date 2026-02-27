@@ -269,7 +269,7 @@ $$
 
 **步骤 4**：计算振幅与抗噪过滤
 
-为避免摄影机高频细微噪点引起的假阳性，系统设置了噪点门槛（Noise Threshold, $Th_{noise} = 1.5^\circ$）：
+为避免摄影机高频细微噪点（尤其是翻拍螢幕产生的摩尔纹/压缩噪点，通常在 1~2.5° 范围 [4]）引起的假阳性，系统设置了噪点门槛（Noise Threshold, $Th_{noise} = 3.0^\circ$）：
 仅当相邻两帧的角度变化量 $|\delta_i| > Th_{noise}$ 时，才将其计入有效动作并计算零交叉。
 
 同时计算有效振幅：
@@ -280,16 +280,18 @@ $$
 #### 判定条件
 
 $$
-\text{tremor\_positive} = (N_{cross} \geq 6) \wedge (3 \leq f_{tremor} \leq 12 \text{ Hz}) \wedge (Amplitude > 1.5^\circ)
+\text{tremor\_positive} = (N_{cross} \geq 8) \wedge (3 \leq f_{tremor} \leq 12 \text{ Hz}) \wedge (Amplitude > 3.0^\circ) \wedge (\text{SignificantRatio} > 0.3)
 $$
+
+其中 $\text{SignificantRatio}$ 为有效抖动帧占比（超过噪点门槛的帧间差数量 / 总帧间差数量），此第四重条件确保震颤为持续性而非偶发性。
 
 #### 严重度分级
 
 | 等级 | 交叉次数 | 振幅 | 临床对应 |
 |------|---------|------|---------|
-| Mild | 6-8 | < 5° | 轻微震颤 |
-| Moderate | 8-12 | 5-15° | 中度震颤 |
-| Severe | > 12 | > 15° | 严重震颤 |
+| Mild | 8-12 | < 8° | 轻微震颤 |
+| Moderate | 12-16 | 8-15° | 中度震颤 |
+| Severe | > 16 | > 15° | 严重震颤 |
 
 #### 临床参考
 
@@ -433,7 +435,7 @@ ELSE:                            → 🔵 动作稳定
 ```
 节点不可见  → z = 0 自动降级为 2D 计算
 主体丢失    → 标记 subjectLocked = false，暂停数据记录
-震颤误报    → 需连续 30 帧（1秒）以上方确认
+震颤误报    → 需连续 45 帧（1.5秒）以上 + 四重条件方确认 [3][4]
 驼背/歪斜   → 仅标记不强制修正，原始数据同步保留
 ```
 
