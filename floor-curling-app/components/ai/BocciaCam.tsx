@@ -150,6 +150,12 @@ export default function BocciaCam({
     // 追蹤整個 session 的指標歷史
     const metricsHistoryRef = useRef<{ rom: number; tilt: number; velocity: number }[]>([])
 
+    // 自動偵測投球 & 自動儲存
+    const autoSaveCountRef = useRef<number>(0)
+    const lastAutoSaveTimeRef = useRef<number>(0)
+    const autoSavingRef = useRef<boolean>(false)
+    const [autoSaveToast, setAutoSaveToast] = useState<string | null>(null)
+
     // Phase 2: 进阶指标展开/折叠
     const [showAdvanced, setShowAdvanced] = useState(false)
     // Phase 2: 生物力学指标状态
@@ -276,6 +282,61 @@ export default function BocciaCam({
         if (bio.isReleaseFrame) {
             diagText = "🎉 成功投出！(Release Point Detected)"
             diagColor = "text-yellow-400"
+
+            // ─── 自動儲存：偵測到有效投擲 → 自動存入 Supabase ───
+            const now2 = Date.now()
+            const cooldownMs = 5000 // 5 秒冷卻期
+            if (!autoSavingRef.current && (now2 - lastAutoSaveTimeRef.current) > cooldownMs) {
+                autoSavingRef.current = true
+                lastAutoSaveTimeRef.current = now2
+                autoSaveCountRef.current += 1
+                const throwNum = autoSaveCountRef.current
+                const currentHistory = [...metricsHistoryRef.current]
+                const currentBioHistory = engineRef.current.getFrameHistory()
+                const dur = Math.round((now2 - startTimeRef.current) / 1000)
+
+                    // 後台非同步儲存（不阻塞即時分析）
+                    ; (async () => {
+                        try {
+                            const romVals = currentHistory.map(h => h.rom).filter(v => v > 0)
+                            const tiltVals = currentHistory.map(h => h.tilt).filter(v => v >= 0)
+                            const velVals = currentHistory.map(h => h.velocity).filter(v => v > 0)
+                            const avgR = romVals.length > 0 ? Math.round(romVals.reduce((a, b) => a + b, 0) / romVals.length) : 0
+                            const avgT = tiltVals.length > 0 ? Math.round(tiltVals.reduce((a, b) => a + b, 0) / tiltVals.length) : 0
+                            const avgV = velVals.length > 0 ? Math.round(velVals.reduce((a, b) => a + b, 0) / velVals.length) : 0
+                            const tFrames = currentBioHistory.filter(b => b.tremorDetected)
+                            const cFrames = currentBioHistory.filter(b => b.compensationType !== null)
+                            const payload = {
+                                elbow_rom: avgR, avg_rom: avgR,
+                                trunk_stability: avgT, avg_trunk_tilt: avgT,
+                                avg_velocity: avgV,
+                                max_rom: romVals.length > 0 ? Math.max(...romVals) : null,
+                                min_rom: romVals.length > 0 ? Math.min(...romVals) : null,
+                                throw_count: throwNum,
+                                duration_seconds: dur,
+                                stable_ratio: currentHistory.length > 0 ? Math.round((currentHistory.filter(h => h.rom >= 160 && h.tilt <= 15).length / currentHistory.length) * 100) : 0,
+                                core_stability_angle: currentBioHistory.length > 0 ? Math.round(currentBioHistory.reduce((s, b) => s + (b.coreStabilityAngle || 0), 0) / currentBioHistory.length * 10) / 10 : null,
+                                avg_shoulder_angular_vel: currentBioHistory.length > 0 ? Math.round(currentBioHistory.reduce((s, b) => s + (b.shoulderAngularVel || 0), 0) / currentBioHistory.length) : null,
+                                avg_elbow_angular_vel: currentBioHistory.length > 0 ? Math.round(currentBioHistory.reduce((s, b) => s + (b.elbowAngularVel || 0), 0) / currentBioHistory.length) : null,
+                                avg_wrist_angular_vel: currentBioHistory.length > 0 ? Math.round(currentBioHistory.reduce((s, b) => s + (b.wristAngularVel || 0), 0) / currentBioHistory.length) : null,
+                                tremor_detected_ratio: currentBioHistory.length > 0 ? Math.round((tFrames.length / currentBioHistory.length) * 100) : 0,
+                                tremor_avg_frequency: tFrames.length > 0 ? Math.round(tFrames.reduce((s, b) => s + (b.tremorFrequency || 0), 0) / tFrames.length * 10) / 10 : null,
+                                compensation_detected_ratio: currentBioHistory.length > 0 ? Math.round((cFrames.length / currentBioHistory.length) * 100) : 0,
+                                compensation_types: [...new Set(cFrames.map(b => b.compensationType).filter(Boolean))],
+                                posture_correction_avg: currentBioHistory.length > 0 ? Math.round(currentBioHistory.reduce((s, b) => s + (b.postureCorrection || 0), 0) / currentBioHistory.length * 10) / 10 : 0,
+                            }
+                            await saveRehabSession({ elderId, matchId, sportType: 'boccia', durationSeconds: dur, metrics: payload })
+                            setAutoSaveToast(`✅ 第 ${throwNum} 次投擲已自動儲存`)
+                            setTimeout(() => setAutoSaveToast(null), 3000)
+                        } catch (e) {
+                            console.error('自動儲存失敗:', e)
+                            setAutoSaveToast(`⚠️ 第 ${throwNum} 次自動儲存失敗`)
+                            setTimeout(() => setAutoSaveToast(null), 3000)
+                        } finally {
+                            autoSavingRef.current = false
+                        }
+                    })()
+            }
         }
         // Rule 1: Safety/Fall Risk
         else if (!isTrunkStable) {
@@ -778,7 +839,7 @@ export default function BocciaCam({
             </div>
 
             {/* Metrics Dashboard */}
-            <div className="p-4 bg-gray-800 space-y-3">
+            <div className="p-3 bg-gray-800 space-y-3 overflow-hidden">
                 {/* Phase 2: 主体锁定 & 坐姿状态指示器 */}
                 <div className="flex items-center justify-between">
                     <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Medical Rehab Data (即時醫療數據)</p>
@@ -796,24 +857,24 @@ export default function BocciaCam({
                     </div>
                 </div>
                 <div className="grid grid-cols-3 gap-3">
-                    <div className={`rounded-xl p-3 text-center ${metrics.isArmExtended ? sideColors.bg : 'bg-red-900/50'}`}>
-                        <p className="text-xs text-gray-400 mb-1">肘部 ROM</p>
-                        <p className={`text-2xl font-black ${metrics.isArmExtended ? sideColors.text : 'text-red-400'}`}>
+                    <div className={`rounded-xl p-2 text-center min-w-0 ${metrics.isArmExtended ? sideColors.bg : 'bg-red-900/50'}`}>
+                        <p className="text-[10px] text-gray-400 mb-0.5 truncate">肘部 ROM</p>
+                        <p className={`text-xl font-black ${metrics.isArmExtended ? sideColors.text : 'text-red-400'}`}>
                             {metrics.elbowROM !== null ? `${metrics.elbowROM}°` : '--'}
                         </p>
                     </div>
 
-                    <div className={`rounded-xl p-3 text-center ${metrics.isTrunkStable ? sideColors.bg : 'bg-red-900/50'}`}>
-                        <p className="text-xs text-gray-400 mb-1">軀幹傾斜</p>
-                        <p className={`text-2xl font-black ${metrics.isTrunkStable ? sideColors.text : 'text-red-400'}`}>
+                    <div className={`rounded-xl p-2 text-center min-w-0 ${metrics.isTrunkStable ? sideColors.bg : 'bg-red-900/50'}`}>
+                        <p className="text-[10px] text-gray-400 mb-0.5 truncate">軀幹傾斜</p>
+                        <p className={`text-xl font-black ${metrics.isTrunkStable ? sideColors.text : 'text-red-400'}`}>
                             {metrics.trunkStability !== null ? `${metrics.trunkStability}°` : '--'}
                         </p>
                     </div>
 
-                    <div className="rounded-xl p-3 text-center bg-gray-700/50">
-                        <p className="text-xs text-gray-400 mb-1">出手速度</p>
-                        <p className="text-2xl font-black text-emerald-400">
-                            {metrics.velocity || '--'} <span className="text-xs text-gray-500">v</span>
+                    <div className="rounded-xl p-2 text-center min-w-0 bg-gray-700/50">
+                        <p className="text-[10px] text-gray-400 mb-0.5 truncate">出手速度</p>
+                        <p className="text-xl font-black text-emerald-400 truncate">
+                            {metrics.velocity || '--'}
                         </p>
                     </div>
                 </div>
@@ -875,16 +936,37 @@ export default function BocciaCam({
                 )}
 
                 {/* Action Buttons */}
+                {/* 自動儲存通知 Toast */}
+                {autoSaveToast && (
+                    <div className="mb-2 py-2 px-4 rounded-xl bg-green-600/90 text-white text-sm font-bold text-center animate-fade-in">
+                        {autoSaveToast}
+                    </div>
+                )}
+
+                {/* 無人畫面提示 */}
+                {!metrics.subjectLocked && (
+                    <div className="mb-2 py-2 px-4 rounded-xl bg-yellow-600/30 border border-yellow-500/50 text-yellow-300 text-sm font-bold text-center animate-pulse">
+                        👤 等待長輩就位... (偵測到人體後自動開始)
+                    </div>
+                )}
+
+                {/* 自動儲存計數器 */}
+                {autoSaveCountRef.current > 0 && (
+                    <div className="mb-2 py-1.5 px-3 rounded-lg bg-emerald-900/40 border border-emerald-500/30 text-emerald-300 text-xs font-bold text-center">
+                        📊 已自動儲存 {autoSaveCountRef.current} 次投擲
+                    </div>
+                )}
+
                 <div className="flex gap-3">
                     <button
                         onClick={handleSaveAndStop}
                         disabled={saving || saved}
                         className={`flex-1 py-3 rounded-xl font-bold text-white transition-all ${saved ? 'bg-green-600' :
                             saving ? 'bg-gray-600' :
-                                'bg-gradient-to-r from-green-500 to-emerald-600 hover:shadow-lg'
+                                'bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600'
                             } disabled:cursor-not-allowed`}
                     >
-                        {saved ? '✅ 已儲存' : saving ? '儲存中...' : '📊 儲存並停止'}
+                        {saved ? '✅ 已結束' : saving ? '結束中...' : '🛑 結束分析'}
                     </button>
                     {/* Sitting Optimization Badge */}
                     <div className="absolute top-16 right-4 bg-gray-900/60 backdrop-blur border border-white/20 rounded-lg px-3 py-1.5 flex flex-col items-end pointer-events-none">
