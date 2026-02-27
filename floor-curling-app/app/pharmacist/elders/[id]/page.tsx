@@ -639,8 +639,16 @@ export default function GenericElderDetailPage() {
                                     <div className="flex gap-2 flex-wrap">
                                         <button
                                             onClick={() => {
-                                                // 純前端產生 CSV — 不經過 API
-                                                const headers = ['長者ID', '長者姓名', '店家', '日期時間', '手肘ROM(°)', '軀幹穩定(°)', '速度', '穩定率(%)', '中軸偏移(°)', '震顫率(%)', '代償率(%)']
+                                                // 學術級 CSV：受試者 + 後設 + 生物力學 + 神經學 + AI 診斷
+                                                const headers = [
+                                                    '受試者代碼(ID)', '受試者姓名', '據點/店家',
+                                                    '檢測日期時間', '訓練時長(秒)', '投擲次數(次)',
+                                                    '手肘ROM平均(°)', '手肘ROM最大(°)', '手肘ROM最小(°)',
+                                                    '軀幹穩定度平均(°)', '出手速度平均(歸一化)', '動作穩定率(%)',
+                                                    '中軸穩定度(°)', '肩角速度平均(°/s)', '肘角速度平均(°/s)', '腕角速度平均(°/s)',
+                                                    '震顫檢出率(%)', '震顫頻率平均(Hz)', '代償動作檢出率(%)', '代償類型',
+                                                    '坐姿修正量平均(°)', 'AI處方等級',
+                                                ]
                                                 const elderName = elder.nickname || elder.full_name || '未知'
                                                 const storeName = elder.store_id || '未知'
                                                 const elderId = (params.id as string).slice(0, 8)
@@ -648,19 +656,28 @@ export default function GenericElderDetailPage() {
                                                     const m = s.metrics || {}
                                                     const dt = new Date(s.created_at)
                                                     const dateStr = `${dt.getFullYear()}/${String(dt.getMonth() + 1).padStart(2, '0')}/${String(dt.getDate()).padStart(2, '0')} ${String(dt.getHours()).padStart(2, '0')}:${String(dt.getMinutes()).padStart(2, '0')}:${String(dt.getSeconds()).padStart(2, '0')}`
+                                                    const px = getAiPrescription(m)
                                                     return [
-                                                        elderId,
-                                                        elderName,
-                                                        storeName,
-                                                        dateStr,
+                                                        elderId, elderName, storeName, dateStr,
+                                                        s.duration_seconds ?? '',
+                                                        m.throw_count ?? '',
                                                         m.avg_rom ?? m.elbow_rom ?? '',
+                                                        m.max_rom ?? '',
+                                                        m.min_rom ?? '',
                                                         m.avg_trunk_tilt ?? m.trunk_stability ?? '',
                                                         m.avg_velocity ?? '',
                                                         m.stable_ratio ?? '',
                                                         m.core_stability_angle ?? '',
+                                                        m.avg_shoulder_angular_vel ?? '',
+                                                        m.avg_elbow_angular_vel ?? '',
+                                                        m.avg_wrist_angular_vel ?? '',
                                                         m.tremor_detected_ratio ?? '',
+                                                        m.tremor_avg_frequency ?? '',
                                                         m.compensation_detected_ratio ?? '',
-                                                    ].join(',')
+                                                        Array.isArray(m.compensation_types) ? m.compensation_types.join(';') : '',
+                                                        m.posture_correction_avg ?? '',
+                                                        px.title || '',
+                                                    ].map(v => `"${v}"`).join(',')
                                                 })
                                                 const csv = '\uFEFF' + headers.join(',') + '\n' + rows.join('\n')
                                                 const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
