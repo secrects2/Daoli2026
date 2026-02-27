@@ -387,11 +387,17 @@ export class TremorDetector {
                 deltas.push(angleSequence[i] - angleSequence[i - 1])
             }
 
-            // 零交叉计数
+            // 零交叉计数与振幅门槛 (Amp Threshold)
+            // 避免因摄影机微小噪点或骨架闪烁 (高频低振幅) 造成的假阳性
+            const NOISE_THRESHOLD = 1.5 // 度
             let crossings = 0
+
             for (let i = 1; i < deltas.length; i++) {
-                if ((deltas[i] > 0 && deltas[i - 1] < 0) || (deltas[i] < 0 && deltas[i - 1] > 0)) {
-                    crossings++
+                // 必须变化幅度超过噪点门槛才计入有效动作
+                if (Math.abs(deltas[i]) > NOISE_THRESHOLD && Math.abs(deltas[i - 1]) > NOISE_THRESHOLD) {
+                    if ((deltas[i] > 0 && deltas[i - 1] < 0) || (deltas[i] < 0 && deltas[i - 1] > 0)) {
+                        crossings++
+                    }
                 }
             }
 
@@ -402,12 +408,13 @@ export class TremorDetector {
             // 估计频率
             const freq = crossings / (2 * tWindow)
 
-            // 计算振幅（角度变化的标准差）
+            // 计算振幅（有效角度变化的标准差或平均绝对值）
             const meanDelta = deltas.reduce((a, b) => a + Math.abs(b), 0) / deltas.length
             const amplitude = meanDelta
 
             // 判断是否为震颤
-            if (crossings >= this.MIN_CROSSINGS && freq >= this.MIN_FREQ_HZ && freq <= this.MAX_FREQ_HZ) {
+            // 严谨条件：交叉次数足够、处于震颤频段、且整体振幅大于一定的噪点水准
+            if (crossings >= this.MIN_CROSSINGS && freq >= this.MIN_FREQ_HZ && freq <= this.MAX_FREQ_HZ && amplitude > NOISE_THRESHOLD) {
                 let severity: 'none' | 'mild' | 'moderate' | 'severe' = 'mild'
                 if (crossings > 12 || amplitude > 15) severity = 'severe'
                 else if (crossings > 8 || amplitude > 5) severity = 'moderate'

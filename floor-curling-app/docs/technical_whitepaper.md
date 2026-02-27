@@ -267,10 +267,20 @@ $$
 f_{tremor} = \frac{N_{cross}}{2 \times T_{window}} \quad (Hz)
 $$
 
+**步骤 4**：计算振幅与抗噪过滤
+
+为避免摄影机高频细微噪点引起的假阳性，系统设置了噪点门槛（Noise Threshold, $Th_{noise} = 1.5^\circ$）：
+仅当相邻两帧的角度变化量 $|\delta_i| > Th_{noise}$ 时，才将其计入有效动作并计算零交叉。
+
+同时计算有效振幅：
+$$
+Amplitude = \frac{1}{n-1} \sum_{i=1}^{n-1} |\delta_i|
+$$
+
 #### 判定条件
 
 $$
-\text{tremor\_positive} = (N_{cross} \geq 6) \wedge (3 \leq f_{tremor} \leq 12 \text{ Hz})
+\text{tremor\_positive} = (N_{cross} \geq 6) \wedge (3 \leq f_{tremor} \leq 12 \text{ Hz}) \wedge (Amplitude > 1.5^\circ)
 $$
 
 #### 严重度分级
