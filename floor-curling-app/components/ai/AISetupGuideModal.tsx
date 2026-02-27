@@ -11,7 +11,7 @@ interface AISetupGuideModalProps {
 export default function AISetupGuideModal({ isOpen, onClose }: AISetupGuideModalProps) {
     return (
         <Transition show={isOpen} as={Fragment}>
-            <Dialog onClose={onClose} className="relative z-50">
+            <Dialog onClose={onClose} className="relative z-[100]">
                 {/* Backdrop */}
                 <Transition.Child
                     as={Fragment}
