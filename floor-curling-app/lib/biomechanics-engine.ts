@@ -356,10 +356,10 @@ export class AngularVelocityAnalyzer {
  * - severe:   N_cross > 12,  振幅 > 15°
  */
 export class TremorDetector {
-    private readonly MIN_CROSSINGS = 6        // 最小交叉次数
+    private readonly MIN_CROSSINGS = 8        // 最小交叉次数（↑从6提升至8，减少偶发假阳性）
     private readonly MIN_FREQ_HZ = 3          // 最小震颤频率
     private readonly MAX_FREQ_HZ = 12         // 最大震颤频率
-    private readonly WINDOW_FRAMES = 30       // 分析窗口帧数
+    private readonly WINDOW_FRAMES = 45       // 分析窗口帧数（↑从30提升至45 ≈ 1.5秒，要求更长持续时间）
 
     /**
      * 分析震颤
@@ -387,13 +387,14 @@ export class TremorDetector {
                 deltas.push(angleSequence[i] - angleSequence[i - 1])
             }
 
-            // 零交叉计数与振幅门槛 (Amp Threshold)
-            // 避免因摄影机微小噪点或骨架闪烁 (高频低振幅) 造成的假阳性
-            const NOISE_THRESHOLD = 1.5 // 度
+            // ─── 抗噪声过滤 (Anti-Noise Gate) ───
+            // 翻拍螢幕(摩尔纹/压缩马赛克)产生的高频噪点一般在 1~2.5° 范围
+            // 帕金森静息震颤振幅通常 > 5°（远高于此阈值），故不受影响
+            const NOISE_THRESHOLD = 3.0 // 度（↑从1.5°提升至3.0°）
             let crossings = 0
 
             for (let i = 1; i < deltas.length; i++) {
-                // 必须变化幅度超过噪点门槛才计入有效动作
+                // 必须连续两帧的变化幅度都超过噪点门槛
                 if (Math.abs(deltas[i]) > NOISE_THRESHOLD && Math.abs(deltas[i - 1]) > NOISE_THRESHOLD) {
                     if ((deltas[i] > 0 && deltas[i - 1] < 0) || (deltas[i] < 0 && deltas[i - 1] > 0)) {
                         crossings++
@@ -408,16 +409,22 @@ export class TremorDetector {
             // 估计频率
             const freq = crossings / (2 * tWindow)
 
-            // 计算振幅（有效角度变化的标准差或平均绝对值）
-            const meanDelta = deltas.reduce((a, b) => a + Math.abs(b), 0) / deltas.length
-            const amplitude = meanDelta
+            // 计算有效振幅（仅计入超过门槛的帧间差）
+            const significantDeltas = deltas.filter(d => Math.abs(d) > NOISE_THRESHOLD)
+            const amplitude = significantDeltas.length > 0
+                ? significantDeltas.reduce((a, b) => a + Math.abs(b), 0) / significantDeltas.length
+                : 0
 
-            // 判断是否为震颤
-            // 严谨条件：交叉次数足够、处于震颤频段、且整体振幅大于一定的噪点水准
-            if (crossings >= this.MIN_CROSSINGS && freq >= this.MIN_FREQ_HZ && freq <= this.MAX_FREQ_HZ && amplitude > NOISE_THRESHOLD) {
+            // ─── 震颤判定（四重条件） ───
+            // 1. 交叉次数 ≥ 8（45帧窗口内）
+            // 2. 频率在临床震颤频段 3-12 Hz
+            // 3. 有效振幅 > 3.0°
+            // 4. 有效抖动帧占比 > 30%（确保是持续性而非偶发）
+            const significantRatio = significantDeltas.length / deltas.length
+            if (crossings >= this.MIN_CROSSINGS && freq >= this.MIN_FREQ_HZ && freq <= this.MAX_FREQ_HZ && amplitude > NOISE_THRESHOLD && significantRatio > 0.3) {
                 let severity: 'none' | 'mild' | 'moderate' | 'severe' = 'mild'
-                if (crossings > 12 || amplitude > 15) severity = 'severe'
-                else if (crossings > 8 || amplitude > 5) severity = 'moderate'
+                if (crossings > 16 || amplitude > 15) severity = 'severe'
+                else if (crossings > 12 || amplitude > 8) severity = 'moderate'
 
                 // 保留最严重的结果
                 const severityRank = { none: 0, mild: 1, moderate: 2, severe: 3 }
