@@ -28,7 +28,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-    themeColor: '#7c3aed',
+    themeColor: '#2ba89d',
     width: 'device-width',
     initialScale: 1,
     maximumScale: 1,
@@ -45,12 +45,15 @@ export default function RootLayout({
         <html lang="zh-TW" className="antialiased">
             <head>
                 <link rel="manifest" href="/manifest.json" />
+                <link rel="preconnect" href="https://fonts.googleapis.com" />
+                <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+                <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
                 <meta name="apple-mobile-web-app-capable" content="yes" />
                 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
             </head>
             {/* Revert to simple white/gray background */}
-            <body className="bg-gray-50 text-slate-800 min-h-screen selection:bg-blue-100 selection:text-blue-900">
-                <NextTopLoader color="#7c3aed" height={4} showSpinner={true} easing="ease" speed={200} shadow="0 0 10px #7c3aed,0 0 5px #7c3aed" zIndex={1600} />
+            <body className="bg-background text-foreground min-h-screen selection:bg-primary/10 selection:text-primary">
+                <NextTopLoader color="hsl(174, 60%, 45%)" height={3} showSpinner={false} easing="ease" speed={200} shadow="0 0 10px hsla(174,60%,45%,0.4)" zIndex={1600} />
                 <LanguageProvider>
                     <ToastProvider />
                     <ConfirmProvider>

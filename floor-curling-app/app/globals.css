@@ -2,61 +2,102 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  /* iOS System Colors - Light Mode */
-  --background: #F2F2F7;
-  /* System Grouped Background */
-  --foreground: #000000;
+@layer base {
+  :root {
+    /* ===== 清爽薄荷绿主色调（灵感来自日本健康 App） ===== */
+    --background: 0 0% 97.5%;
+    --foreground: 220 15% 20%;
 
-  --card: #FFFFFF;
-  --card-foreground: #000000;
+    --card: 0 0% 100%;
+    --card-foreground: 220 15% 20%;
 
-  --popover: #FFFFFF;
-  --popover-foreground: #000000;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 15% 20%;
 
-  --primary: #007AFF;
-  /* System Blue */
-  --primary-foreground: #FFFFFF;
+    /* 主色调：薄荷绿 / 蒂芙尼蓝 */
+    --primary: 174 60% 45%;
+    --primary-foreground: 0 0% 100%;
 
-  --secondary: #E5E5EA;
-  /* System Gray 5 */
-  --secondary-foreground: #000000;
+    --secondary: 174 30% 95%;
+    --secondary-foreground: 174 60% 30%;
 
-  --muted: #8E8E93;
-  /* System Gray */
-  --muted-foreground: #8E8E93;
+    --muted: 220 10% 95%;
+    --muted-foreground: 220 10% 50%;
 
-  --accent: #E5E5EA;
-  /* System Gray 5 (for rows/items) */
-  --accent-foreground: #000000;
+    --accent: 174 30% 92%;
+    --accent-foreground: 174 60% 25%;
 
-  --destructive: #FF3B30;
-  /* System Red */
-  --destructive-foreground: #FFFFFF;
+    --destructive: 0 80% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-  --border: #C6C6C8;
-  /* System Gray 3 */
-  --input: #E5E5EA;
-  --ring: #007AFF;
+    --border: 220 10% 90%;
+    --input: 220 10% 92%;
+    --ring: 174 60% 45%;
 
-  --radius: 0.75rem;
-  /* ~12px to 16px usually */
-}
+    --chart-1: 174 60% 45%;
+    --chart-2: 340 65% 55%;
+    --chart-3: 43 80% 55%;
+    --chart-4: 220 60% 55%;
+    --chart-5: 280 55% 55%;
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --radius: 0.75rem;
 
-  /* iOS App Feel - Disable selection & rubber banding on body (optional) */
-  -webkit-tap-highlight-color: transparent;
-  /* Remove blue highlight on tap */
-  -webkit-touch-callout: none;
-  /* Disable long-press menu context */
-  user-select: none;
-  /* UI feel */
-  touch-action: manipulation;
-  /* Faster click response */
+    /* 额外品牌色 */
+    --success: 152 60% 42%;
+    --warning: 38 92% 50%;
+    --info: 210 80% 55%;
+  }
+
+  .dark {
+    --background: 220 15% 8%;
+    --foreground: 0 0% 95%;
+
+    --card: 220 15% 12%;
+    --card-foreground: 0 0% 95%;
+
+    --popover: 220 15% 12%;
+    --popover-foreground: 0 0% 95%;
+
+    --primary: 174 60% 50%;
+    --primary-foreground: 220 15% 8%;
+
+    --secondary: 220 15% 18%;
+    --secondary-foreground: 0 0% 90%;
+
+    --muted: 220 15% 18%;
+    --muted-foreground: 220 10% 60%;
+
+    --accent: 220 15% 18%;
+    --accent-foreground: 0 0% 90%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 220 15% 20%;
+    --input: 220 15% 20%;
+    --ring: 174 60% 50%;
+
+    --chart-1: 174 60% 50%;
+    --chart-2: 340 65% 60%;
+    --chart-3: 43 80% 60%;
+    --chart-4: 220 60% 60%;
+    --chart-5: 280 55% 60%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    user-select: none;
+    touch-action: manipulation;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 }
 
 @layer utilities {
@@ -64,42 +105,46 @@ body {
     text-wrap: balance;
   }
 
-  /* iOS-like glass morphism */
+  /* 毛玻璃效果 */
   .glass {
-    background: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   }
 
-  /* iOS Large Title Emulation */
+  /* iOS 风大标题 */
   .ios-large-title {
-    font-size: 34px;
-    font-weight: 700;
+    font-size: 28px;
+    font-weight: 800;
     letter-spacing: -0.5px;
-    line-height: 41px;
+    line-height: 34px;
   }
 
   .ios-section-header {
-    font-size: 13px;
-    color: var(--muted-foreground);
+    font-size: 12px;
+    color: hsl(var(--muted-foreground));
     text-transform: uppercase;
-    padding-left: 1rem;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    padding-left: 0.25rem;
     padding-bottom: 0.5rem;
     margin-top: 1.5rem;
   }
 
+  /* 优雅卡片（保留向后兼容） */
   .ios-card {
-    background: var(--card);
-    border-radius: 10px;
+    background: hsl(var(--card));
+    border-radius: var(--radius);
     overflow: hidden;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+    border: 1px solid hsl(var(--border));
   }
 
   .ios-list-item {
-    padding: 1rem;
-    background: var(--card);
-    border-bottom: 0.5px solid var(--border);
+    padding: 0.875rem 1rem;
+    background: hsl(var(--card));
+    border-bottom: 0.5px solid hsl(var(--border));
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -112,40 +157,39 @@ body {
   .ios-input {
     display: block;
     width: 100%;
-    border-radius: 12px;
-    border: 1px solid transparent;
-    background-color: var(--input);
+    border-radius: var(--radius);
+    border: 1px solid hsl(var(--border));
+    background-color: hsl(var(--card));
     padding: 12px 16px;
-    font-size: 17px;
-    line-height: 22px;
-    color: var(--foreground);
+    font-size: 15px;
+    line-height: 20px;
+    color: hsl(var(--foreground));
     transition: all 0.2s;
   }
 
   .ios-input:focus {
     outline: none;
-    background-color: #FFFFFF;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
+    border-color: hsl(var(--primary));
+    box-shadow: 0 0 0 3px hsla(174, 60%, 45%, 0.12);
   }
 
   .ios-btn {
     width: 100%;
-    border-radius: 14px;
-    font-size: 17px;
+    border-radius: var(--radius);
+    font-size: 15px;
     font-weight: 600;
-    padding: 14px;
+    padding: 12px;
     color: #FFFFFF;
-    transition: all 0.2s active;
+    transition: all 0.15s;
   }
 
   .ios-btn:active {
-    opacity: 0.7;
+    opacity: 0.85;
     transform: scale(0.98);
   }
 
   .ios-btn-secondary {
-    background-color: var(--secondary);
-    color: var(--primary);
+    background-color: hsl(var(--secondary));
+    color: hsl(var(--primary));
   }
 }
