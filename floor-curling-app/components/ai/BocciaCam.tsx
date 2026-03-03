@@ -314,10 +314,12 @@ export default function BocciaCam({
             diagText = "🎉 成功投出！(Release Point Detected)"
             diagColor = "text-yellow-400"
 
-            // ─── 自動儲存：偵測到有效投擲 → 自動存入 Supabase ───
-            const now2 = Date.now()
-            const cooldownMs = 5000 // 5 秒冷卻期
-            if (!autoSavingRef.current && (now2 - lastAutoSaveTimeRef.current) > cooldownMs) {
+            // ─── 自動出手檢測已停用（混合方案：改用手動標記 + Session 平均值）───
+            // 保留 isReleaseFrame 作為 HUD 提示，但不再觸發自動儲存
+            if (false) {
+                const now2 = Date.now()
+                const cooldownMs = 5000
+                const _unused = !autoSavingRef.current && (now2 - lastAutoSaveTimeRef.current) > cooldownMs
                 autoSavingRef.current = true
                 lastAutoSaveTimeRef.current = now2
                 autoSaveCountRef.current += 1
@@ -851,7 +853,7 @@ export default function BocciaCam({
             </div>
 
             {/* Webcam - Expand to fill remaining space */}
-            <div className="relative flex-1 w-full bg-black">
+            <div className="relative flex-1 w-full bg-black" style={{ minHeight: '45vh' }}>
                 <Webcam
                     ref={webcamRef} audio={false}
                     // Remove mirrored for back camera
@@ -908,7 +910,7 @@ export default function BocciaCam({
             </div>
 
             {/* Metrics Dashboard */}
-            <div className="p-3 bg-gray-800 space-y-3 overflow-hidden">
+            <div className="p-3 bg-gray-800 space-y-3 overflow-y-auto" style={{ maxHeight: '40vh' }}>
                 {/* Phase 2: 主体锁定 & 坐姿状态指示器 */}
                 <div className="flex items-center justify-between">
                     <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Medical Rehab Data (即時醫療數據)</p>
@@ -1002,21 +1004,6 @@ export default function BocciaCam({
                             </div>
                         )}
 
-                        {/* 手指张开度 */}
-                        <div className="grid grid-cols-2 gap-2">
-                            <div className="rounded-lg p-2 bg-gray-700/30 text-center">
-                                <p className="text-[10px] text-gray-500">🤚 手指张开</p>
-                                <p className={`text-lg font-bold ${(bioMetrics.fingerSpreadAngle ?? 0) > 40 ? 'text-amber-400' : 'text-sky-400'}`}>
-                                    {bioMetrics.fingerSpreadAngle ?? '--'}°
-                                </p>
-                            </div>
-                            <div className="rounded-lg p-2 bg-gray-700/30 text-center">
-                                <p className="text-[10px] text-gray-500">释放参考</p>
-                                <p className={`text-sm font-medium ${bioMetrics.fingerReleaseDetected ? 'text-yellow-400/70' : 'text-gray-600'}`}>
-                                    {bioMetrics.fingerReleaseDetected ? '⚡ 参考' : '—'}
-                                </p>
-                            </div>
-                        </div>
                     </div>
                 )}
 
