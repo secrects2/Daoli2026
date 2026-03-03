@@ -61,15 +61,15 @@ export default function ElderShopClient({ user, points: initialPoints, products 
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-20">
+        <div className="min-h-screen bg-background pb-20">
             {/* Header */}
-            <div className="sticky top-0 z-10 bg-white/90 backdrop-blur-md pt-5 pb-2 px-4 border-b border-gray-200">
+            <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-xl pt-5 pb-2 px-4 border-b border-border shadow-soft">
                 <div className="flex items-center justify-between">
                     <button onClick={() => router.back()} className="text-2xl">⬅️</button>
-                    <h1 className="text-xl font-bold">榮譽商店</h1>
-                    <div className="bg-yellow-100 px-3 py-1 rounded-full flex items-center gap-1">
+                    <h1 className="text-lg font-extrabold text-foreground">榮譽商店</h1>
+                    <div className="bg-amber-50 px-3 py-1 rounded-full flex items-center gap-1 border border-amber-200">
                         <span>💰</span>
-                        <span className="font-bold text-yellow-700">{points}</span>
+                        <span className="font-bold text-amber-700">{points}</span>
                     </div>
                 </div>
             </div>
@@ -78,26 +78,26 @@ export default function ElderShopClient({ user, points: initialPoints, products 
                 {/* Categories - Simplified for now */}
                 <div className="space-y-4">
                     {filteredProducts.map(product => (
-                        <div key={product.id} className="bg-white rounded-2xl p-4 shadow-sm flex gap-4 items-center">
-                            <div className="w-24 h-24 bg-gray-50 rounded-xl flex-shrink-0 p-2">
+                        <div key={product.id} className="bg-card rounded-2xl p-4 shadow-card border border-border/50 flex gap-4 items-center hover:shadow-card-hover transition-shadow">
+                            <div className="w-24 h-24 bg-muted rounded-xl flex-shrink-0 p-2">
                                 <img src={product.image_url} alt={product.name} className="w-full h-full object-contain" />
                             </div>
                             <div className="flex-1">
                                 <div className="flex justify-between items-start">
-                                    <h3 className="font-bold text-lg text-gray-900">{product.name}</h3>
-                                    <span className="bg-yellow-100 text-yellow-800 text-xs font-bold px-2 py-1 rounded-full border border-yellow-200">
+                                    <h3 className="font-bold text-base text-foreground">{product.name}</h3>
+                                    <span className="bg-primary/10 text-primary text-xs font-bold px-2 py-1 rounded-full">
                                         {product.category === 'health' ? '健康' : '裝備'}
                                     </span>
                                 </div>
-                                <p className="text-gray-500 text-sm mt-1 line-clamp-2">{product.description}</p>
+                                <p className="text-muted-foreground text-sm mt-1 line-clamp-2">{product.description}</p>
                                 <div className="mt-3 flex justify-between items-center">
-                                    <span className="text-orange-600 font-bold text-lg">{product.price_points} 分</span>
+                                    <span className="text-amber-600 font-bold text-lg">{product.price_points} 分</span>
                                     <button
                                         onClick={() => handleBuy(product)}
                                         disabled={!!purchasing || points < product.price_points}
                                         className={`px-4 py-2 rounded-full font-bold text-sm transition-all ${points >= product.price_points
-                                            ? 'bg-blue-600 text-white shadow-md active:scale-95'
-                                            : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                            ? 'bg-primary text-primary-foreground shadow-md active:scale-95'
+                                            : 'bg-muted text-muted-foreground cursor-not-allowed'
                                             }`}
                                     >
                                         {purchasing === product.id ? '處理中...' : '購買'}
