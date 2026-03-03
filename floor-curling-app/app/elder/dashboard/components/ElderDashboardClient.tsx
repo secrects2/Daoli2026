@@ -63,11 +63,11 @@ export default function ElderDashboardClient({
     return (
         <div className="min-h-screen pb-24 space-y-6">
             {/* Glass Header */}
-            <div className="sticky top-0 z-20 backdrop-blur-xl bg-white/70 border-b border-white/50 px-5 pt-12 pb-4 shadow-glass transition-all duration-300">
+            <div className="sticky top-0 z-20 backdrop-blur-xl bg-white/80 border-b border-gray-100 px-5 pt-12 pb-4 shadow-soft transition-all duration-300">
                 <div className="flex justify-between items-center">
                     <div>
-                        <h1 className="text-3xl font-black text-gray-900 tracking-tight">長輩主頁</h1>
-                        <p className="text-sm font-medium text-gray-500">歡迎回來，{user.user_metadata?.full_name}</p>
+                        <h1 className="text-2xl font-extrabold text-foreground tracking-tight">長輩主頁</h1>
+                        <p className="text-sm font-medium text-muted-foreground">歡迎回來，{user.user_metadata?.full_name}</p>
                     </div>
                     <div className="flex items-center gap-3">
                         <button
@@ -92,19 +92,19 @@ export default function ElderDashboardClient({
             <main className="px-5 space-y-6 animate-fade-in-up">
 
                 {/* QR Code Card */}
-                <div className="bg-white rounded-3xl p-8 shadow-glass border border-white/60 text-center relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-2xl -mr-16 -mt-16 transition-all group-hover:bg-blue-500/10"></div>
+                <div className="bg-card rounded-2xl p-8 shadow-card border border-border/50 text-center relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl -mr-16 -mt-16 transition-all group-hover:bg-primary/10"></div>
                     <div className="relative z-10">
                         <div className="flex justify-center mb-6">
-                            <div className="p-4 bg-white rounded-2xl shadow-sm border border-gray-100 group-hover:scale-105 transition-transform duration-300">
+                            <div className="p-4 bg-card rounded-2xl shadow-soft border border-border/50 group-hover:scale-105 transition-transform duration-300">
                                 <QRCodeGenerator
                                     value={generateElderQRContent(user.id)}
                                     size={200}
                                 />
                             </div>
                         </div>
-                        <h2 className="text-2xl font-bold text-gray-900">{user.user_metadata?.full_name || '長輩'}</h2>
-                        <div className="inline-flex items-center gap-1 mt-2 px-3 py-1 bg-gray-100/80 rounded-full text-xs font-medium text-gray-500">
+                        <h2 className="text-2xl font-bold text-foreground">{user.user_metadata?.full_name || '長輩'}</h2>
+                        <div className="inline-flex items-center gap-1 mt-2 px-3 py-1 bg-muted rounded-full text-xs font-medium text-muted-foreground">
                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
                             請讓家屬掃描綁定
                         </div>
@@ -113,11 +113,11 @@ export default function ElderDashboardClient({
 
                 {/* Stats Card */}
                 <Link href="/elder/stats" className="block transform transition hover:scale-[1.02] active:scale-[0.98]">
-                    <div className="relative bg-gradient-to-br from-[#007AFF] to-[#0055FF] rounded-3xl p-6 shadow-lg shadow-blue-500/20 overflow-hidden text-white">
+                    <div className="relative bg-gradient-to-br from-teal-500 to-emerald-600 rounded-2xl p-6 shadow-lg shadow-teal-500/20 overflow-hidden text-white">
                         <div className="relative z-10 flex justify-between items-center">
                             <div>
-                                <p className="text-blue-100 font-medium mb-1 flex items-center gap-2">
-                                    <span className="w-2 h-2 rounded-full bg-blue-300 animate-pulse"></span>
+                                <p className="text-teal-100 font-medium mb-1 flex items-center gap-2">
+                                    <span className="w-2 h-2 rounded-full bg-teal-300 animate-pulse"></span>
                                     本週健康存摺
                                 </p>
                                 <h3 className="text-4xl font-black tracking-tight mb-2">
@@ -193,12 +193,12 @@ export default function ElderDashboardClient({
                 </div>
 
                 {/* Inventory */}
-                <div className="bg-white/80 backdrop-blur-md rounded-3xl p-6 shadow-sm border border-white/60">
+                <div className="bg-card/80 backdrop-blur-md rounded-2xl p-6 shadow-card border border-border/50">
                     <div className="flex justify-between items-center mb-4">
-                        <h3 className="font-bold text-gray-900 text-lg flex items-center gap-2">
+                        <h3 className="font-bold text-foreground text-lg flex items-center gap-2">
                             🎒 我的裝備
                         </h3>
-                        <Link href="/elder/shop" className="text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-full transition-colors">
+                        <Link href="/elder/shop" className="text-xs font-bold text-primary bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-full transition-colors">
                             + 購買
                         </Link>
                     </div>
@@ -229,8 +229,8 @@ export default function ElderDashboardClient({
                 </div>
 
                 {/* Family List */}
-                <div className="bg-white/80 backdrop-blur-md rounded-3xl p-6 shadow-sm border border-white/60">
-                    <h3 className="font-bold text-gray-900 text-lg mb-4">已連結家屬</h3>
+                <div className="bg-card/80 backdrop-blur-md rounded-2xl p-6 shadow-card border border-border/50">
+                    <h3 className="font-bold text-foreground text-lg mb-4">已連結家屬</h3>
                     {familyMembers.length === 0 ? (
                         <div className="text-center py-6">
                             <p className="text-gray-400 text-sm">還沒有家屬連結</p>
@@ -259,7 +259,7 @@ export default function ElderDashboardClient({
                     )}
                 </div>
 
-                <div className="text-center text-xs text-gray-400 pb-4 pt-2">
+                <div className="text-center text-xs text-muted-foreground pb-4 pt-2">
                     ID: {user.id.slice(0, 8)} • v2.0.0
                 </div>
             </main>

@@ -266,15 +266,15 @@ export default function GenericElderDetailPage() {
         }
     }
 
-    if (loading) return <div className="p-8 text-center bg-gray-50 min-h-screen">載入中...</div>
+    if (loading) return <div className="p-8 text-center bg-background min-h-screen text-muted-foreground">載入中...</div>
     if (!elder) return null
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-20">
+        <div className="min-h-screen bg-background pb-20">
             {/* Header / Nav */}
-            <div className="bg-white border-b border-gray-200">
+            <div className="bg-card border-b border-border">
                 <div className="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
-                    <Link href="/pharmacist/elders" className="text-sm text-gray-500 hover:text-gray-900 flex items-center gap-1">
+                    <Link href="/pharmacist/elders" className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1">
                         &larr; 返回長輩名單
                     </Link>
                     <div className="flex gap-2">
@@ -326,7 +326,7 @@ export default function GenericElderDetailPage() {
 
                         <button
                             onClick={() => setShowBindingQR(true)}
-                            className="text-sm bg-blue-50 hover:bg-blue-100 text-blue-600 px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center gap-1"
+                            className="text-sm bg-primary/10 hover:bg-primary/20 text-primary px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center gap-1"
                         >
                             <span>🔗</span> 綁定家屬
                         </button>
@@ -358,7 +358,7 @@ export default function GenericElderDetailPage() {
             <main className="max-w-4xl mx-auto px-4 py-8 space-y-6">
 
                 {/* Profile Card */}
-                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col md:flex-row gap-6 items-center md:items-start relative">
+                <div className="bg-card rounded-2xl p-6 shadow-card border border-border/50 flex flex-col md:flex-row gap-6 items-center md:items-start relative">
                     {/* Edit Modal / Overlay */}
                     {isEditing && (
                         <div className="absolute inset-x-0 inset-y-0 z-20 bg-white/95 backdrop-blur-sm rounded-2xl p-4 md:p-6 flex flex-col justify-start items-center overflow-y-auto">
@@ -413,8 +413,8 @@ export default function GenericElderDetailPage() {
                                     />
                                 </div>
                                 <div className="flex gap-2 justify-end mt-4">
-                                    <button onClick={() => setIsEditing(false)} className="px-4 py-2 text-gray-500 hover:bg-gray-100 rounded-lg">取消</button>
-                                    <button onClick={handleUpdate} className="px-4 py-2 bg-blue-600 text-white rounded-lg">儲存</button>
+                                    <button onClick={() => setIsEditing(false)} className="px-4 py-2 text-muted-foreground hover:bg-muted rounded-lg">取消</button>
+                                    <button onClick={handleUpdate} className="px-4 py-2 bg-primary text-primary-foreground rounded-lg">儲存</button>
                                 </div>
                             </div>
                         </div>
@@ -712,8 +712,8 @@ export default function GenericElderDetailPage() {
                                     <div
                                         key={a.id}
                                         className={`relative p-4 rounded-xl border text-center transition-all ${a.unlocked
-                                                ? 'bg-gradient-to-br from-amber-50 to-yellow-50 border-amber-200 shadow-sm'
-                                                : 'bg-gray-50 border-gray-100 opacity-50'
+                                            ? 'bg-gradient-to-br from-amber-50 to-yellow-50 border-amber-200 shadow-sm'
+                                            : 'bg-gray-50 border-gray-100 opacity-50'
                                             }`}
                                     >
                                         <div className={`text-3xl mb-2 ${a.unlocked ? '' : 'grayscale'}`}>{a.icon}</div>
