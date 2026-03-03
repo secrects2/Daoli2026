@@ -165,6 +165,9 @@ export default function BocciaCam({
     const [throwMarkCount, setThrowMarkCount] = useState(0)
     const [markToast, setMarkToast] = useState<string | null>(null)
 
+    // 一旦偵測到人體就不再顯示「等待就位」
+    const hasEverLockedRef = useRef<boolean>(false)
+
     // UI 節流：每 500ms 才更新一次顯示值，讓人眼可以清楚閱讀
     const lastUIUpdateRef = useRef<number>(0)
     const UI_THROTTLE_MS = 500
@@ -463,6 +466,9 @@ export default function BocciaCam({
             ctx.fillStyle = '#10B981'
             ctx.fillText(`↑${velocity}`, rawWristLandmark.x * canvas.width + 10, rawWristLandmark.y * canvas.height + 20)
         }
+
+        // 一旦偵測到人體，永不回退「等待就位」
+        if (bio.subjectLocked) hasEverLockedRef.current = true
 
         const newMetrics: BocciaMetrics = {
             elbowROM: Math.round(elbowROM),
@@ -1022,8 +1028,8 @@ export default function BocciaCam({
                     </div>
                 )}
 
-                {/* 無人畫面提示 */}
-                {!metrics.subjectLocked && (
+                {/* 無人畫面提示（一旦偵測到過人體就不再顯示） */}
+                {!metrics.subjectLocked && !hasEverLockedRef.current && (
                     <div className="mb-2 py-2 px-4 rounded-xl bg-yellow-600/30 border border-yellow-500/50 text-yellow-300 text-sm font-bold text-center animate-pulse">
                         👤 等待長輩就位... (偵測到人體後自動開始)
                     </div>
