@@ -32,6 +32,7 @@ export default function GenericElderDetailPage() {
     const [isEditing, setIsEditing] = useState(false)
     const [showBindingQR, setShowBindingQR] = useState(false)
     const [editData, setEditData] = useState({ nickname: '', notes: '', emergency_contact_name: '', emergency_contact_phone: '', health_notes: '' })
+    const [expandedSessionId, setExpandedSessionId] = useState<string | null>(null)
 
     const supabase = createBrowserClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -874,24 +875,81 @@ export default function GenericElderDetailPage() {
                                         </button>
                                     </div>
                                 </div>
-                                {aiSessions.slice(1, 4).map(session => (
-                                    <div key={session.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                                        <div>
-                                            <p className="font-bold text-sm">{new Date(session.created_at).toLocaleDateString()}</p>
-                                            <p className="text-xs text-gray-500">
-                                                ROM: {session.metrics?.avg_rom}° | 穩定: {session.metrics?.avg_trunk_tilt}°
-                                            </p>
+                                {aiSessions.slice(1).map(session => {
+                                    const isExpanded = expandedSessionId === session.id
+                                    const m = session.metrics || {}
+                                    return (
+                                        <div key={session.id} className="rounded-lg border border-border/50 overflow-hidden">
+                                            <button
+                                                onClick={() => setExpandedSessionId(isExpanded ? null : session.id)}
+                                                className="w-full flex justify-between items-center p-3 bg-background hover:bg-muted transition-colors text-left"
+                                            >
+                                                <div>
+                                                    <p className="font-bold text-sm">{new Date(session.created_at).toLocaleDateString()}</p>
+                                                    <p className="text-xs text-muted-foreground">
+                                                        ROM: {m.avg_rom ?? '--'}° | 穩定: {m.avg_trunk_tilt ?? '--'}°
+                                                    </p>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <span className={`text-xs px-2 py-1 rounded-full ${getAiPrescription(m).color.includes('green') ? 'bg-green-100 text-green-700' :
+                                                        getAiPrescription(m).color.includes('red') ? 'bg-red-100 text-red-700' :
+                                                            'bg-orange-100 text-orange-700'
+                                                        }`}>
+                                                        {getAiPrescription(m).title.split(' ')[1]}
+                                                    </span>
+                                                    <span className="text-muted-foreground text-xs">{isExpanded ? '▲' : '▼'}</span>
+                                                </div>
+                                            </button>
+                                            {isExpanded && (
+                                                <div className="p-3 border-t border-border/50 space-y-2 bg-card">
+                                                    <div className="grid grid-cols-3 gap-2">
+                                                        <div className="p-2 bg-background rounded-lg text-center">
+                                                            <p className="text-[10px] text-muted-foreground">手肘 ROM</p>
+                                                            <p className="text-sm font-bold text-foreground">{m.avg_rom ?? '--'}°</p>
+                                                        </div>
+                                                        <div className="p-2 bg-background rounded-lg text-center">
+                                                            <p className="text-[10px] text-muted-foreground">軀幹傾斜</p>
+                                                            <p className="text-sm font-bold text-foreground">{m.avg_trunk_tilt ?? '--'}°</p>
+                                                        </div>
+                                                        <div className="p-2 bg-background rounded-lg text-center">
+                                                            <p className="text-[10px] text-muted-foreground">穩定率</p>
+                                                            <p className="text-sm font-bold text-foreground">{m.stable_ratio ?? 0}%</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="grid grid-cols-2 gap-2">
+                                                        <div className="p-2 bg-background rounded-lg text-center">
+                                                            <p className="text-[10px] text-muted-foreground">中軸偏移</p>
+                                                            <p className={`text-sm font-bold ${(m.core_stability_angle || 0) > 15 ? 'text-red-500' : 'text-cyan-600'}`}>{m.core_stability_angle ?? '--'}°</p>
+                                                        </div>
+                                                        <div className="p-2 bg-background rounded-lg text-center">
+                                                            <p className="text-[10px] text-muted-foreground">出手速度</p>
+                                                            <p className="text-sm font-bold text-emerald-600">{m.avg_velocity ?? '--'}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="grid grid-cols-3 gap-2">
+                                                        <div className="p-2 bg-background rounded-lg text-center">
+                                                            <p className="text-[10px] text-muted-foreground">肩角速</p>
+                                                            <p className="text-xs font-bold text-purple-600">{m.avg_shoulder_angular_vel ?? '--'}°/s</p>
+                                                        </div>
+                                                        <div className="p-2 bg-background rounded-lg text-center">
+                                                            <p className="text-[10px] text-muted-foreground">肘角速</p>
+                                                            <p className="text-xs font-bold text-purple-600">{m.avg_elbow_angular_vel ?? '--'}°/s</p>
+                                                        </div>
+                                                        <div className="p-2 bg-background rounded-lg text-center">
+                                                            <p className="text-[10px] text-muted-foreground">腕角速</p>
+                                                            <p className="text-xs font-bold text-purple-600">{m.avg_wrist_angular_vel ?? '--'}°/s</p>
+                                                        </div>
+                                                    </div>
+                                                    {/* AI 處方 */}
+                                                    <div className={`p-3 rounded-lg border-l-4 mt-2 ${getAiPrescription(m).color}`}>
+                                                        <p className="font-bold text-sm">{getAiPrescription(m).title}</p>
+                                                        <p className="text-xs opacity-80 mt-1">{getAiPrescription(m).content}</p>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
-                                        <div className="text-right">
-                                            <span className={`text-xs px-2 py-1 rounded-full ${getAiPrescription(session.metrics).color.includes('green') ? 'bg-green-100 text-green-700' :
-                                                getAiPrescription(session.metrics).color.includes('red') ? 'bg-red-100 text-red-700' :
-                                                    'bg-orange-100 text-orange-700'
-                                                }`}>
-                                                {getAiPrescription(session.metrics).title.split(' ')[1]}
-                                            </span>
-                                        </div>
-                                    </div>
-                                ))}
+                                    )
+                                })}
                             </div>
                         </div>
                     ) : (
