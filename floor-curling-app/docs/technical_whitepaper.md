@@ -35,7 +35,8 @@ graph TB
         ROM["指标 A：手肘 ROM"]
         TRUNK["指标 B：躯干倾斜"]
         VEL["指标 C：出手速度"]
-        REL["指标 H：出手瞬间判定<br/>(ReleaseDetector)"]
+        REL["指标 H：出手瞬间判定<br/>(已停用，改用手動標記)"]
+        MARK["📌 手動標記投球<br/>(ManualThrowMark)"]
     end
 
     subgraph BRAIN["🧬 The Brain 诊断引擎"]
