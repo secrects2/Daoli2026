@@ -6,7 +6,7 @@
  * 独立的医学级生物力学计算引擎，从 BocciaCam 中解耦所有数学运算。
  * 供专利申请使用 — 所有公式均有完整数学文档。
  *
- * 包含六大分析器：
+ * 包含八大分析器：
  * 1. CoreStabilityAnalyzer   — 中轴偏移角度（肩-髋连线 vs 垂直轴）
  * 2. AngularVelocityAnalyzer — 肩/肘/腕三关节角速度 (°/s)
  * 3. TremorDetector          — 震颤检测（滑动窗口频率分析）
@@ -14,9 +14,10 @@
  * 5. SubjectTracker          — 主体锁定（多人环境下锁定目标）
  * 6. PostureCorrector        — 坐姿修正（驼背/歪斜补偿）
  * 7. SignalProcessor         — 信号降噪（四阶 Butterworth 零相位滤波）
+ * 8. FingerSpreadDetector    — 手指张开检测（出手释放辅助判定）
  *
  * @author AI Biomechanics System
- * @patent 3D 骨架追踪分析系统 — Phase 2
+ * @patent 3D 骨架追踪分析系统 — Phase 2.1
  */
 
 import { KalmanFilter1D } from './kalman-filter'
@@ -96,7 +97,12 @@ export interface BiomechanicsMetrics {
     isHunched: boolean
     isTilted: boolean
 
-    // === 新增: 动作检测 ===
+    // === Phase 2.1: 手指张开检测 ===
+    fingerSpreadAngle: number | null  // 拇指-手腕-小指夹角 (°)
+    fingerSpreadDelta: number         // 帧间张开变化率 (°/frame)
+    fingerReleaseDetected: boolean    // 手指张开释放信号
+
+    // === 动作检测 ===
     isReleaseFrame: boolean   // 当前帧是否为判定出的「出手瞬间」
 }
 
@@ -117,8 +123,12 @@ export const LANDMARKS = {
     RIGHT_ELBOW: 14,
     LEFT_WRIST: 15,
     RIGHT_WRIST: 16,
+    LEFT_PINKY: 17,
+    RIGHT_PINKY: 18,
     LEFT_INDEX: 19,
     RIGHT_INDEX: 20,
+    LEFT_THUMB: 21,
+    RIGHT_THUMB: 22,
     LEFT_HIP: 23,
     RIGHT_HIP: 24,
     LEFT_KNEE: 25,
@@ -945,6 +955,7 @@ export class BiomechanicsEngine {
     readonly subjectTracker = new SubjectTracker()
     readonly postureCorrector = new PostureCorrector()
     readonly releaseDetector = new ReleaseDetector()
+    readonly fingerSpread = new FingerSpreadDetector()
 
     // 独立信号降噪信道 (Channels)
     private filters = {
@@ -996,6 +1007,10 @@ export class BiomechanicsEngine {
             ? this.toRealPixels(landmarks[LANDMARKS.RIGHT_EAR], imageWidth, imageHeight) : null
         const rIndex = landmarks[LANDMARKS.RIGHT_INDEX]?.visibility > 0.3
             ? this.toRealPixels(landmarks[LANDMARKS.RIGHT_INDEX], imageWidth, imageHeight) : null
+        const rThumb = landmarks[LANDMARKS.RIGHT_THUMB]?.visibility > 0.3
+            ? this.toRealPixels(landmarks[LANDMARKS.RIGHT_THUMB], imageWidth, imageHeight) : null
+        const rPinky = landmarks[LANDMARKS.RIGHT_PINKY]?.visibility > 0.3
+            ? this.toRealPixels(landmarks[LANDMARKS.RIGHT_PINKY], imageWidth, imageHeight) : null
 
         // 0. 主体锁定
         const trackingResult = this.subjectTracker.update(landmarks)
@@ -1077,8 +1092,19 @@ export class BiomechanicsEngine {
             isHunched: postureResult.isHunched,
             isTilted: postureResult.isTilted,
 
+            // Phase 2.1: 手指张开检测
+            fingerSpreadAngle: null,   // 在下方计算后填入
+            fingerSpreadDelta: 0,
+            fingerReleaseDetected: false,
+
             isReleaseFrame: false, // 暫時給預設值，這將在外部使用速度輔助判定或在內部實作
         }
+
+        // 6. 手指张开检测 (Finger Spread Detection)
+        const fingerResult = this.fingerSpread.update(rWrist, rThumb, rPinky)
+        metrics.fingerSpreadAngle = fingerResult.spreadAngle
+        metrics.fingerSpreadDelta = fingerResult.delta
+        metrics.fingerReleaseDetected = fingerResult.releaseDetected
 
         // 6. 出手瞬間判定 (Release Detection)
         // 需結合外部已經算好的 smoothing 速度與手肘角度，所以這裡先透過 releaseDetector 計算
@@ -1098,9 +1124,10 @@ export class BiomechanicsEngine {
         filteredElbowROM: number,
         wristY: number | null,
         shoulderY: number | null,
-        hipY: number | null
+        hipY: number | null,
+        fingerReleaseDetected: boolean = false
     ): boolean {
-        const isRelease = this.releaseDetector.detect(filteredVelocity, filteredElbowROM, wristY, shoulderY, hipY);
+        const isRelease = this.releaseDetector.detect(filteredVelocity, filteredElbowROM, wristY, shoulderY, hipY, fingerReleaseDetected);
         if (this.frameHistory.length > 0 && isRelease) {
             this.frameHistory[this.frameHistory.length - 1].isReleaseFrame = true;
         }
@@ -1136,24 +1163,141 @@ export class BiomechanicsEngine {
         this.filters.velocity.reset()
         this.filters.coreStabilityAngle.reset()
         this.releaseDetector.reset()
+        this.fingerSpread.reset()
 
         this.frameHistory = []
     }
 }
 
 // ============================================================================
-// 8. ReleaseDetector — 出手瞬间判定
+// 8. FingerSpreadDetector — 手指张开检测
 // ============================================================================
 /**
- * 基于「速度波峰」、「手臂伸展」以及「投球后的腕部轨迹高度下降 (Follow-through)」
+ * 手指张开检测器
+ *
+ * 【数学模型】
+ * 利用 MediaPipe Pose 的指尖节点（拇指 ID:22, 小指 ID:18）与手腕(ID:16)，
+ * 计算「拇指→手腕→小指」的 3D 夹角 θ_spread：
+ *
+ * $$
+ * \theta_{spread} = \cos^{-1}\left(\frac{\vec{WT} \cdot \vec{WP}}{|\vec{WT}||\vec{WP}|}\right) \times \frac{180°}{\pi}
+ * $$
+ *
+ * 其中 $\vec{WT}$ = 拇指 - 手腕，$\vec{WP}$ = 小指 - 手腕。
+ *
+ * 【释放判定】
+ * - 握球状态：θ_spread ≈ 10°~30°（手指收拢）
+ * - 释放状态：θ_spread ≈ 50°~90°（手指张开）
+ * - 释放信号：Δθ > 15°/frame 且 θ_spread > 40°
+ *
+ * 【临床意义】
+ * 比纯速度峰值法更精确地判定球离手瞬间，
+ * 减少假阳性（快速挥拳但未释放球）和假阴性（慢速释放）。
+ */
+export class FingerSpreadDetector {
+    private prevSpreadAngle: number | null = null
+    private spreadHistory: number[] = []
+    private readonly HISTORY_SIZE = 5
+
+    // 释放判定阈值
+    private readonly SPREAD_THRESHOLD = 40     // 张开角度门槛 (°)
+    private readonly DELTA_THRESHOLD = 12      // 帧间变化率门槛 (°/frame)
+    private readonly COOLDOWN_FRAMES = 20      // 冷却帧数
+    private framesSinceLastRelease: number = 999
+
+    /**
+     * 计算 3D 夹角（向量点积法）
+     */
+    private calculateSpreadAngle(wrist: Point3D, thumb: Point3D, pinky: Point3D): number {
+        // 向量 WT = thumb - wrist, WP = pinky - wrist
+        const wt = { x: thumb.x - wrist.x, y: thumb.y - wrist.y, z: (thumb.z || 0) - (wrist.z || 0) }
+        const wp = { x: pinky.x - wrist.x, y: pinky.y - wrist.y, z: (pinky.z || 0) - (wrist.z || 0) }
+
+        const dot = wt.x * wp.x + wt.y * wp.y + wt.z * wp.z
+        const magWT = Math.sqrt(wt.x ** 2 + wt.y ** 2 + wt.z ** 2)
+        const magWP = Math.sqrt(wp.x ** 2 + wp.y ** 2 + wp.z ** 2)
+
+        if (magWT === 0 || magWP === 0) return 0
+
+        const cosTheta = Math.max(-1, Math.min(1, dot / (magWT * magWP)))
+        return Math.acos(cosTheta) * (180 / Math.PI)
+    }
+
+    /**
+     * 处理一帧数据
+     * @param wrist 手腕 3D 坐标
+     * @param thumb 拇指 3D 坐标 (可能不可见)
+     * @param pinky 小指 3D 坐标 (可能不可见)
+     * @returns { spreadAngle, delta, releaseDetected }
+     */
+    update(
+        wrist: Point3D,
+        thumb: Point3D | null,
+        pinky: Point3D | null
+    ): { spreadAngle: number | null; delta: number; releaseDetected: boolean } {
+        this.framesSinceLastRelease++
+
+        // 如果拇指或小指不可见，无法计算
+        if (!thumb || !pinky) {
+            return { spreadAngle: null, delta: 0, releaseDetected: false }
+        }
+
+        const angle = this.calculateSpreadAngle(wrist, thumb, pinky)
+
+        // 平滑处理：5 帧滑动窗口
+        this.spreadHistory.push(angle)
+        if (this.spreadHistory.length > this.HISTORY_SIZE) {
+            this.spreadHistory.shift()
+        }
+        const smoothedAngle = this.spreadHistory.reduce((a, b) => a + b, 0) / this.spreadHistory.length
+
+        // 计算帧间变化率
+        let delta = 0
+        if (this.prevSpreadAngle !== null) {
+            delta = smoothedAngle - this.prevSpreadAngle
+        }
+
+        // 释放判定：角度足够大 + 正在快速张开 + 冷却期已过
+        const releaseDetected = (
+            smoothedAngle > this.SPREAD_THRESHOLD &&
+            delta > this.DELTA_THRESHOLD &&
+            this.framesSinceLastRelease > this.COOLDOWN_FRAMES
+        )
+
+        if (releaseDetected) {
+            this.framesSinceLastRelease = 0
+        }
+
+        this.prevSpreadAngle = smoothedAngle
+
+        return {
+            spreadAngle: Math.round(smoothedAngle * 10) / 10,
+            delta: Math.round(delta * 10) / 10,
+            releaseDetected,
+        }
+    }
+
+    reset() {
+        this.prevSpreadAngle = null
+        this.spreadHistory = []
+        this.framesSinceLastRelease = 999
+    }
+}
+
+
+// ============================================================================
+// 9. ReleaseDetector — 出手瞬间判定（强化版）
+// ============================================================================
+/**
+ * 基于「速度波峰」、「手臂伸展」、「腕部轨迹高度」以及「手指张开信号」
  * 结合的状态机，以防范「假装出手 (Fake Throw)」。
  * 
  * 条件：
- * 1. 速度波峰 (Velocity Peak > 50)
+ * 1. 速度波峰 (Velocity Peak > 50，若手指确认释放则降至 35)
  * 2. 伴随手臂达到伸展状态 (Elbow ROM > 140)
- * *** 针对假动作防范的新增条件 ***
- * 3. 投掷瞬间，手腕高度 (Wrist Y) 必须处于相对较低的位置（接近臀部或膝盖），而非在胸前举起。
+ * 3. 投掷瞬间，手腕高度处于身体下半部
  * 4. 设有冷却时间 (Cooldown) 避免同一次投球触发多次
+ * 5. [新增] 手指张开释放信号可降低速度门槛，使慢速释放也被捕捉
  */
 export class ReleaseDetector {
     private lastVelocity: number = 0;
@@ -1161,9 +1305,10 @@ export class ReleaseDetector {
     private framesSinceLastRelease: number = 999;
 
     // 门槛值
-    private readonly COOLDOWN_FRAMES = 30; // 冷却：约1秒
-    private readonly VEL_THRESHOLD = 50;   // 速度门槛
-    private readonly ROM_THRESHOLD = 140;  // 获取最大伸展
+    private readonly COOLDOWN_FRAMES = 30;          // 冷却：约1秒
+    private readonly VEL_THRESHOLD = 50;            // 基础速度门槛
+    private readonly VEL_THRESHOLD_WITH_FINGER = 35; // 手指确认时的低速门槛
+    private readonly ROM_THRESHOLD = 140;           // 获取最大伸展
 
     /**
      * @param currentVelocity 当前归一化速度
@@ -1171,13 +1316,15 @@ export class ReleaseDetector {
      * @param wristY 手腕的 Y 坐标 (向下为正)
      * @param shoulderY 肩膀的 Y 坐标
      * @param hipY 髋部的 Y 坐标
+     * @param fingerReleaseDetected 手指张开释放信号 (Phase 2.1)
      */
     detect(
         currentVelocity: number,
         currentRom: number,
         wristY: number | null,
         shoulderY: number | null,
-        hipY: number | null
+        hipY: number | null,
+        fingerReleaseDetected: boolean = false
     ): boolean {
         this.framesSinceLastRelease++;
 
@@ -1186,22 +1333,24 @@ export class ReleaseDetector {
 
         let isRelease = false;
 
-        // 防伪验证：确保手腕在投出时处于身体下半部 (低于肩膀，且接近或低于髋部)
-        // 在标准的滚球动作中，出手点通常是很低的。如果是「假装往前挥拳」，手腕会在较高位置。
+        // 防伪验证：确保手腕在投出时处于身体下半部
         let isWristPositionValid = true;
         if (wristY !== null && shoulderY !== null && hipY !== null) {
-            // Y 轴向下为正，所以 wristY > shoulderY 代表手在肩膀下方
-            // 我们要求出手时，手至少要低过肩膀到髋部之间的一定比例 (例如 70% 偏下)
             const torsoHeight = hipY - shoulderY;
             const wristDepth = wristY - shoulderY;
             if (wristDepth < torsoHeight * 0.7) {
-                isWristPositionValid = false; // 手举太高，可能是假动作
+                isWristPositionValid = false;
             }
         }
 
+        // 根据手指释放信号动态调整速度门槛
+        const effectiveVelThreshold = fingerReleaseDetected
+            ? this.VEL_THRESHOLD_WITH_FINGER
+            : this.VEL_THRESHOLD;
+
         if (
             isLocalPeak &&
-            this.lastVelocity > this.VEL_THRESHOLD &&
+            this.lastVelocity > effectiveVelThreshold &&
             currentRom > this.ROM_THRESHOLD &&
             isWristPositionValid &&
             this.framesSinceLastRelease > this.COOLDOWN_FRAMES

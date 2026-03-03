@@ -44,6 +44,9 @@ export interface BocciaMetrics {
     // === Phase 2: 场域信息 ===
     subjectLocked: boolean
     postureCorrection: number
+    // === Phase 2.1: 手指张开检测 ===
+    fingerSpreadAngle: number | null
+    fingerReleaseDetected: boolean
     isArmExtended: boolean
     isTrunkStable: boolean
     isReadyToThrow: boolean
@@ -156,6 +159,12 @@ export default function BocciaCam({
     const autoSavingRef = useRef<boolean>(false)
     const [autoSaveToast, setAutoSaveToast] = useState<string | null>(null)
 
+    // 混合方案：手動標記投球
+    const throwMarksRef = useRef<{ time: number; rom: number; tilt: number; velocity: number; coreStability: number | null; shoulderVel: number | null; elbowVel: number | null; wristVel: number | null }[]>([])
+    const lastMarkTimeRef = useRef<number>(0)
+    const [throwMarkCount, setThrowMarkCount] = useState(0)
+    const [markToast, setMarkToast] = useState<string | null>(null)
+
     // UI 節流：每 500ms 才更新一次顯示值，讓人眼可以清楚閱讀
     const lastUIUpdateRef = useRef<number>(0)
     const UI_THROTTLE_MS = 500
@@ -175,6 +184,7 @@ export default function BocciaCam({
         tremorDetected: false, tremorFrequency: null,
         compensationType: null, compensationSeverity: 0,
         subjectLocked: false, postureCorrection: 0,
+        fingerSpreadAngle: null, fingerReleaseDetected: false,
         isArmExtended: true, isTrunkStable: true,
         isReadyToThrow: false, stableSeconds: 0,
     })
@@ -211,6 +221,25 @@ export default function BocciaCam({
         const now = Date.now()
         const W = video.videoWidth || 640  // 像素寬度
         const H = video.videoHeight || 480  // 像素高度
+
+        // 🛡️ 人體骨架守衛：需要完整上半身（雙肩+臀部+手臂）才進行分析
+        // 僅靠手臂3關節不足以排除鍵盤等非人體誤判
+        const rShoulder = landmarks[LANDMARKS.RIGHT_SHOULDER]
+        const lShoulder = landmarks[LANDMARKS.LEFT_SHOULDER]
+        const rElbow = landmarks[LANDMARKS.RIGHT_ELBOW]
+        const rWrist = landmarks[LANDMARKS.RIGHT_WRIST]
+        const lHip = landmarks[LANDMARKS.LEFT_HIP]
+        const rHip = landmarks[LANDMARKS.RIGHT_HIP]
+
+        // 雙肩 + 右手臂 + 至少一側臀部 都需 visibility > 0.5
+        const armVisible = Math.min(rShoulder?.visibility || 0, rElbow?.visibility || 0, rWrist?.visibility || 0) > 0.5
+        const shouldersVisible = (lShoulder?.visibility || 0) > 0.5
+        const hipVisible = Math.max(lHip?.visibility || 0, rHip?.visibility || 0) > 0.5
+
+        if (!armVisible || !shouldersVisible || !hipVisible) {
+            // 無完整人體骨架 → 不產生數據
+            return
+        }
 
         // 專利核心：長寬比感知轉換 (Aspect-Ratio Aware)
         // 將 MediaPipe 正規化座標 (0~1) 還原為真實像素座標
@@ -266,7 +295,7 @@ export default function BocciaCam({
         const shoulderY = toRealPixels(landmarks[LANDMARKS.RIGHT_SHOULDER], W, H).y
         const hipY = toRealPixels(landmarks[LANDMARKS.RIGHT_HIP], W, H).y
 
-        const isRelease = engineRef.current.updateReleasePoint(velocity, elbowROM, wristY, shoulderY, hipY)
+        const isRelease = engineRef.current.updateReleasePoint(velocity, elbowROM, wristY, shoulderY, hipY, bio.fingerReleaseDetected)
 
         bio.elbowROM = Math.round(elbowROM)
         bio.elbowROM_raw = Math.round(rawElbowROM)
@@ -447,6 +476,8 @@ export default function BocciaCam({
             compensationSeverity: bio.compensationSeverity,
             subjectLocked: bio.subjectLocked,
             postureCorrection: bio.postureCorrection,
+            fingerSpreadAngle: bio.fingerSpreadAngle,
+            fingerReleaseDetected: bio.fingerReleaseDetected,
             isArmExtended, isTrunkStable, isReadyToThrow,
             stableSeconds: Math.round(stableSeconds * 10) / 10,
         }
@@ -472,6 +503,28 @@ export default function BocciaCam({
     const [prescription, setPrescription] = useState... 
     useEffect...
     */
+
+    // 混合方案：手動標記這一球
+    const handleMarkThrow = () => {
+        const now = Date.now()
+        if (now - lastMarkTimeRef.current < 1000) return // 1秒冷却
+        lastMarkTimeRef.current = now
+
+        const snap = {
+            time: now - startTimeRef.current,
+            rom: metrics.elbowROM ?? 0,
+            tilt: metrics.trunkStability ?? 0,
+            velocity: metrics.velocity ?? 0,
+            coreStability: metrics.coreStabilityAngle,
+            shoulderVel: metrics.shoulderAngularVel,
+            elbowVel: metrics.elbowAngularVel,
+            wristVel: metrics.wristAngularVel,
+        }
+        throwMarksRef.current.push(snap)
+        setThrowMarkCount(throwMarksRef.current.length)
+        setMarkToast(`📌 第 ${throwMarksRef.current.length} 球已標記`)
+        setTimeout(() => setMarkToast(null), 1500)
+    }
 
     // 儲存分析結果到 training_sessions
     const handleSaveAndStop = async () => {
@@ -532,6 +585,9 @@ export default function BocciaCam({
                 posture_correction_avg: bioHistory.length > 0
                     ? Math.round(bioHistory.reduce((s, b) => s + (b.postureCorrection || 0), 0) / bioHistory.length * 10) / 10
                     : 0,
+                // 混合方案：手動標記的每球快照
+                manual_throw_count: throwMarksRef.current.length,
+                throw_marks: throwMarksRef.current,
             }
 
             // 使用共享的 AI 處方引擎（與長者詳情頁一致）
@@ -666,6 +722,73 @@ export default function BocciaCam({
                             <span className="text-lg font-black text-gray-900">{sessionReport.metrics.stable_ratio || 0}%</span>
                         </div>
                     </div>
+
+                    {/* 進階生物力學數據 */}
+                    <div className="rounded-xl border border-gray-200 overflow-hidden">
+                        <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
+                            <h5 className="text-xs font-bold text-gray-500 uppercase tracking-widest">進階生物力學數據</h5>
+                        </div>
+                        <div className="p-3 space-y-2">
+                            <div className="grid grid-cols-2 gap-2">
+                                <div className="p-2 bg-gray-50 rounded-lg text-center">
+                                    <p className="text-[10px] text-gray-500">中軸偏移</p>
+                                    <p className={`text-lg font-bold ${(sessionReport.metrics.core_stability_angle || 0) > 15 ? 'text-red-500' : 'text-cyan-600'}`}>
+                                        {sessionReport.metrics.core_stability_angle ?? '--'}°
+                                    </p>
+                                </div>
+                                <div className="p-2 bg-gray-50 rounded-lg text-center">
+                                    <p className="text-[10px] text-gray-500">震顫</p>
+                                    <p className={`text-lg font-bold ${(sessionReport.metrics.tremor_detected_ratio || 0) > 0 ? 'text-red-500' : 'text-green-600'}`}>
+                                        {sessionReport.metrics.tremor_detected_ratio != null ? `${sessionReport.metrics.tremor_detected_ratio}%` : '無'}
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2">
+                                <div className="p-2 bg-gray-50 rounded-lg text-center">
+                                    <p className="text-[10px] text-gray-500">肩角速</p>
+                                    <p className="text-sm font-bold text-purple-600">{sessionReport.metrics.avg_shoulder_angular_vel ?? '--'}°/s</p>
+                                </div>
+                                <div className="p-2 bg-gray-50 rounded-lg text-center">
+                                    <p className="text-[10px] text-gray-500">肘角速</p>
+                                    <p className="text-sm font-bold text-purple-600">{sessionReport.metrics.avg_elbow_angular_vel ?? '--'}°/s</p>
+                                </div>
+                                <div className="p-2 bg-gray-50 rounded-lg text-center">
+                                    <p className="text-[10px] text-gray-500">腕角速</p>
+                                    <p className="text-sm font-bold text-purple-600">{sessionReport.metrics.avg_wrist_angular_vel ?? '--'}°/s</p>
+                                </div>
+                            </div>
+                            {(sessionReport.metrics.compensation_detected_ratio || 0) > 0 && (
+                                <div className="p-2 bg-orange-50 rounded-lg border border-orange-100 flex items-center gap-2">
+                                    <span className="text-orange-500">⚠️</span>
+                                    <div>
+                                        <p className="text-xs font-bold text-orange-700">代償動作 {sessionReport.metrics.compensation_detected_ratio}%</p>
+                                        {sessionReport.metrics.compensation_types?.length > 0 && (
+                                            <p className="text-[10px] text-orange-500">{sessionReport.metrics.compensation_types.join(', ')}</p>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* 手動標記的每球快照 */}
+                    {sessionReport.metrics.throw_marks?.length > 0 && (
+                        <div className="rounded-xl border border-amber-200 overflow-hidden">
+                            <div className="bg-amber-50 px-4 py-2 border-b border-amber-200">
+                                <h5 className="text-xs font-bold text-amber-700 uppercase tracking-widest">📌 手動標記投球 ({sessionReport.metrics.manual_throw_count} 球)</h5>
+                            </div>
+                            <div className="p-3 space-y-2">
+                                {sessionReport.metrics.throw_marks.map((t: any, i: number) => (
+                                    <div key={i} className="flex items-center justify-between p-2 bg-amber-50/50 rounded-lg text-sm">
+                                        <span className="font-bold text-amber-700">#{i + 1}</span>
+                                        <span className="text-gray-600">ROM {t.rom}°</span>
+                                        <span className="text-gray-600">傾斜 {t.tilt}°</span>
+                                        <span className="text-emerald-600 font-bold">速度 {t.velocity}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
                     {/* AI 處方卡片 */}
                     <div className={`p-5 rounded-xl border-l-4 ${sessionReport.prescription.color} bg-white shadow-sm`}>
@@ -820,7 +943,7 @@ export default function BocciaCam({
                     <div className="rounded-xl p-2 text-center min-w-0 bg-gray-700/50">
                         <p className="text-[10px] text-gray-400 mb-0.5 truncate">出手速度</p>
                         <p className="text-xl font-black text-emerald-400 truncate">
-                            {metrics.velocity || '--'}
+                            {metrics.velocity ? metrics.velocity.toFixed(2) : '--'}
                         </p>
                     </div>
                 </div>
@@ -878,10 +1001,33 @@ export default function BocciaCam({
                                 </div>
                             </div>
                         )}
+
+                        {/* 手指张开度 */}
+                        <div className="grid grid-cols-2 gap-2">
+                            <div className="rounded-lg p-2 bg-gray-700/30 text-center">
+                                <p className="text-[10px] text-gray-500">🤚 手指张开</p>
+                                <p className={`text-lg font-bold ${(bioMetrics.fingerSpreadAngle ?? 0) > 40 ? 'text-amber-400' : 'text-sky-400'}`}>
+                                    {bioMetrics.fingerSpreadAngle ?? '--'}°
+                                </p>
+                            </div>
+                            <div className="rounded-lg p-2 bg-gray-700/30 text-center">
+                                <p className="text-[10px] text-gray-500">释放参考</p>
+                                <p className={`text-sm font-medium ${bioMetrics.fingerReleaseDetected ? 'text-yellow-400/70' : 'text-gray-600'}`}>
+                                    {bioMetrics.fingerReleaseDetected ? '⚡ 参考' : '—'}
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 )}
 
                 {/* Action Buttons */}
+                {/* 手動標記 Toast */}
+                {markToast && (
+                    <div className="mb-2 py-2 px-4 rounded-xl bg-amber-600/90 text-white text-sm font-bold text-center animate-fade-in">
+                        {markToast}
+                    </div>
+                )}
+
                 {/* 自動儲存通知 Toast */}
                 {autoSaveToast && (
                     <div className="mb-2 py-2 px-4 rounded-xl bg-green-600/90 text-white text-sm font-bold text-center animate-fade-in">
@@ -902,6 +1048,19 @@ export default function BocciaCam({
                         📊 已自動儲存 {autoSaveCountRef.current} 次投擲
                     </div>
                 )}
+
+                {/* 📌 手動標記按鈕 */}
+                <button
+                    onClick={handleMarkThrow}
+                    disabled={saving || saved}
+                    className="w-full py-3 mb-2 rounded-xl font-bold text-white bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 active:scale-[0.97] transition-all shadow-lg shadow-amber-500/20 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                    <span className="text-xl">📌</span>
+                    <span>標記這一球</span>
+                    {throwMarkCount > 0 && (
+                        <span className="ml-1 bg-white/20 px-2 py-0.5 rounded-full text-xs">{throwMarkCount}</span>
+                    )}
+                </button>
 
                 <div className="flex gap-3">
                     <button

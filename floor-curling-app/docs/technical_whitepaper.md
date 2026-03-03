@@ -345,6 +345,60 @@ $$
 
 ---
 
+### 3.6 指标 I：手指张开检测 (Finger Spread Detection) — Phase 2.1 新增
+
+#### 目的
+
+利用 MediaPipe Pose 已有的指尖节点，检测投球过程中手指从握持状态到释放状态的张开动作，作为出手瞬间判定的辅助信号。
+
+#### 使用节点
+
+| 节点 | MediaPipe ID | 说明 |
+|------|-------------|------|
+| 右手腕 | 16 | 夹角顶点 |
+| 右拇指 | 22 | 夹角边 1 |
+| 右小指 | 18 | 夹角边 2 |
+
+#### 数学模型
+
+以手腕为顶点，计算拇指→手腕→小指的 3D 夹角：
+
+$$
+\vec{WT} = P_{thumb} - P_{wrist}, \quad \vec{WP} = P_{pinky} - P_{wrist}
+$$
+
+$$
+\theta_{spread} = \cos^{-1}\left(\frac{\vec{WT} \cdot \vec{WP}}{|\vec{WT}||\vec{WP}|}\right) \times \frac{180°}{\pi}
+$$
+
+#### 释放信号判定
+
+使用 5 帧滑动窗口平滑后，追踪帧间变化率：
+
+$$
+\Delta\theta = \theta_{spread,t} - \theta_{spread,t-1}
+$$
+
+$$
+\text{release\_signal} = (\theta_{spread} > 40°) \wedge (\Delta\theta > 12°/\text{frame}) \wedge (\text{cooldown\_ok})
+$$
+
+#### 临床参考值
+
+| 状态 | 角度范围 | 说明 |
+|------|---------|------|
+| 握球 | 10°~30° | 手指收拢，球在手中 |
+| 过渡 | 30°~40° | 手指开始松开 |
+| 释放 | 40°~90° | 手指完全张开，球已离手 |
+
+#### 与出手判定的融合
+
+当 `fingerReleaseDetected = true` 时，`ReleaseDetector` 的速度门槛从 50 降至 35：
+- **快速投球**（速度 > 50）：无论手指是否检测到，都能触发
+- **慢速释放**（速度 35~50）：仅在手指确认张开时才触发
+
+---
+
 ## 四、诊断规则引擎 (The Brain v2)
 
 ```
@@ -474,6 +528,7 @@ ELSE:                            → 🔵 动作稳定
 > **版本历史**
 > - Phase 1 (v1.0): 手肘 ROM + 躯干倾斜 + 出手速度 + 长宽比感知
 > - Phase 2 (v2.0): 中轴稳定度 + 角速度 + 震颤检测 + 代偿识别 + 主体锁定 + 坐姿修正 + 防伪出手判定 + CSV/Excel 导出
+> - Phase 2.1 (v2.1): 手指张开检测 (Finger Spread Detection) + 出手判定融合强化
 
 ---
 

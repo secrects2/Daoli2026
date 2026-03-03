@@ -90,32 +90,41 @@ export default function GenericElderDetailPage() {
                 localPoints: wallet?.local_points || 0
             })
 
-            // 4. Fetch Equipment (Simulated via Point Transactions)
-            const allProducts = [
-                { id: 1, name: '專業滾球輔具', icon: '🎯', price: 500 },
-                { id: 2, name: '防滑運動手套', icon: '🧤', price: 200 },
-                { id: 3, name: '能量營養棒', icon: '🍫', price: 150 },
-                { id: 4, name: '紀念毛巾', icon: '🧣', price: 300 },
-            ]
+            // 4. Fetch Equipment — 从真实商店物品表获取
+            const { data: allEquipment } = await supabase
+                .from('equipment')
+                .select('*')
+                .order('rarity')
 
-            const { data: transactions } = await supabase
-                .from('point_transactions')
+            // 查询该长者的购买记录（transactions 表中 type='spend' 且描述含「購買裝備」）
+            const { data: purchaseTxns } = await supabase
+                .from('transactions')
                 .select('description')
-                .eq('wallet_id', wallet?.id)
-                .eq('type', 'spent')
+                .eq('user_id', params.id)
+                .eq('type', 'spend')
+                .ilike('description', '購買裝備%')
 
-            const ownedProductIds = new Set()
-            transactions?.forEach(t => {
-                allProducts.forEach(p => {
-                    if (t.description?.includes(p.name)) {
-                        ownedProductIds.add(p.id)
-                    }
-                })
+            // 稀有度图标映射
+            const rarityIcons: Record<string, string> = {
+                legendary: '👑', epic: '💎', rare: '⭐', common: '🎯'
+            }
+
+            // 从购买记录中提取已拥有的装备名称
+            const ownedNames = new Set<string>()
+            purchaseTxns?.forEach((t: any) => {
+                const match = t.description?.match(/購買裝備:\s*(.+)/)
+                if (match) ownedNames.add(match[1].trim())
             })
 
-            setEquipment(allProducts.map(p => ({
-                ...p,
-                owned: ownedProductIds.has(p.id)
+            setEquipment((allEquipment || []).map((eq: any) => ({
+                id: eq.id,
+                name: eq.name,
+                description: eq.description,
+                icon: rarityIcons[eq.rarity] || '🎮',
+                rarity: eq.rarity || 'common',
+                stats: eq.stats || {},
+                image_url: eq.image_url,
+                owned: ownedNames.has(eq.name),
             })))
 
 
@@ -546,35 +555,187 @@ export default function GenericElderDetailPage() {
                 {/* Equipment Inventory */}
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                     <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                        <span>🎒</span> 裝備庫與成就
+                        <span>🎒</span> 裝備庫
+                        <span className="text-xs text-gray-400 font-normal ml-auto">
+                            已擁有 {equipment.filter((e: any) => e.owned).length} / {equipment.length}
+                        </span>
                     </h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                        {equipment.map(item => (
-                            <div
-                                key={item.id}
-                                className={`
-                                    relative p-4 rounded-xl border text-center transition-all
-                                    ${item.owned
-                                        ? 'bg-gradient-to-br from-yellow-50 to-orange-50 border-orange-200 shadow-sm'
-                                        : 'bg-gray-50 border-gray-100 opacity-60 grayscale'
-                                    }
-                                `}
-                            >
-                                <div className="text-4xl mb-2">{item.icon}</div>
-                                <p className={`text-sm font-bold ${item.owned ? 'text-gray-900' : 'text-gray-400'}`}>
-                                    {item.name}
-                                </p>
-                                <p className="text-xs text-gray-500 mt-1">
-                                    {item.owned ? '已擁有' : '未解鎖'}
-                                </p>
-                                {item.owned && (
-                                    <div className="absolute top-2 right-2 text-green-500">
-                                        ✓
+                    {equipment.length === 0 ? (
+                        <div className="text-center py-8 text-gray-400 text-sm">
+                            <p>商店尚無裝備上架</p>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                            {equipment.map((item: any) => {
+                                const rarityColors: Record<string, string> = {
+                                    legendary: 'from-yellow-50 to-orange-50 border-yellow-300 ring-2 ring-yellow-200',
+                                    epic: 'from-purple-50 to-pink-50 border-purple-300',
+                                    rare: 'from-blue-50 to-cyan-50 border-blue-300',
+                                    common: 'from-gray-50 to-white border-gray-200',
+                                }
+                                const rarityLabels: Record<string, { text: string; cls: string }> = {
+                                    legendary: { text: '傳說', cls: 'bg-yellow-100 text-yellow-700' },
+                                    epic: { text: '史詩', cls: 'bg-purple-100 text-purple-700' },
+                                    rare: { text: '稀有', cls: 'bg-blue-100 text-blue-700' },
+                                    common: { text: '普通', cls: 'bg-gray-100 text-gray-600' },
+                                }
+                                const rarity = item.rarity || 'common'
+                                const label = rarityLabels[rarity] || rarityLabels.common
+                                const colorCls = rarityColors[rarity] || rarityColors.common
+
+                                return (
+                                    <div
+                                        key={item.id}
+                                        className={`
+                                            relative p-4 rounded-xl border text-center transition-all
+                                            ${item.owned
+                                                ? `bg-gradient-to-br ${colorCls} shadow-sm`
+                                                : 'bg-gray-50 border-gray-100 opacity-50 grayscale'
+                                            }
+                                        `}
+                                    >
+                                        {/* 稀有度标签 */}
+                                        <span className={`absolute top-2 left-2 text-[10px] px-1.5 py-0.5 rounded-full font-bold ${item.owned ? label.cls : 'bg-gray-100 text-gray-400'}`}>
+                                            {label.text}
+                                        </span>
+                                        {item.owned && (
+                                            <div className="absolute top-2 right-2 text-green-500 text-sm font-bold">✓</div>
+                                        )}
+
+                                        {/* 装备图标/图片 */}
+                                        <div className="mt-4 mb-2">
+                                            {item.image_url ? (
+                                                <img src={item.image_url} alt={item.name} className="w-14 h-14 mx-auto object-contain rounded-lg" />
+                                            ) : (
+                                                <div className="text-4xl">{item.icon}</div>
+                                            )}
+                                        </div>
+
+                                        <p className={`text-sm font-bold ${item.owned ? 'text-gray-900' : 'text-gray-400'}`}>
+                                            {item.name}
+                                        </p>
+
+                                        {/* 属性徽章 */}
+                                        {item.stats && Object.keys(item.stats).length > 0 && item.owned && (
+                                            <div className="flex flex-wrap gap-1 justify-center mt-2">
+                                                {Object.entries(item.stats).slice(0, 2).map(([key, val]) => (
+                                                    <span key={key} className="text-[10px] bg-white/80 text-gray-600 px-1.5 py-0.5 rounded border border-gray-100">
+                                                        {key} +{val as number}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        <p className="text-[10px] text-gray-400 mt-1">
+                                            {item.owned ? '已擁有' : '🔒 未解鎖'}
+                                        </p>
                                     </div>
-                                )}
+                                )
+                            })}
+                        </div>
+                    )}
+                </div>
+
+                {/* Achievements */}
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <span>🏆</span> 成就
+                    </h3>
+                    {(() => {
+                        // 基于 AI 训练数据计算成就
+                        const totalSessions = aiSessions.length
+                        const latestMetrics = aiSessions[0]?.metrics || {}
+                        const bestRom = Math.max(...aiSessions.map((s: any) => s.metrics?.avg_rom || 0), 0)
+                        const bestVelocity = Math.max(...aiSessions.map((s: any) => s.metrics?.avg_velocity || 0), 0)
+                        const bestStable = Math.max(...aiSessions.map((s: any) => s.metrics?.stable_ratio || 0), 0)
+
+                        const achievements = [
+                            {
+                                id: 'first_train',
+                                icon: '🏅',
+                                name: '初次訓練',
+                                desc: '完成第 1 次 AI 動作分析',
+                                unlocked: totalSessions >= 1,
+                                progress: Math.min(totalSessions, 1),
+                                max: 1,
+                            },
+                            {
+                                id: 'precision',
+                                icon: '🎯',
+                                name: '精準控制',
+                                desc: '手肘 ROM 平均 > 160°',
+                                unlocked: bestRom > 160,
+                                progress: Math.min(Math.round(bestRom), 160),
+                                max: 160,
+                            },
+                            {
+                                id: 'speedster',
+                                icon: '⚡',
+                                name: '速度達人',
+                                desc: '出手速度達到 80+',
+                                unlocked: bestVelocity >= 80,
+                                progress: Math.min(Math.round(bestVelocity), 80),
+                                max: 80,
+                            },
+                            {
+                                id: 'stable',
+                                icon: '🧘',
+                                name: '穩定大師',
+                                desc: '動作穩定率 > 80%',
+                                unlocked: bestStable > 80,
+                                progress: Math.min(Math.round(bestStable), 80),
+                                max: 80,
+                            },
+                            {
+                                id: 'streak',
+                                icon: '🔥',
+                                name: '連續訓練',
+                                desc: '累計完成 5 次訓練',
+                                unlocked: totalSessions >= 5,
+                                progress: Math.min(totalSessions, 5),
+                                max: 5,
+                            },
+                            {
+                                id: 'veteran',
+                                icon: '🏆',
+                                name: '資深選手',
+                                desc: '累計完成 20 次訓練',
+                                unlocked: totalSessions >= 20,
+                                progress: Math.min(totalSessions, 20),
+                                max: 20,
+                            },
+                        ]
+
+                        return (
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                                {achievements.map(a => (
+                                    <div
+                                        key={a.id}
+                                        className={`relative p-4 rounded-xl border text-center transition-all ${a.unlocked
+                                                ? 'bg-gradient-to-br from-amber-50 to-yellow-50 border-amber-200 shadow-sm'
+                                                : 'bg-gray-50 border-gray-100 opacity-50'
+                                            }`}
+                                    >
+                                        <div className={`text-3xl mb-2 ${a.unlocked ? '' : 'grayscale'}`}>{a.icon}</div>
+                                        <p className={`text-sm font-bold ${a.unlocked ? 'text-gray-900' : 'text-gray-400'}`}>
+                                            {a.name}
+                                        </p>
+                                        <p className="text-[10px] text-gray-400 mt-0.5">{a.desc}</p>
+                                        {/* 进度条 */}
+                                        <div className="mt-2 w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                                            <div
+                                                className={`h-full rounded-full transition-all ${a.unlocked ? 'bg-amber-400' : 'bg-gray-300'}`}
+                                                style={{ width: `${Math.min((a.progress / a.max) * 100, 100)}%` }}
+                                            />
+                                        </div>
+                                        <p className="text-[10px] text-gray-400 mt-1">
+                                            {a.unlocked ? '✅ 已解鎖' : `${a.progress} / ${a.max}`}
+                                        </p>
+                                    </div>
+                                ))}
                             </div>
-                        ))}
-                    </div>
+                        )
+                    })()}
                 </div>
 
                 {/* AI Analysis & Prescription Section */}

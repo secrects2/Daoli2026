@@ -12,6 +12,7 @@ interface AiAnalysisSectionProps {
 export default function AiAnalysisSection({ elderId, showLink = false }: AiAnalysisSectionProps) {
     const [aiSessions, setAiSessions] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
+    const [expandedSessionId, setExpandedSessionId] = useState<string | null>(null)
 
     useEffect(() => {
         const fetchSessions = async () => {
@@ -74,6 +75,75 @@ export default function AiAnalysisSection({ elderId, showLink = false }: AiAnaly
                         </div>
                     </div>
 
+                    {/* 進階數據面板（永遠顯示） */}
+                    <div className="rounded-xl border border-gray-200 overflow-hidden">
+                        <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
+                            <h5 className="text-xs font-bold text-gray-500 uppercase tracking-widest">進階生物力學數據</h5>
+                        </div>
+                        <div className="p-4 space-y-3">
+                            {/* 中轴稳定度 + 出手速度 */}
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="p-3 bg-gray-50 rounded-lg">
+                                    <p className="text-[10px] text-gray-500 mb-1">中軸偏移</p>
+                                    <p className={`text-lg font-bold ${(aiSessions[0].metrics?.core_stability_angle || 0) > 15 ? 'text-red-500' : 'text-cyan-600'}`}>
+                                        {aiSessions[0].metrics?.core_stability_angle ?? '--'}°
+                                    </p>
+                                </div>
+                                <div className="p-3 bg-gray-50 rounded-lg">
+                                    <p className="text-[10px] text-gray-500 mb-1">出手速度均值</p>
+                                    <p className="text-lg font-bold text-emerald-600">{aiSessions[0].metrics?.avg_velocity ?? '--'}</p>
+                                </div>
+                            </div>
+
+                            {/* 角速度 */}
+                            <div className="grid grid-cols-3 gap-2">
+                                <div className="p-2 bg-gray-50 rounded-lg text-center">
+                                    <p className="text-[10px] text-gray-500">肩角速</p>
+                                    <p className="text-sm font-bold text-purple-600">{aiSessions[0].metrics?.avg_shoulder_angular_vel ?? '--'}°/s</p>
+                                </div>
+                                <div className="p-2 bg-gray-50 rounded-lg text-center">
+                                    <p className="text-[10px] text-gray-500">肘角速</p>
+                                    <p className="text-sm font-bold text-purple-600">{aiSessions[0].metrics?.avg_elbow_angular_vel ?? '--'}°/s</p>
+                                </div>
+                                <div className="p-2 bg-gray-50 rounded-lg text-center">
+                                    <p className="text-[10px] text-gray-500">腕角速</p>
+                                    <p className="text-sm font-bold text-purple-600">{aiSessions[0].metrics?.avg_wrist_angular_vel ?? '--'}°/s</p>
+                                </div>
+                            </div>
+
+                            {/* 震颤 & 代偿 */}
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className={`p-3 rounded-lg ${(aiSessions[0].metrics?.tremor_detected_ratio || 0) > 0 ? 'bg-red-50 border border-red-100' : 'bg-gray-50'}`}>
+                                    <p className="text-[10px] text-gray-500 mb-1">震顫檢出率</p>
+                                    <p className={`text-lg font-bold ${(aiSessions[0].metrics?.tremor_detected_ratio || 0) > 0 ? 'text-red-500' : 'text-green-600'}`}>
+                                        {aiSessions[0].metrics?.tremor_detected_ratio != null ? `${aiSessions[0].metrics.tremor_detected_ratio}%` : '--'}
+                                    </p>
+                                </div>
+                                <div className={`p-3 rounded-lg ${(aiSessions[0].metrics?.compensation_detected_ratio || 0) > 0 ? 'bg-orange-50 border border-orange-100' : 'bg-gray-50'}`}>
+                                    <p className="text-[10px] text-gray-500 mb-1">代償動作</p>
+                                    <p className={`text-lg font-bold ${(aiSessions[0].metrics?.compensation_detected_ratio || 0) > 0 ? 'text-orange-500' : 'text-green-600'}`}>
+                                        {aiSessions[0].metrics?.compensation_detected_ratio != null ? `${aiSessions[0].metrics.compensation_detected_ratio}%` : '--'}
+                                    </p>
+                                    {aiSessions[0].metrics?.compensation_types?.length > 0 && (
+                                        <p className="text-[10px] text-orange-400 mt-0.5">{aiSessions[0].metrics.compensation_types.join(', ')}</p>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* 坐姿修正 & 手指张开 */}
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="p-3 bg-gray-50 rounded-lg">
+                                    <p className="text-[10px] text-gray-500 mb-1">坐姿修正量</p>
+                                    <p className="text-lg font-bold text-blue-600">{aiSessions[0].metrics?.posture_correction_avg ?? '--'}°</p>
+                                </div>
+                                <div className="p-3 bg-gray-50 rounded-lg">
+                                    <p className="text-[10px] text-gray-500 mb-1">🤚 手指張開度</p>
+                                    <p className="text-lg font-bold text-amber-600">{aiSessions[0].metrics?.finger_spread_avg ?? '--'}°</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     {/* AI 智能推薦 */}
                     <div className="p-5 rounded-xl border border-indigo-100 bg-gradient-to-br from-indigo-50 to-purple-50 shadow-sm relative overflow-hidden">
                         <div className="absolute -top-4 -right-4 text-7xl opacity-5">💡</div>
@@ -96,28 +166,102 @@ export default function AiAnalysisSection({ elderId, showLink = false }: AiAnaly
                         </div>
                     </div>
 
-                    {/* 歷史檢測紀錄 */}
+                    {/* 歷史檢測紀錄（可展開） */}
                     {aiSessions.length > 1 && (
                         <div className="space-y-2">
                             <h5 className="text-sm font-bold text-gray-500">歷史檢測紀錄</h5>
-                            {aiSessions.slice(1, 4).map(session => (
-                                <div key={session.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                                    <div>
-                                        <p className="font-bold text-sm">{new Date(session.created_at).toLocaleDateString()}</p>
-                                        <p className="text-xs text-gray-500">
-                                            ROM: {session.metrics?.avg_rom}° | 穩定: {session.metrics?.avg_trunk_tilt}°
-                                        </p>
+                            {aiSessions.slice(1).map(session => {
+                                const isExpanded = expandedSessionId === session.id
+                                const m = session.metrics || {}
+                                return (
+                                    <div key={session.id} className="rounded-lg border border-gray-100 overflow-hidden">
+                                        <button
+                                            onClick={() => setExpandedSessionId(isExpanded ? null : session.id)}
+                                            className="w-full flex justify-between items-center p-3 bg-gray-50 hover:bg-gray-100 transition-colors text-left"
+                                        >
+                                            <div>
+                                                <p className="font-bold text-sm">{new Date(session.created_at).toLocaleDateString()}</p>
+                                                <p className="text-xs text-gray-500">
+                                                    ROM: {m.avg_rom ?? '--'}° | 穩定: {m.avg_trunk_tilt ?? '--'}°
+                                                </p>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <span className={`text-xs px-2 py-1 rounded-full ${getAiPrescription(m).color.includes('green') ? 'bg-green-100 text-green-700' :
+                                                    getAiPrescription(m).color.includes('red') ? 'bg-red-100 text-red-700' :
+                                                        'bg-orange-100 text-orange-700'
+                                                    }`}>
+                                                    {getAiPrescription(m).title.split(' ')[1]}
+                                                </span>
+                                                <span className="text-gray-400 text-xs">{isExpanded ? '▲' : '▼'}</span>
+                                            </div>
+                                        </button>
+                                        {isExpanded && (
+                                            <div className="p-3 border-t border-gray-100 space-y-2 bg-white">
+                                                <div className="grid grid-cols-3 gap-2">
+                                                    <div className="p-2 bg-gray-50 rounded-lg text-center">
+                                                        <p className="text-[10px] text-gray-500">手肘 ROM</p>
+                                                        <p className="text-sm font-bold text-gray-900">{m.avg_rom ?? '--'}°</p>
+                                                    </div>
+                                                    <div className="p-2 bg-gray-50 rounded-lg text-center">
+                                                        <p className="text-[10px] text-gray-500">軀幹傾斜</p>
+                                                        <p className="text-sm font-bold text-gray-900">{m.avg_trunk_tilt ?? '--'}°</p>
+                                                    </div>
+                                                    <div className="p-2 bg-gray-50 rounded-lg text-center">
+                                                        <p className="text-[10px] text-gray-500">穩定率</p>
+                                                        <p className="text-sm font-bold text-gray-900">{m.stable_ratio ?? '--'}%</p>
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-2">
+                                                    <div className="p-2 bg-gray-50 rounded-lg text-center">
+                                                        <p className="text-[10px] text-gray-500">中軸偏移</p>
+                                                        <p className={`text-sm font-bold ${(m.core_stability_angle || 0) > 15 ? 'text-red-500' : 'text-cyan-600'}`}>{m.core_stability_angle ?? '--'}°</p>
+                                                    </div>
+                                                    <div className="p-2 bg-gray-50 rounded-lg text-center">
+                                                        <p className="text-[10px] text-gray-500">出手速度</p>
+                                                        <p className="text-sm font-bold text-emerald-600">{m.avg_velocity ?? '--'}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-3 gap-2">
+                                                    <div className="p-2 bg-gray-50 rounded-lg text-center">
+                                                        <p className="text-[10px] text-gray-500">肩角速</p>
+                                                        <p className="text-xs font-bold text-purple-600">{m.avg_shoulder_angular_vel ?? '--'}°/s</p>
+                                                    </div>
+                                                    <div className="p-2 bg-gray-50 rounded-lg text-center">
+                                                        <p className="text-[10px] text-gray-500">肘角速</p>
+                                                        <p className="text-xs font-bold text-purple-600">{m.avg_elbow_angular_vel ?? '--'}°/s</p>
+                                                    </div>
+                                                    <div className="p-2 bg-gray-50 rounded-lg text-center">
+                                                        <p className="text-[10px] text-gray-500">腕角速</p>
+                                                        <p className="text-xs font-bold text-purple-600">{m.avg_wrist_angular_vel ?? '--'}°/s</p>
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-2">
+                                                    <div className={`p-2 rounded-lg text-center ${(m.tremor_detected_ratio || 0) > 0 ? 'bg-red-50' : 'bg-gray-50'}`}>
+                                                        <p className="text-[10px] text-gray-500">震顫</p>
+                                                        <p className={`text-sm font-bold ${(m.tremor_detected_ratio || 0) > 0 ? 'text-red-500' : 'text-green-600'}`}>
+                                                            {m.tremor_detected_ratio != null ? `${m.tremor_detected_ratio}%` : '--'}
+                                                        </p>
+                                                    </div>
+                                                    <div className={`p-2 rounded-lg text-center ${(m.compensation_detected_ratio || 0) > 0 ? 'bg-orange-50' : 'bg-gray-50'}`}>
+                                                        <p className="text-[10px] text-gray-500">代償</p>
+                                                        <p className={`text-sm font-bold ${(m.compensation_detected_ratio || 0) > 0 ? 'text-orange-500' : 'text-green-600'}`}>
+                                                            {m.compensation_detected_ratio != null ? `${m.compensation_detected_ratio}%` : '--'}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                {m.throw_marks?.length > 0 && (
+                                                    <div className="mt-1 p-2 bg-amber-50 rounded-lg">
+                                                        <p className="text-[10px] font-bold text-amber-700 mb-1">📌 手動標記 ({m.manual_throw_count} 球)</p>
+                                                        {m.throw_marks.map((t: any, i: number) => (
+                                                            <p key={i} className="text-[10px] text-amber-600">#{i + 1} ROM {t.rom}° | 傾斜 {t.tilt}° | 速度 {t.velocity}</p>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
-                                    <div className="text-right">
-                                        <span className={`text-xs px-2 py-1 rounded-full ${getAiPrescription(session.metrics).color.includes('green') ? 'bg-green-100 text-green-700' :
-                                            getAiPrescription(session.metrics).color.includes('red') ? 'bg-red-100 text-red-700' :
-                                                'bg-orange-100 text-orange-700'
-                                            }`}>
-                                            {getAiPrescription(session.metrics).title.split(' ')[1]}
-                                        </span>
-                                    </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     )}
                 </div>
