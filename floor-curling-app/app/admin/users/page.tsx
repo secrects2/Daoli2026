@@ -183,22 +183,22 @@ export default function AdminUsersPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-20">
+        <div className="min-h-screen bg-background pb-20">
             {/* Header */}
-            <div className="sticky top-0 z-20 backdrop-blur-xl bg-white/80 border-b border-gray-100 px-5 pt-12 pb-4">
+            <div className="sticky top-0 z-20 backdrop-blur-xl bg-card/80 border-b border-border/50 px-5 pt-12 pb-4">
                 <div className="max-w-6xl mx-auto flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <Link
                             href="/admin"
-                            className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors"
+                            className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-gray-600 hover:bg-accent transition-colors"
                         >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                             </svg>
                         </Link>
                         <div>
-                            <h1 className="text-2xl font-black text-gray-900">用戶管理</h1>
-                            <p className="text-sm text-gray-500">共 {users.length} 位用戶</p>
+                            <h1 className="text-2xl font-extrabold text-foreground">用戶管理</h1>
+                            <p className="text-sm text-muted-foreground">共 {users.length} 位用戶</p>
                         </div>
                     </div>
                     <div className="flex gap-2">
@@ -213,7 +213,7 @@ export default function AdminUsersPage() {
                         </button>
                         <button
                             onClick={() => { setEditingUser(null); resetForm(); setShowModal(true); }}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-xl font-bold text-sm hover:bg-blue-700 transition-colors flex items-center gap-2"
+                            className="px-4 py-2 bg-primary text-white rounded-xl font-bold text-sm hover:bg-blue-700 transition-colors flex items-center gap-2"
                         >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -238,8 +238,8 @@ export default function AdminUsersPage() {
                             key={item.key}
                             onClick={() => setFilter(item.key)}
                             className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${filter === item.key
-                                ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
-                                : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+                                ? 'bg-primary text-white shadow-lg shadow-blue-200'
+                                : 'bg-card text-gray-600 hover:bg-muted border border-border'
                                 }`}
                         >
                             {item.label}
@@ -255,28 +255,28 @@ export default function AdminUsersPage() {
                         <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
                     </div>
                 ) : (
-                    <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+                    <div className="bg-card rounded-2xl shadow-card overflow-hidden">
                         <table className="w-full">
-                            <thead className="bg-gray-50 border-b border-gray-100">
+                            <thead className="bg-background border-b border-border/50">
                                 <tr>
-                                    <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">用戶</th>
-                                    <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">角色</th>
-                                    <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">門店</th>
-                                    <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">狀態</th>
-                                    <th className="px-4 py-3 text-right text-xs font-bold text-gray-500 uppercase">操作</th>
+                                    <th className="px-4 py-3 text-left text-xs font-bold text-muted-foreground uppercase">用戶</th>
+                                    <th className="px-4 py-3 text-left text-xs font-bold text-muted-foreground uppercase">角色</th>
+                                    <th className="px-4 py-3 text-left text-xs font-bold text-muted-foreground uppercase">門店</th>
+                                    <th className="px-4 py-3 text-left text-xs font-bold text-muted-foreground uppercase">狀態</th>
+                                    <th className="px-4 py-3 text-right text-xs font-bold text-muted-foreground uppercase">操作</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
                                 {users.map(user => (
-                                    <tr key={user.id} className="hover:bg-gray-50 transition-colors">
+                                    <tr key={user.id} className="hover:bg-background transition-colors">
                                         <td className="px-4 py-4">
                                             <div>
-                                                <p className="font-bold text-gray-900">{user.full_name || user.nickname || '未命名'}</p>
-                                                <p className="text-xs text-gray-500">{user.email}</p>
+                                                <p className="font-bold text-foreground">{user.full_name || user.nickname || '未命名'}</p>
+                                                <p className="text-xs text-muted-foreground">{user.email}</p>
                                             </div>
                                         </td>
                                         <td className="px-4 py-4">
-                                            <span className={`px-2 py-1 rounded-full text-xs font-bold ${ROLE_LABELS[user.role]?.color || 'bg-gray-100 text-gray-600'}`}>
+                                            <span className={`px-2 py-1 rounded-full text-xs font-bold ${ROLE_LABELS[user.role]?.color || 'bg-muted text-gray-600'}`}>
                                                 {ROLE_LABELS[user.role]?.label || user.role}
                                             </span>
                                         </td>
@@ -292,7 +292,7 @@ export default function AdminUsersPage() {
                                         <td className="px-4 py-4 text-right">
                                             <button
                                                 onClick={() => openEditModal(user)}
-                                                className="px-3 py-1 text-sm font-bold text-blue-600 hover:bg-blue-50 rounded-lg transition-colors mr-2"
+                                                className="px-3 py-1 text-sm font-bold text-primary hover:bg-primary/10 rounded-lg transition-colors mr-2"
                                             >
                                                 編輯
                                             </button>
@@ -316,8 +316,8 @@ export default function AdminUsersPage() {
             {/* Modal */}
             {showModal && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm">
-                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 p-6">
-                        <h3 className="text-xl font-bold text-gray-900 mb-4">
+                    <div className="bg-card rounded-2xl shadow-xl w-full max-w-md mx-4 p-6">
+                        <h3 className="text-xl font-bold text-foreground mb-4">
                             {editingUser ? '編輯用戶' : '新增用戶'}
                         </h3>
 
@@ -330,7 +330,7 @@ export default function AdminUsersPage() {
                                             type="email"
                                             value={form.email}
                                             onChange={e => setForm({ ...form, email: e.target.value })}
-                                            className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                                            className="w-full px-4 py-2 border border-border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                                         />
                                     </div>
                                     <div>
@@ -339,7 +339,7 @@ export default function AdminUsersPage() {
                                             type="password"
                                             value={form.password}
                                             onChange={e => setForm({ ...form, password: e.target.value })}
-                                            className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                                            className="w-full px-4 py-2 border border-border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                                         />
                                     </div>
                                 </>
@@ -351,7 +351,7 @@ export default function AdminUsersPage() {
                                     type="text"
                                     value={form.full_name}
                                     onChange={e => setForm({ ...form, full_name: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                                    className="w-full px-4 py-2 border border-border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                                 />
                             </div>
 
@@ -360,7 +360,7 @@ export default function AdminUsersPage() {
                                 <select
                                     value={form.role}
                                     onChange={e => setForm({ ...form, role: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                                    className="w-full px-4 py-2 border border-border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                                 >
                                     <option value="elder">長輩</option>
                                     <option value="family">家屬</option>
@@ -374,7 +374,7 @@ export default function AdminUsersPage() {
                                 <select
                                     value={form.store_id}
                                     onChange={e => setForm({ ...form, store_id: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                                    className="w-full px-4 py-2 border border-border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                                 >
                                     <option value="">無</option>
                                     {stores.map(store => (
@@ -390,7 +390,7 @@ export default function AdminUsersPage() {
                                         type="text"
                                         value={form.nickname}
                                         onChange={e => setForm({ ...form, nickname: e.target.value })}
-                                        className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                                        className="w-full px-4 py-2 border border-border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                                     />
                                 </div>
                                 <div>
@@ -399,7 +399,7 @@ export default function AdminUsersPage() {
                                         type="tel"
                                         value={form.phone}
                                         onChange={e => setForm({ ...form, phone: e.target.value })}
-                                        className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                                        className="w-full px-4 py-2 border border-border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                                     />
                                 </div>
                             </div>
@@ -408,13 +408,13 @@ export default function AdminUsersPage() {
                         <div className="flex gap-3 mt-6">
                             <button
                                 onClick={() => { setShowModal(false); setEditingUser(null); }}
-                                className="flex-1 py-2 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-colors"
+                                className="flex-1 py-2 bg-muted text-gray-700 rounded-xl font-bold hover:bg-accent transition-colors"
                             >
                                 取消
                             </button>
                             <button
                                 onClick={editingUser ? handleUpdate : handleCreate}
-                                className="flex-1 py-2 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-colors"
+                                className="flex-1 py-2 bg-primary text-white rounded-xl font-bold hover:bg-blue-700 transition-colors"
                             >
                                 {editingUser ? '儲存' : '創建'}
                             </button>

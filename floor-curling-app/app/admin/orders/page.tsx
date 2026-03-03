@@ -24,7 +24,7 @@ const STATUS_MAP: Record<string, { label: string; color: string }> = {
     processing: { label: '處理中', color: 'bg-purple-100 text-purple-800' },
     shipped: { label: '已送達', color: 'bg-indigo-100 text-indigo-800' },
     completed: { label: '已完成', color: 'bg-green-100 text-green-800' },
-    cancelled: { label: '已取消', color: 'bg-gray-100 text-gray-800' },
+    cancelled: { label: '已取消', color: 'bg-muted text-gray-800' },
     refunded: { label: '已退款', color: 'bg-red-100 text-red-800' },
 }
 
@@ -99,11 +99,11 @@ export default function AdminOrdersPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-100">
+        <div className="min-h-screen bg-muted">
             {/* Header */}
-            <div className="bg-white shadow-sm sticky top-0 z-10">
+            <div className="bg-card shadow-card sticky top-0 z-10">
                 <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-                    <h1 className="text-2xl font-bold text-gray-900">📦 訂單管理</h1>
+                    <h1 className="text-2xl font-bold text-foreground">📦 訂單管理</h1>
                     <div className="flex gap-2">
                         <button
                             onClick={() => window.open(`/api/admin/export?type=orders&format=csv&status=${filter}`, '_blank')}
@@ -116,7 +116,7 @@ export default function AdminOrdersPage() {
                         </button>
                         <button
                             onClick={fetchOrders}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700"
                         >
                             刷新
                         </button>
@@ -126,10 +126,10 @@ export default function AdminOrdersPage() {
 
             <div className="max-w-7xl mx-auto px-4 py-6">
                 {/* Filters */}
-                <div className="bg-white rounded-xl shadow-sm p-4 mb-6 flex flex-wrap gap-2">
+                <div className="bg-card rounded-xl shadow-card p-4 mb-6 flex flex-wrap gap-2">
                     <button
                         onClick={() => setFilter('')}
-                        className={`px-4 py-2 rounded-lg text-sm font-medium ${!filter ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium ${!filter ? 'bg-primary text-white' : 'bg-muted text-gray-700 hover:bg-accent'}`}
                     >
                         全部
                     </button>
@@ -137,7 +137,7 @@ export default function AdminOrdersPage() {
                         <button
                             key={key}
                             onClick={() => setFilter(key)}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium ${filter === key ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium ${filter === key ? 'bg-primary text-white' : 'bg-muted text-gray-700 hover:bg-accent'}`}
                         >
                             {label}
                         </button>
@@ -146,17 +146,17 @@ export default function AdminOrdersPage() {
 
                 {/* Orders Table */}
                 {loading ? (
-                    <div className="bg-white rounded-xl shadow-sm p-8 text-center">
+                    <div className="bg-card rounded-xl shadow-card p-8 text-center">
                         <div className="animate-spin h-8 w-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
                     </div>
                 ) : orders.length === 0 ? (
-                    <div className="bg-white rounded-xl shadow-sm p-8 text-center text-gray-500">
+                    <div className="bg-card rounded-xl shadow-card p-8 text-center text-muted-foreground">
                         目前沒有訂單
                     </div>
                 ) : (
-                    <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+                    <div className="bg-card rounded-xl shadow-card overflow-hidden">
                         <table className="w-full text-sm">
-                            <thead className="bg-gray-50 border-b">
+                            <thead className="bg-background border-b">
                                 <tr>
                                     <th className="text-left px-4 py-3 font-medium text-gray-700">訂單編號</th>
                                     <th className="text-left px-4 py-3 font-medium text-gray-700">購買者</th>
@@ -169,21 +169,21 @@ export default function AdminOrdersPage() {
                             </thead>
                             <tbody>
                                 {orders.map(order => (
-                                    <tr key={order.id} className="border-b hover:bg-gray-50">
+                                    <tr key={order.id} className="border-b hover:bg-background">
                                         <td className="px-4 py-3 font-mono text-xs">{order.order_number}</td>
                                         <td className="px-4 py-3">{order.buyer?.full_name || '-'}</td>
                                         <td className="px-4 py-3">{order.recipient?.full_name || '-'}</td>
                                         <td className="px-4 py-3 font-medium">NT$ {order.total_amount}</td>
                                         <td className="px-4 py-3">
-                                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${STATUS_MAP[order.status]?.color || 'bg-gray-100'}`}>
+                                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${STATUS_MAP[order.status]?.color || 'bg-muted'}`}>
                                                 {STATUS_MAP[order.status]?.label || order.status}
                                             </span>
                                         </td>
-                                        <td className="px-4 py-3 text-gray-500">{formatDate(order.created_at)}</td>
+                                        <td className="px-4 py-3 text-muted-foreground">{formatDate(order.created_at)}</td>
                                         <td className="px-4 py-3">
                                             <button
                                                 onClick={() => setSelectedOrder(order)}
-                                                className="text-blue-600 hover:underline"
+                                                className="text-primary hover:underline"
                                             >
                                                 詳情
                                             </button>
@@ -199,10 +199,10 @@ export default function AdminOrdersPage() {
             {/* Order Detail Modal */}
             {selectedOrder && (
                 <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4">
-                    <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+                    <div className="bg-card rounded-2xl max-w-lg w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
                         <div className="flex justify-between items-start mb-4">
                             <h3 className="text-xl font-bold">訂單詳情</h3>
-                            <button onClick={() => setSelectedOrder(null)} className="text-gray-400 hover:text-gray-600">
+                            <button onClick={() => setSelectedOrder(null)} className="text-muted-foreground hover:text-gray-600">
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                 </svg>
@@ -212,21 +212,21 @@ export default function AdminOrdersPage() {
                         <div className="space-y-4">
                             <div className="grid grid-cols-2 gap-4 text-sm">
                                 <div>
-                                    <span className="text-gray-500">訂單編號</span>
+                                    <span className="text-muted-foreground">訂單編號</span>
                                     <p className="font-mono">{selectedOrder.order_number}</p>
                                 </div>
                                 <div>
-                                    <span className="text-gray-500">狀態</span>
+                                    <span className="text-muted-foreground">狀態</span>
                                     <p className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${STATUS_MAP[selectedOrder.status]?.color}`}>
                                         {STATUS_MAP[selectedOrder.status]?.label}
                                     </p>
                                 </div>
                                 <div>
-                                    <span className="text-gray-500">購買者</span>
+                                    <span className="text-muted-foreground">購買者</span>
                                     <p>{selectedOrder.buyer?.full_name}</p>
                                 </div>
                                 <div>
-                                    <span className="text-gray-500">收禮者</span>
+                                    <span className="text-muted-foreground">收禮者</span>
                                     <p>{selectedOrder.recipient?.full_name}</p>
                                 </div>
                             </div>
@@ -261,8 +261,8 @@ export default function AdminOrdersPage() {
                                             onClick={() => handleUpdateStatus(selectedOrder.id, key)}
                                             disabled={updating || selectedOrder.status === key}
                                             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${selectedOrder.status === key
-                                                ? 'bg-blue-600 text-white'
-                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                ? 'bg-primary text-white'
+                                                : 'bg-muted text-gray-700 hover:bg-accent'
                                                 } disabled:opacity-50`}
                                         >
                                             {label}

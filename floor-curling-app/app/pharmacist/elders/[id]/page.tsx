@@ -281,7 +281,7 @@ export default function GenericElderDetailPage() {
                         {/* Binding QR Modal */}
                         {showBindingQR && (
                             <div className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center px-4" onClick={() => setShowBindingQR(false)}>
-                                <div className="bg-white rounded-2xl p-8 max-w-sm w-full text-center space-y-6" onClick={e => e.stopPropagation()}>
+                                <div className="bg-card rounded-2xl p-8 max-w-sm w-full text-center space-y-6" onClick={e => e.stopPropagation()}>
                                     <h3 className="text-xl font-bold text-gray-900">家屬綁定 QR Code</h3>
                                     <div className="flex justify-center">
                                         <div className="p-4 border-2 border-blue-100 rounded-xl bg-blue-50">
@@ -361,7 +361,7 @@ export default function GenericElderDetailPage() {
                 <div className="bg-card rounded-2xl p-6 shadow-card border border-border/50 flex flex-col md:flex-row gap-6 items-center md:items-start relative">
                     {/* Edit Modal / Overlay */}
                     {isEditing && (
-                        <div className="absolute inset-x-0 inset-y-0 z-20 bg-white/95 backdrop-blur-sm rounded-2xl p-4 md:p-6 flex flex-col justify-start items-center overflow-y-auto">
+                        <div className="absolute inset-x-0 inset-y-0 z-20 bg-card/95 backdrop-blur-sm rounded-2xl p-4 md:p-6 flex flex-col justify-start items-center overflow-y-auto">
                             <h3 className="font-bold text-lg mb-4 mt-2">編輯資料</h3>
                             <div className="w-full md:w-[400px] space-y-4 pb-16 text-left">
                                 <div>
@@ -443,11 +443,11 @@ export default function GenericElderDetailPage() {
                     <div className="flex gap-3">
                         <div className="text-center p-4 bg-amber-50 rounded-xl border border-amber-100 min-w-[100px]">
                             <p className="text-amber-600 text-xs font-bold uppercase mb-1">🏅 榮譽積分</p>
-                            <p className="text-3xl font-mono font-black text-amber-600">{stats.globalPoints}</p>
+                            <p className="text-3xl font-mono font-extrabold text-amber-600">{stats.globalPoints}</p>
                         </div>
                         <div className="text-center p-4 bg-green-50 rounded-xl border border-green-100 min-w-[100px]">
                             <p className="text-green-600 text-xs font-bold uppercase mb-1">💰 兌換積分</p>
-                            <p className="text-3xl font-mono font-black text-green-600">{stats.localPoints}</p>
+                            <p className="text-3xl font-mono font-extrabold text-green-600">{stats.localPoints}</p>
                         </div>
                     </div>
                 </div>
@@ -455,7 +455,7 @@ export default function GenericElderDetailPage() {
                 {/* Additional Info Cards Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {/* Health/Notes */}
-                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 md:col-span-2">
+                    <div className="bg-card p-6 rounded-2xl shadow-card border border-gray-100 md:col-span-2">
                         <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
                             <span>📋</span> 健康與備註
                         </h3>
@@ -480,7 +480,7 @@ export default function GenericElderDetailPage() {
                     </div>
 
                     {/* 暫時隱藏地壺球生涯戰績
-                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <div className="bg-card p-6 rounded-2xl shadow-card border border-gray-100">
                         <h3 className="font-bold text-gray-900 mb-4">生涯戰績</h3>
                         <div className="space-y-4">
                             <div className="flex justify-between items-center pb-2 border-b border-gray-50">
@@ -503,7 +503,7 @@ export default function GenericElderDetailPage() {
                 </div>
 
                 {/* Health Metrics Dashboard */}
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <div className="bg-card p-6 rounded-2xl shadow-card border border-gray-100">
                     <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
                         <span>❤️</span> 健康存摺
                     </h3>
@@ -516,26 +516,26 @@ export default function GenericElderDetailPage() {
                                 <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                                     <button onClick={() => setActiveModal('steps')} className="p-4 bg-blue-50 rounded-xl border border-blue-100 text-left hover:shadow-md transition-all active:scale-[0.97]">
                                         <p className="text-xs font-bold text-gray-500 mb-1">今日步數</p>
-                                        <p className="text-2xl font-black text-gray-900">{(today.steps || 0).toLocaleString()} <span className="text-xs text-gray-400">步</span></p>
+                                        <p className="text-2xl font-extrabold text-gray-900">{(today.steps || 0).toLocaleString()} <span className="text-xs text-gray-400">步</span></p>
                                         {today.stepsTrend !== undefined && <p className={`text-[10px] font-bold mt-1 ${today.stepsTrend >= 0 ? 'text-green-500' : 'text-red-500'}`}>{today.stepsTrend >= 0 ? '↑' : '↓'} {Math.abs(today.stepsTrend)}%</p>}
                                     </button>
                                     <button onClick={() => setActiveModal('heartRate')} className="p-4 bg-red-50 rounded-xl border border-red-100 text-left hover:shadow-md transition-all active:scale-[0.97]">
                                         <p className="text-xs font-bold text-gray-500 mb-1">平均心率</p>
-                                        <p className="text-2xl font-black text-gray-900">{today.heartRate || 0} <span className="text-xs text-gray-400">bpm</span></p>
+                                        <p className="text-2xl font-extrabold text-gray-900">{today.heartRate || 0} <span className="text-xs text-gray-400">bpm</span></p>
                                     </button>
                                     <button onClick={() => setActiveModal('ranking')} className="p-4 bg-yellow-50 rounded-xl border border-yellow-100 text-left hover:shadow-md transition-all active:scale-[0.97]">
                                         <p className="text-xs font-bold text-gray-500 mb-1">全國排名</p>
-                                        <p className="text-2xl font-black text-gray-900">{today.ranking || 0} <span className="text-xs text-gray-400">名</span></p>
+                                        <p className="text-2xl font-extrabold text-gray-900">{today.ranking || 0} <span className="text-xs text-gray-400">名</span></p>
                                         {today.rankChange > 0 && <p className="text-[10px] font-bold text-green-500 mt-1">↑ 上升{today.rankChange}名</p>}
                                     </button>
                                     <button onClick={() => setActiveModal('calories')} className="p-4 bg-orange-50 rounded-xl border border-orange-100 text-left hover:shadow-md transition-all active:scale-[0.97]">
                                         <p className="text-xs font-bold text-gray-500 mb-1">消耗熱量</p>
-                                        <p className="text-2xl font-black text-gray-900">{today.calories || 0} <span className="text-xs text-gray-400">kcal</span></p>
+                                        <p className="text-2xl font-extrabold text-gray-900">{today.calories || 0} <span className="text-xs text-gray-400">kcal</span></p>
                                         {today.caloriesTrend !== undefined && <p className={`text-[10px] font-bold mt-1 ${today.caloriesTrend >= 0 ? 'text-green-500' : 'text-red-500'}`}>{today.caloriesTrend >= 0 ? '↑' : '↓'} {Math.abs(today.caloriesTrend)}%</p>}
                                     </button>
                                     <div className="p-4 bg-green-50 rounded-xl border border-green-100">
                                         <p className="text-xs font-bold text-gray-500 mb-1">連續運動</p>
-                                        <p className="text-2xl font-black text-gray-900">{today.consecutiveDays || 0} <span className="text-xs text-gray-400">天</span></p>
+                                        <p className="text-2xl font-extrabold text-gray-900">{today.consecutiveDays || 0} <span className="text-xs text-gray-400">天</span></p>
                                         {(today.consecutiveDays || 0) >= 7 && <p className="text-[10px] font-bold text-green-500 mt-1">達標！</p>}
                                     </div>
                                 </div>
@@ -553,7 +553,7 @@ export default function GenericElderDetailPage() {
                 </div>
 
                 {/* Equipment Inventory */}
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <div className="bg-card p-6 rounded-2xl shadow-card border border-gray-100">
                     <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
                         <span>🎒</span> 裝備庫
                         <span className="text-xs text-gray-400 font-normal ml-auto">
@@ -619,7 +619,7 @@ export default function GenericElderDetailPage() {
                                         {item.stats && Object.keys(item.stats).length > 0 && item.owned && (
                                             <div className="flex flex-wrap gap-1 justify-center mt-2">
                                                 {Object.entries(item.stats).slice(0, 2).map(([key, val]) => (
-                                                    <span key={key} className="text-[10px] bg-white/80 text-gray-600 px-1.5 py-0.5 rounded border border-gray-100">
+                                                    <span key={key} className="text-[10px] bg-card/80 text-gray-600 px-1.5 py-0.5 rounded border border-gray-100">
                                                         {key} +{val as number}
                                                     </span>
                                                 ))}
@@ -637,7 +637,7 @@ export default function GenericElderDetailPage() {
                 </div>
 
                 {/* Achievements */}
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <div className="bg-card p-6 rounded-2xl shadow-card border border-gray-100">
                     <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
                         <span>🏆</span> 成就
                     </h3>
@@ -739,7 +739,7 @@ export default function GenericElderDetailPage() {
                 </div>
 
                 {/* AI Analysis & Prescription Section */}
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <div className="bg-card p-6 rounded-2xl shadow-card border border-gray-100">
                     <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
                         <span>🤖</span> AI 動作分析與處方
                     </h3>
@@ -747,7 +747,7 @@ export default function GenericElderDetailPage() {
                     {aiSessions.length > 0 ? (
                         <div className="space-y-6">
                             {/* Latest Prescription Card */}
-                            <div className={`p-5 rounded-xl border-l-4 shadow-sm ${getAiPrescription(aiSessions[0].metrics || {}).color}`}>
+                            <div className={`p-5 rounded-xl border-l-4 shadow-card ${getAiPrescription(aiSessions[0].metrics || {}).color}`}>
                                 <div className="flex justify-between items-start mb-2">
                                     <h4 className="font-bold text-lg">{getAiPrescription(aiSessions[0].metrics || {}).title}</h4>
                                     <span className="text-xs opacity-75">{new Date(aiSessions[0].created_at).toLocaleDateString()}</span>
@@ -758,21 +758,21 @@ export default function GenericElderDetailPage() {
                                 <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-black/5">
                                     <div className="text-center">
                                         <p className="text-xs opacity-70">手肘 ROM</p>
-                                        <p className="font-black text-xl">{aiSessions[0].metrics?.avg_rom || '--'}°</p>
+                                        <p className="font-extrabold text-xl">{aiSessions[0].metrics?.avg_rom || '--'}°</p>
                                     </div>
                                     <div className="text-center">
                                         <p className="text-xs opacity-70">軀幹穩定</p>
-                                        <p className="font-black text-xl">{aiSessions[0].metrics?.avg_trunk_tilt || '--'}°</p>
+                                        <p className="font-extrabold text-xl">{aiSessions[0].metrics?.avg_trunk_tilt || '--'}°</p>
                                     </div>
                                     <div className="text-center">
                                         <p className="text-xs opacity-70">穩定率</p>
-                                        <p className="font-black text-xl">{aiSessions[0].metrics?.stable_ratio || 0}%</p>
+                                        <p className="font-extrabold text-xl">{aiSessions[0].metrics?.stable_ratio || 0}%</p>
                                     </div>
                                 </div>
                             </div>
 
                             {/* AI Smart Recommendation */}
-                            <div className="p-5 rounded-xl border border-indigo-100 bg-gradient-to-br from-indigo-50 to-purple-50 shadow-sm relative overflow-hidden">
+                            <div className="p-5 rounded-xl border border-indigo-100 bg-gradient-to-br from-indigo-50 to-purple-50 shadow-card relative overflow-hidden">
                                 <div className="absolute -top-4 -right-4 text-7xl opacity-5">💡</div>
                                 <h4 className="font-bold text-lg text-indigo-900 mb-2 flex items-center gap-2 relative z-10">
                                     <span>✨</span> AI 智能推薦
@@ -782,7 +782,7 @@ export default function GenericElderDetailPage() {
                                 </p>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 relative z-10">
                                     {getAiPrescription(aiSessions[0].metrics || {}).recommendedProducts?.map((product, idx) => (
-                                        <div key={idx} className="bg-white/90 backdrop-blur-sm p-3 rounded-xl flex items-center gap-3 shadow-sm border border-indigo-50 hover:border-indigo-200 transition-all cursor-pointer group">
+                                        <div key={idx} className="bg-card/90 backdrop-blur-sm p-3 rounded-xl flex items-center gap-3 shadow-card border border-indigo-50 hover:border-indigo-200 transition-all cursor-pointer group">
                                             <div className="text-3xl bg-indigo-50/50 w-12 h-12 flex items-center justify-center rounded-lg group-hover:scale-110 transition-transform">{product.icon}</div>
                                             <div>
                                                 <p className="font-bold text-gray-900">{product.name}</p>
@@ -905,7 +905,7 @@ export default function GenericElderDetailPage() {
                 </div>
 
                 {/* Media Gallery */}
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <div className="bg-card p-6 rounded-2xl shadow-card border border-gray-100">
                     <div className="flex justify-between items-center mb-4">
                         <h3 className="font-bold text-gray-900 flex items-center gap-2">
                             <span>�</span> 此長輩的比賽影片與照片

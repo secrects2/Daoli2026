@@ -274,18 +274,18 @@ export default function NewMatchPage() {
     ]
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-64">
+        <div className="min-h-screen bg-background pb-64">
             {/* Sticky Glass Header */}
-            <div className="sticky top-0 z-30 backdrop-blur-xl bg-white/80 border-b border-white/50 px-5 pt-12 pb-4 shadow-glass transition-all">
+            <div className="sticky top-0 z-30 backdrop-blur-xl bg-card/80 border-b border-white/50 px-5 pt-12 pb-4 shadow-card transition-all">
                 <div className="flex justify-between items-center">
                     <div className="flex items-center gap-3">
                         <button
                             onClick={() => router.back()}
-                            className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200"
+                            className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-gray-600 hover:bg-accent"
                         >
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
                         </button>
-                        <h1 className="text-2xl font-black text-gray-900 tracking-tight">{t('matchNew.title')}</h1>
+                        <h1 className="text-2xl font-extrabold text-foreground tracking-tight">{t('matchNew.title')}</h1>
                     </div>
                     <div className="flex items-center gap-3">
                         <LanguageSwitcher />
@@ -296,19 +296,19 @@ export default function NewMatchPage() {
             <main className="max-w-4xl mx-auto px-4 pt-6 space-y-8 animate-fade-in-up">
 
                 {/* Scoreboard */}
-                <div className="relative bg-black rounded-3xl p-6 shadow-2xl overflow-hidden border border-gray-800">
+                <div className="relative bg-black rounded-2xl p-6 shadow-2xl overflow-hidden border border-gray-800">
                     <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-white/10 to-transparent pointer-events-none"></div>
 
                     <div className="relative z-10 grid grid-cols-2 gap-8 text-center text-white">
                         <div>
                             <p className="text-red-500 font-bold uppercase tracking-widest text-sm mb-2">{t('matchNew.redTeam')}</p>
-                            <div className="text-6xl font-black tabular-nums tracking-tighter text-red-500 drop-shadow-[0_0_15px_rgba(239,68,68,0.5)]">
+                            <div className="text-6xl font-extrabold tabular-nums tracking-tighter text-red-500 drop-shadow-[0_0_15px_rgba(239,68,68,0.5)]">
                                 {redTotal}
                             </div>
                         </div>
                         <div className="border-l border-white/10">
                             <p className="text-yellow-400 font-bold uppercase tracking-widest text-sm mb-2">{t('matchNew.yellowTeam')}</p>
-                            <div className="text-6xl font-black tabular-nums tracking-tighter text-yellow-400 drop-shadow-[0_0_15px_rgba(250,204,21,0.5)]">
+                            <div className="text-6xl font-extrabold tabular-nums tracking-tighter text-yellow-400 drop-shadow-[0_0_15px_rgba(250,204,21,0.5)]">
                                 {yellowTotal}
                             </div>
                         </div>
@@ -316,33 +316,33 @@ export default function NewMatchPage() {
 
                     <div className="absolute top-4 right-4 flex items-center gap-2">
                         <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                        <span className="text-xs font-mono text-gray-500">{t('matchNew.live')}</span>
+                        <span className="text-xs font-mono text-muted-foreground">{t('matchNew.live')}</span>
                     </div>
                     {storeId && <div className="absolute bottom-4 left-0 w-full text-center text-xs font-mono text-gray-600">{t('matchNew.storeId')}: {storeId}</div>}
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-8">
 
-                    <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
+                    <div className="bg-card rounded-2xl p-6 shadow-card border border-border/50">
                         <div className="mb-6">
-                            <label className="block text-sm font-bold text-gray-900 mb-2">{t('matchNew.storeId')} <span className="text-xs font-normal text-gray-400 ml-2">({t('matchNew.autoFilled')})</span></label>
+                            <label className="block text-sm font-bold text-foreground mb-2">{t('matchNew.storeId')} <span className="text-xs font-normal text-muted-foreground ml-2">({t('matchNew.autoFilled')})</span></label>
                             <div className="relative">
                                 <input
                                     type="text"
                                     value={storeId}
                                     readOnly
-                                    className="w-full px-5 py-3 pl-12 rounded-2xl bg-gray-50 border border-gray-200 text-gray-500 font-mono cursor-not-allowed select-all"
+                                    className="w-full px-5 py-3 pl-12 rounded-2xl bg-background border border-border text-muted-foreground font-mono cursor-not-allowed select-all"
                                     placeholder={t('matchNew.loadingStoreId')}
                                 />
-                                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
                                 </div>
                             </div>
                         </div>
 
                         <div className="mb-8">
-                            <label className="block text-sm font-bold text-gray-900 mb-2">{t('matchNew.matchMode')}</label>
-                            <div className="grid grid-cols-3 gap-3 p-1 bg-gray-50 rounded-2xl border border-gray-200">
+                            <label className="block text-sm font-bold text-foreground mb-2">{t('matchNew.matchMode')}</label>
+                            <div className="grid grid-cols-3 gap-3 p-1 bg-background rounded-2xl border border-border">
                                 {matchModes.map(mode => (
                                     <button
                                         key={mode.id}
@@ -351,8 +351,8 @@ export default function NewMatchPage() {
                                         className={clsx(
                                             "py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2",
                                             matchMode === mode.id
-                                                ? "bg-white text-gray-900 shadow-sm ring-1 ring-black/5"
-                                                : "text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+                                                ? "bg-card text-foreground shadow-card ring-1 ring-black/5"
+                                                : "text-muted-foreground hover:text-gray-600 hover:bg-muted"
                                         )}
                                     >
                                         <span className="text-lg">{mode.icon}</span>
@@ -364,7 +364,7 @@ export default function NewMatchPage() {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {/* Red Team */}
-                            <div className="p-4 rounded-3xl bg-red-50/50 border border-red-100 relative overflow-hidden">
+                            <div className="p-4 rounded-2xl bg-red-50/50 border border-red-100 relative overflow-hidden">
                                 <div className="flex justify-between items-center mb-4 relative z-10">
                                     <h3 className="font-bold text-red-900 flex items-center gap-2">
                                         <div className="w-3 h-3 rounded-full bg-red-500"></div>
@@ -380,7 +380,7 @@ export default function NewMatchPage() {
                                 <div className="grid grid-cols-1 gap-2 mb-4 relative z-10">
                                     {Array.from({ length: MAX_PLAYERS }).map((_, i) => (
                                         redTeamIds[i] ? (
-                                            <div key={i} className="flex justify-between items-center bg-white p-3 rounded-xl border border-red-100 shadow-sm text-sm animate-fade-in-up">
+                                            <div key={i} className="flex justify-between items-center bg-card p-3 rounded-xl border border-red-100 shadow-card text-sm animate-fade-in-up">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-6 h-6 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-bold text-xs">{i + 1}</div>
                                                     <span className="font-mono text-gray-600">{redTeamIds[i].slice(0, 8)}...</span>
@@ -390,7 +390,7 @@ export default function NewMatchPage() {
                                                 </button>
                                             </div>
                                         ) : (
-                                            <div key={i} className="flex items-center gap-3 p-3 rounded-xl border border-dashed border-red-200 bg-white/50 text-sm text-red-300">
+                                            <div key={i} className="flex items-center gap-3 p-3 rounded-xl border border-dashed border-red-200 bg-card/50 text-sm text-red-300">
                                                 <div className="w-6 h-6 rounded-full bg-red-50 text-red-200 flex items-center justify-center font-bold text-xs">{i + 1}</div>
                                                 <span>{t('matchNew.waitingPlayer')}</span>
                                             </div>
@@ -420,7 +420,7 @@ export default function NewMatchPage() {
                             </div>
 
                             {/* Yellow Team */}
-                            <div className="p-4 rounded-3xl bg-yellow-50/50 border border-yellow-100 relative overflow-hidden">
+                            <div className="p-4 rounded-2xl bg-yellow-50/50 border border-yellow-100 relative overflow-hidden">
                                 <div className="flex justify-between items-center mb-4 relative z-10">
                                     <h3 className="font-bold text-yellow-900 flex items-center gap-2">
                                         <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
@@ -436,7 +436,7 @@ export default function NewMatchPage() {
                                 <div className="grid grid-cols-1 gap-2 mb-4 relative z-10">
                                     {Array.from({ length: MAX_PLAYERS }).map((_, i) => (
                                         yellowTeamIds[i] ? (
-                                            <div key={i} className="flex justify-between items-center bg-white p-3 rounded-xl border border-yellow-100 shadow-sm text-sm animate-fade-in-up">
+                                            <div key={i} className="flex justify-between items-center bg-card p-3 rounded-xl border border-yellow-100 shadow-card text-sm animate-fade-in-up">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-6 h-6 rounded-full bg-yellow-100 text-yellow-600 flex items-center justify-center font-bold text-xs">{i + 1}</div>
                                                     <span className="font-mono text-gray-600">{yellowTeamIds[i].slice(0, 8)}...</span>
@@ -446,7 +446,7 @@ export default function NewMatchPage() {
                                                 </button>
                                             </div>
                                         ) : (
-                                            <div key={i} className="flex items-center gap-3 p-3 rounded-xl border border-dashed border-yellow-200 bg-white/50 text-sm text-yellow-500/50">
+                                            <div key={i} className="flex items-center gap-3 p-3 rounded-xl border border-dashed border-yellow-200 bg-card/50 text-sm text-yellow-500/50">
                                                 <div className="w-6 h-6 rounded-full bg-yellow-100 text-yellow-600/50 flex items-center justify-center font-bold text-xs">{i + 1}</div>
                                                 <span>{t('matchNew.waitingPlayer')}</span>
                                             </div>
@@ -480,12 +480,12 @@ export default function NewMatchPage() {
                     {/* Ends List ... */}
                     <div className="space-y-6">
                         <div className="flex items-center justify-between">
-                            <h3 className="text-xl font-bold text-gray-900">{t('matchNew.gameEnds')}</h3>
+                            <h3 className="text-xl font-bold text-foreground">{t('matchNew.gameEnds')}</h3>
                             <button
                                 type="button"
                                 onClick={addEnd}
                                 disabled={ends.length >= 6}
-                                className="px-5 py-2.5 bg-blue-600 text-white font-bold rounded-full shadow-lg shadow-blue-200 active:scale-95 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="px-5 py-2.5 bg-primary text-white font-bold rounded-full shadow-lg shadow-blue-200 active:scale-95 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
                                 {t('matchNew.addEnd')}
@@ -493,14 +493,14 @@ export default function NewMatchPage() {
                         </div>
 
                         {ends.length === 0 ? (
-                            <div className="text-center py-12 bg-white rounded-3xl border-2 border-dashed border-gray-200">
-                                <p className="text-gray-400 mb-2">{t('matchNew.noEnds')}</p>
-                                <p className="text-sm text-gray-400">{t('matchNew.startRecording')}</p>
+                            <div className="text-center py-12 bg-card rounded-2xl border-2 border-dashed border-border">
+                                <p className="text-muted-foreground mb-2">{t('matchNew.noEnds')}</p>
+                                <p className="text-sm text-muted-foreground">{t('matchNew.startRecording')}</p>
                             </div>
                         ) : (
                             ends.map((end, index) => (
-                                <div key={index} className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 relative group overflow-hidden">
-                                    <div className="absolute top-0 left-0 bg-gray-100 px-4 py-2 rounded-br-2xl text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                <div key={index} className="bg-card p-6 rounded-2xl shadow-card border border-border/50 relative group overflow-hidden">
+                                    <div className="absolute top-0 left-0 bg-muted px-4 py-2 rounded-br-2xl text-xs font-bold text-muted-foreground uppercase tracking-wider">
                                         {t('matchNew.end', { n: end.endNumber })}
                                     </div>
 
@@ -516,27 +516,27 @@ export default function NewMatchPage() {
                                         <div className="text-center">
                                             <label className="block text-xs font-bold text-red-400 uppercase tracking-wider mb-2">{t('matchNew.redScore')}</label>
                                             <div className="flex items-center justify-center gap-3">
-                                                <button type="button" onClick={() => updateEndScore(index, 'red', end.redScore - 1)} className="w-10 h-10 rounded-full bg-gray-100 text-gray-600 font-bold hover:bg-red-100 hover:text-red-600 transition-colors">-</button>
+                                                <button type="button" onClick={() => updateEndScore(index, 'red', end.redScore - 1)} className="w-10 h-10 rounded-full bg-muted text-gray-600 font-bold hover:bg-red-100 hover:text-red-600 transition-colors">-</button>
                                                 <input
                                                     type="number"
                                                     value={end.redScore}
                                                     onChange={(e) => updateEndScore(index, 'red', parseInt(e.target.value) || 0)}
-                                                    className="w-16 h-16 text-center text-3xl font-black bg-white rounded-2xl border-2 border-red-50 text-red-600 focus:border-red-500 focus:ring-0 outline-none appearance-none"
+                                                    className="w-16 h-16 text-center text-3xl font-extrabold bg-card rounded-2xl border-2 border-red-50 text-red-600 focus:border-red-500 focus:ring-0 outline-none appearance-none"
                                                 />
-                                                <button type="button" onClick={() => updateEndScore(index, 'red', end.redScore + 1)} className="w-10 h-10 rounded-full bg-gray-100 text-gray-600 font-bold hover:bg-red-100 hover:text-red-600 transition-colors">+</button>
+                                                <button type="button" onClick={() => updateEndScore(index, 'red', end.redScore + 1)} className="w-10 h-10 rounded-full bg-muted text-gray-600 font-bold hover:bg-red-100 hover:text-red-600 transition-colors">+</button>
                                             </div>
                                         </div>
                                         <div className="text-center">
                                             <label className="block text-xs font-bold text-yellow-500 uppercase tracking-wider mb-2">{t('matchNew.yellowScore')}</label>
                                             <div className="flex items-center justify-center gap-3">
-                                                <button type="button" onClick={() => updateEndScore(index, 'yellow', end.yellowScore - 1)} className="w-10 h-10 rounded-full bg-gray-100 text-gray-600 font-bold hover:bg-yellow-100 hover:text-yellow-600 transition-colors">-</button>
+                                                <button type="button" onClick={() => updateEndScore(index, 'yellow', end.yellowScore - 1)} className="w-10 h-10 rounded-full bg-muted text-gray-600 font-bold hover:bg-yellow-100 hover:text-yellow-600 transition-colors">-</button>
                                                 <input
                                                     type="number"
                                                     value={end.yellowScore}
                                                     onChange={(e) => updateEndScore(index, 'yellow', parseInt(e.target.value) || 0)}
-                                                    className="w-16 h-16 text-center text-3xl font-black bg-white rounded-2xl border-2 border-yellow-50 text-yellow-500 focus:border-yellow-500 focus:ring-0 outline-none appearance-none"
+                                                    className="w-16 h-16 text-center text-3xl font-extrabold bg-card rounded-2xl border-2 border-yellow-50 text-yellow-500 focus:border-yellow-500 focus:ring-0 outline-none appearance-none"
                                                 />
-                                                <button type="button" onClick={() => updateEndScore(index, 'yellow', end.yellowScore + 1)} className="w-10 h-10 rounded-full bg-gray-100 text-gray-600 font-bold hover:bg-yellow-100 hover:text-yellow-600 transition-colors">+</button>
+                                                <button type="button" onClick={() => updateEndScore(index, 'yellow', end.yellowScore + 1)} className="w-10 h-10 rounded-full bg-muted text-gray-600 font-bold hover:bg-yellow-100 hover:text-yellow-600 transition-colors">+</button>
                                             </div>
                                         </div>
                                     </div>
@@ -552,22 +552,22 @@ export default function NewMatchPage() {
                                             <div className={`
                                                 flex flex-col items-center justify-center p-4 rounded-2xl border-2 border-dashed transition-all
                                                 ${end.houseSnapshotFile
-                                                    ? 'bg-blue-50 border-blue-400'
-                                                    : 'bg-gray-50 border-gray-200 group-hover/upload:border-blue-400 group-hover/upload:bg-blue-50'}
+                                                    ? 'bg-primary/10 border-blue-400'
+                                                    : 'bg-background border-border group-hover/upload:border-blue-400 group-hover/upload:bg-primary/10'}
                                             `}>
                                                 {end.houseSnapshotFile ? (
                                                     <>
-                                                        <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white mb-2">
+                                                        <div className="w-10 h-10 bg-primary/100 rounded-full flex items-center justify-center text-white mb-2">
                                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                                                         </div>
                                                         <span className="text-xs font-bold text-blue-700 max-w-full truncate px-2">{end.houseSnapshotFile.name}</span>
                                                     </>
                                                 ) : (
                                                     <>
-                                                        <div className="w-10 h-10 bg-white rounded-full shadow-sm flex items-center justify-center text-blue-500 mb-2">
+                                                        <div className="w-10 h-10 bg-card rounded-full shadow-card flex items-center justify-center text-blue-500 mb-2">
                                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                                                         </div>
-                                                        <span className="text-xs font-bold text-gray-500 group-hover/upload:text-blue-600">{t('matchNew.camBPrompt')}</span>
+                                                        <span className="text-xs font-bold text-muted-foreground group-hover/upload:text-primary">{t('matchNew.camBPrompt')}</span>
                                                     </>
                                                 )}
                                             </div>
@@ -584,7 +584,7 @@ export default function NewMatchPage() {
                                                 flex flex-col items-center justify-center p-4 rounded-2xl border-2 border-dashed transition-all
                                                 ${end.vibeVideoFile
                                                     ? 'bg-green-50 border-green-400'
-                                                    : 'bg-gray-50 border-gray-200 group-hover/upload:border-green-400 group-hover/upload:bg-green-50'}
+                                                    : 'bg-background border-border group-hover/upload:border-green-400 group-hover/upload:bg-green-50'}
                                             `}>
                                                 {end.vibeVideoFile ? (
                                                     <>
@@ -595,10 +595,10 @@ export default function NewMatchPage() {
                                                     </>
                                                 ) : (
                                                     <>
-                                                        <div className="w-10 h-10 bg-white rounded-full shadow-sm flex items-center justify-center text-green-500 mb-2">
+                                                        <div className="w-10 h-10 bg-card rounded-full shadow-card flex items-center justify-center text-green-500 mb-2">
                                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
                                                         </div>
-                                                        <span className="text-xs font-bold text-gray-500 group-hover/upload:text-green-600">{t('matchNew.camAPrompt')}</span>
+                                                        <span className="text-xs font-bold text-muted-foreground group-hover/upload:text-green-600">{t('matchNew.camAPrompt')}</span>
                                                     </>
                                                 )}
                                             </div>
@@ -609,13 +609,13 @@ export default function NewMatchPage() {
                         )}
                     </div>
 
-                    <div className="fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-lg border-t border-gray-200 p-4 pb-8 z-40">
+                    <div className="fixed bottom-0 left-0 w-full bg-card/90 backdrop-blur-lg border-t border-border p-4 pb-8 z-40">
                         <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
                             <div className="flex gap-3 ml-auto">
                                 <button
                                     type="button"
                                     onClick={() => router.back()}
-                                    className="px-6 py-3 rounded-2xl font-bold text-gray-500 hover:bg-gray-100 transition-colors"
+                                    className="px-6 py-3 rounded-2xl font-bold text-muted-foreground hover:bg-muted transition-colors"
                                 >
                                     {t('common.cancel')}
                                 </button>
@@ -643,10 +643,10 @@ export default function NewMatchPage() {
 
                 {loading && uploadProgress && (
                     <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center">
-                        <div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl animate-scale-in">
+                        <div className="bg-card rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl animate-scale-in">
                             <div className="w-16 h-16 border-4 border-blue-100 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-2">{t('matchNew.processing')}</h3>
-                            <p className="text-gray-500 animate-pulse">{uploadProgress}</p>
+                            <h3 className="text-xl font-bold text-foreground mb-2">{t('matchNew.processing')}</h3>
+                            <p className="text-muted-foreground animate-pulse">{uploadProgress}</p>
                         </div>
                     </div>
                 )}

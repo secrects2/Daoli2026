@@ -167,27 +167,27 @@ export default function AdminProductsPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-20">
+        <div className="min-h-screen bg-background pb-20">
             {/* 頂部導航 */}
-            <div className="sticky top-0 z-20 backdrop-blur-xl bg-white/80 border-b border-gray-100 px-5 pt-12 pb-4">
+            <div className="sticky top-0 z-20 backdrop-blur-xl bg-card/80 border-b border-border/50 px-5 pt-12 pb-4">
                 <div className="max-w-6xl mx-auto flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <Link
                             href="/admin"
-                            className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors"
+                            className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-gray-600 hover:bg-accent transition-colors"
                         >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                             </svg>
                         </Link>
                         <div>
-                            <h1 className="text-2xl font-black text-gray-900">商品管理</h1>
-                            <p className="text-sm text-gray-500">共 {products.length} 件商品</p>
+                            <h1 className="text-2xl font-extrabold text-foreground">商品管理</h1>
+                            <p className="text-sm text-muted-foreground">共 {products.length} 件商品</p>
                         </div>
                     </div>
                     <button
                         onClick={() => { setEditingProduct(null); resetForm(); setShowModal(true); }}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-xl font-bold text-sm hover:bg-blue-700 transition-colors flex items-center gap-2"
+                        className="px-4 py-2 bg-primary text-white rounded-xl font-bold text-sm hover:bg-blue-700 transition-colors flex items-center gap-2"
                     >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -203,8 +203,8 @@ export default function AdminProductsPage() {
                     <button
                         onClick={() => setFilter('all')}
                         className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${filter === 'all'
-                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
-                            : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+                            ? 'bg-primary text-white shadow-lg shadow-blue-200'
+                            : 'bg-card text-gray-600 hover:bg-muted border border-border'
                             }`}
                     >
                         全部
@@ -214,8 +214,8 @@ export default function AdminProductsPage() {
                             key={key}
                             onClick={() => setFilter(key)}
                             className={`px-4 py-2 rounded-full text-sm font-bold transition-all flex items-center gap-1 ${filter === key
-                                ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
-                                : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+                                ? 'bg-primary text-white shadow-lg shadow-blue-200'
+                                : 'bg-card text-gray-600 hover:bg-muted border border-border'
                                 }`}
                         >
                             <span>{emoji}</span>
@@ -233,25 +233,25 @@ export default function AdminProductsPage() {
                     </div>
                 ) : products.length === 0 ? (
                     <div className="text-center py-20">
-                        <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
                             <span className="text-4xl">📦</span>
                         </div>
-                        <h3 className="text-lg font-bold text-gray-900 mb-1">尚無商品</h3>
-                        <p className="text-gray-500 text-sm">點擊右上方「新增商品」開始添加</p>
+                        <h3 className="text-lg font-bold text-foreground mb-1">尚無商品</h3>
+                        <p className="text-muted-foreground text-sm">點擊右上方「新增商品」開始添加</p>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {products.map(product => {
-                            const cat = CATEGORY_LABELS[product.category] || { label: product.category, color: 'bg-gray-100 text-gray-600', emoji: '📦' }
+                            const cat = CATEGORY_LABELS[product.category] || { label: product.category, color: 'bg-muted text-gray-600', emoji: '📦' }
 
                             return (
                                 <div
                                     key={product.id}
-                                    className={`bg-white rounded-2xl p-5 border shadow-sm transition-all hover:shadow-md ${product.is_active ? 'border-gray-100' : 'border-red-200 bg-red-50/30'
+                                    className={`bg-card rounded-2xl p-5 border shadow-card transition-all hover:shadow-md ${product.is_active ? 'border-border/50' : 'border-red-200 bg-red-50/30'
                                         }`}
                                 >
                                     {/* 商品圖片 */}
-                                    <div className="w-full h-40 bg-gray-100 rounded-xl mb-4 overflow-hidden flex items-center justify-center">
+                                    <div className="w-full h-40 bg-muted rounded-xl mb-4 overflow-hidden flex items-center justify-center">
                                         {product.image_url ? (
                                             <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
                                         ) : (
@@ -261,27 +261,27 @@ export default function AdminProductsPage() {
 
                                     {/* 商品資訊 */}
                                     <div className="flex items-start justify-between mb-2">
-                                        <h3 className="font-bold text-gray-900 text-lg">{product.name}</h3>
+                                        <h3 className="font-bold text-foreground text-lg">{product.name}</h3>
                                         <span className={`px-2 py-1 rounded-full text-xs font-bold ${cat.color}`}>
                                             {cat.label}
                                         </span>
                                     </div>
 
                                     {product.description && (
-                                        <p className="text-sm text-gray-500 mb-3 line-clamp-2">{product.description}</p>
+                                        <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{product.description}</p>
                                     )}
 
                                     {/* 價格與庫存 */}
                                     <div className="flex items-center gap-4 mb-4 text-sm">
                                         <div className="flex items-center gap-1">
                                             <span className="text-yellow-500">🪙</span>
-                                            <span className="font-bold text-gray-900">{product.price_local}</span>
-                                            <span className="text-gray-400">本地積分</span>
+                                            <span className="font-bold text-foreground">{product.price_local}</span>
+                                            <span className="text-muted-foreground">本地積分</span>
                                         </div>
                                         <div className="flex items-center gap-1">
                                             <span className="text-blue-500">💎</span>
-                                            <span className="font-bold text-gray-900">{product.price_global}</span>
-                                            <span className="text-gray-400">全域積分</span>
+                                            <span className="font-bold text-foreground">{product.price_global}</span>
+                                            <span className="text-muted-foreground">全域積分</span>
                                         </div>
                                     </div>
 
@@ -293,7 +293,7 @@ export default function AdminProductsPage() {
                                         <div className="flex gap-2">
                                             <button
                                                 onClick={() => openEditModal(product)}
-                                                className="px-3 py-1 text-sm font-bold text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                className="px-3 py-1 text-sm font-bold text-primary hover:bg-primary/10 rounded-lg transition-colors"
                                             >
                                                 編輯
                                             </button>
@@ -323,8 +323,8 @@ export default function AdminProductsPage() {
             {/* 新增/編輯彈窗 */}
             {showModal && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6">
-                        <h3 className="text-xl font-bold text-gray-900 mb-4">
+                    <div className="bg-card rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6">
+                        <h3 className="text-xl font-bold text-foreground mb-4">
                             {editingProduct ? '編輯商品' : '新增商品'}
                         </h3>
 
@@ -335,7 +335,7 @@ export default function AdminProductsPage() {
                                     type="text"
                                     value={form.name}
                                     onChange={e => setForm({ ...form, name: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                                    className="w-full px-4 py-2 border border-border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                                     placeholder="輸入商品名稱"
                                 />
                             </div>
@@ -345,7 +345,7 @@ export default function AdminProductsPage() {
                                 <textarea
                                     value={form.description}
                                     onChange={e => setForm({ ...form, description: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+                                    className="w-full px-4 py-2 border border-border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none resize-none"
                                     rows={3}
                                     placeholder="輸入商品描述"
                                 />
@@ -356,7 +356,7 @@ export default function AdminProductsPage() {
                                 <select
                                     value={form.category}
                                     onChange={e => setForm({ ...form, category: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                                    className="w-full px-4 py-2 border border-border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                                 >
                                     {Object.entries(CATEGORY_LABELS).map(([key, { label, emoji }]) => (
                                         <option key={key} value={key}>{emoji} {label}</option>
@@ -372,7 +372,7 @@ export default function AdminProductsPage() {
                                         min="0"
                                         value={form.price_local}
                                         onChange={e => setForm({ ...form, price_local: parseInt(e.target.value) || 0 })}
-                                        className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                                        className="w-full px-4 py-2 border border-border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                                     />
                                 </div>
                                 <div>
@@ -382,7 +382,7 @@ export default function AdminProductsPage() {
                                         min="0"
                                         value={form.price_global}
                                         onChange={e => setForm({ ...form, price_global: parseInt(e.target.value) || 0 })}
-                                        className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                                        className="w-full px-4 py-2 border border-border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                                     />
                                 </div>
                             </div>
@@ -394,7 +394,7 @@ export default function AdminProductsPage() {
                                     min="0"
                                     value={form.stock_quantity}
                                     onChange={e => setForm({ ...form, stock_quantity: parseInt(e.target.value) || 0 })}
-                                    className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                                    className="w-full px-4 py-2 border border-border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                                 />
                             </div>
 
@@ -404,7 +404,7 @@ export default function AdminProductsPage() {
                                     type="url"
                                     value={form.image_url}
                                     onChange={e => setForm({ ...form, image_url: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                                    className="w-full px-4 py-2 border border-border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                                     placeholder="https://example.com/image.jpg"
                                 />
                             </div>
@@ -415,7 +415,7 @@ export default function AdminProductsPage() {
                                     id="is_active"
                                     checked={form.is_active}
                                     onChange={e => setForm({ ...form, is_active: e.target.checked })}
-                                    className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                    className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-blue-500"
                                 />
                                 <label htmlFor="is_active" className="text-sm font-bold text-gray-700">上架中</label>
                             </div>
@@ -424,13 +424,13 @@ export default function AdminProductsPage() {
                         <div className="flex gap-3 mt-6">
                             <button
                                 onClick={() => { setShowModal(false); setEditingProduct(null); }}
-                                className="flex-1 py-2 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-colors"
+                                className="flex-1 py-2 bg-muted text-gray-700 rounded-xl font-bold hover:bg-accent transition-colors"
                             >
                                 取消
                             </button>
                             <button
                                 onClick={editingProduct ? handleUpdate : handleCreate}
-                                className="flex-1 py-2 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-colors"
+                                className="flex-1 py-2 bg-primary text-white rounded-xl font-bold hover:bg-blue-700 transition-colors"
                             >
                                 {editingProduct ? '儲存' : '新增'}
                             </button>

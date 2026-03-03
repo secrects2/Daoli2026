@@ -47,7 +47,7 @@ export default function ElderStatsPage() {
     const getModalData = (key: string) => health?.history?.map((h: any) => ({ date: h.date, value: h[key] })) || []
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-safe">
+        <div className="min-h-screen bg-background pb-safe">
             {/* Header */}
             <div className="sticky top-0 z-10 bg-[#F2F2F7]/90 backdrop-blur-md pt-5 pb-2 px-4 border-b border-black/5 flex items-center gap-3">
                 <Link href="/elder/dashboard" className="text-blue-500 font-medium">
@@ -58,26 +58,26 @@ export default function ElderStatsPage() {
 
             <div className="p-4 space-y-6 max-w-lg mx-auto">
                 {/* 即時健康數據 Dashboard */}
-                <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
+                <div className="bg-card rounded-2xl p-5 shadow-card border border-border/50">
                     <div className="mb-5">
                         <div className="flex items-center gap-2 mb-2">
                             <span className="w-2 h-2 rounded-full bg-orange-500"></span>
                             <span className="text-orange-500 font-bold text-sm">即時健康數據</span>
                         </div>
-                        <h2 className="text-2xl font-black text-gray-900 leading-tight">隨時掌握</h2>
-                        <h2 className="text-2xl font-black text-orange-400 mb-3">您的健康狀況</h2>
-                        <p className="text-gray-500 text-sm leading-relaxed">
+                        <h2 className="text-2xl font-extrabold text-foreground leading-tight">隨時掌握</h2>
+                        <h2 className="text-2xl font-extrabold text-orange-400 mb-3">您的健康狀況</h2>
+                        <p className="text-muted-foreground text-sm leading-relaxed">
                             透過我們的智慧系統，即時追蹤您的運動表現和健康數據。
                         </p>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
-                        <button onClick={() => setActiveModal('steps')} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col text-left hover:shadow-md hover:border-blue-200 transition-all active:scale-[0.97]">
-                            <div className="w-10 h-10 rounded-xl bg-blue-500 text-white flex items-center justify-center mb-3 shadow-md shadow-blue-500/20"><StepsIcon /></div>
-                            <p className="text-xs font-bold text-gray-500 mb-1">今日步數</p>
+                        <button onClick={() => setActiveModal('steps')} className="bg-card p-4 rounded-2xl shadow-card border border-border/50 flex flex-col text-left hover:shadow-md hover:border-blue-200 transition-all active:scale-[0.97]">
+                            <div className="w-10 h-10 rounded-xl bg-primary/100 text-white flex items-center justify-center mb-3 shadow-md shadow-blue-500/20"><StepsIcon /></div>
+                            <p className="text-xs font-bold text-muted-foreground mb-1">今日步數</p>
                             <div className="flex items-baseline gap-1">
-                                <span className="text-2xl font-black text-gray-900">{(today.steps || 0).toLocaleString()}</span>
-                                <span className="text-xs font-bold text-gray-400">步</span>
+                                <span className="text-2xl font-extrabold text-foreground">{(today.steps || 0).toLocaleString()}</span>
+                                <span className="text-xs font-bold text-muted-foreground">步</span>
                             </div>
                             {today.stepsTrend !== undefined && (
                                 <p className={`text-[10px] font-bold mt-2 flex items-center gap-0.5 ${today.stepsTrend >= 0 ? 'text-green-500' : 'text-red-500'}`}>
@@ -86,37 +86,37 @@ export default function ElderStatsPage() {
                             )}
                         </button>
 
-                        <button onClick={() => setActiveModal('heartRate')} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col text-left hover:shadow-md hover:border-red-200 transition-all active:scale-[0.97]">
+                        <button onClick={() => setActiveModal('heartRate')} className="bg-card p-4 rounded-2xl shadow-card border border-border/50 flex flex-col text-left hover:shadow-md hover:border-red-200 transition-all active:scale-[0.97]">
                             <div className="w-10 h-10 rounded-xl bg-red-500 text-white flex items-center justify-center mb-3 shadow-md shadow-red-500/20 relative">
                                 <HeartIcon />
                                 <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-400 border border-white rounded-full animate-ping"></span>
                                 <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 border border-white rounded-full"></span>
                             </div>
-                            <p className="text-xs font-bold text-gray-500 mb-1">平均心率</p>
+                            <p className="text-xs font-bold text-muted-foreground mb-1">平均心率</p>
                             <div className="flex items-baseline gap-1">
-                                <span className="text-2xl font-black text-gray-900">{today.heartRate || 0}</span>
-                                <span className="text-xs font-bold text-gray-400">bpm</span>
+                                <span className="text-2xl font-extrabold text-foreground">{today.heartRate || 0}</span>
+                                <span className="text-xs font-bold text-muted-foreground">bpm</span>
                             </div>
                         </button>
 
-                        <button onClick={() => setActiveModal('ranking')} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col text-left hover:shadow-md hover:border-yellow-200 transition-all active:scale-[0.97]">
+                        <button onClick={() => setActiveModal('ranking')} className="bg-card p-4 rounded-2xl shadow-card border border-border/50 flex flex-col text-left hover:shadow-md hover:border-yellow-200 transition-all active:scale-[0.97]">
                             <div className="w-10 h-10 rounded-xl bg-yellow-500 text-white flex items-center justify-center mb-3 shadow-md shadow-yellow-500/20"><BadgeIcon /></div>
-                            <p className="text-xs font-bold text-gray-500 mb-1">全國排名</p>
+                            <p className="text-xs font-bold text-muted-foreground mb-1">全國排名</p>
                             <div className="flex items-baseline gap-1">
-                                <span className="text-2xl font-black text-gray-900">{today.ranking || 0}</span>
-                                <span className="text-xs font-bold text-gray-400">名</span>
+                                <span className="text-2xl font-extrabold text-foreground">{today.ranking || 0}</span>
+                                <span className="text-xs font-bold text-muted-foreground">名</span>
                             </div>
                             {today.rankChange > 0 && (
                                 <p className="text-[10px] font-bold text-green-500 mt-2 flex items-center gap-0.5"><TrendUpIcon />上升{today.rankChange}名</p>
                             )}
                         </button>
 
-                        <button onClick={() => setActiveModal('calories')} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col text-left hover:shadow-md hover:border-orange-200 transition-all active:scale-[0.97]">
+                        <button onClick={() => setActiveModal('calories')} className="bg-card p-4 rounded-2xl shadow-card border border-border/50 flex flex-col text-left hover:shadow-md hover:border-orange-200 transition-all active:scale-[0.97]">
                             <div className="w-10 h-10 rounded-xl bg-orange-500 text-white flex items-center justify-center mb-3 shadow-md shadow-orange-500/20"><FireIcon /></div>
-                            <p className="text-xs font-bold text-gray-500 mb-1">消耗熱量</p>
+                            <p className="text-xs font-bold text-muted-foreground mb-1">消耗熱量</p>
                             <div className="flex items-baseline gap-1">
-                                <span className="text-2xl font-black text-gray-900">{today.calories || 0}</span>
-                                <span className="text-xs font-bold text-gray-400">kcal</span>
+                                <span className="text-2xl font-extrabold text-foreground">{today.calories || 0}</span>
+                                <span className="text-xs font-bold text-muted-foreground">kcal</span>
                             </div>
                             {today.caloriesTrend !== undefined && (
                                 <p className={`text-[10px] font-bold mt-2 flex items-center gap-0.5 ${today.caloriesTrend >= 0 ? 'text-green-500' : 'text-red-500'}`}>
@@ -125,14 +125,14 @@ export default function ElderStatsPage() {
                             )}
                         </button>
 
-                        <div className="col-span-2 bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between mt-1">
+                        <div className="col-span-2 bg-card p-4 rounded-2xl shadow-card border border-border/50 flex items-center justify-between mt-1">
                             <div className="flex items-center gap-4">
                                 <div className="w-10 h-10 rounded-xl bg-green-500 text-white flex items-center justify-center shadow-md shadow-green-500/20"><CalendarIcon /></div>
                                 <div>
-                                    <p className="text-xs font-bold text-gray-500 mb-1">連續運動</p>
+                                    <p className="text-xs font-bold text-muted-foreground mb-1">連續運動</p>
                                     <div className="flex items-baseline gap-1">
-                                        <span className="text-2xl font-black text-gray-900">{today.consecutiveDays || 0}</span>
-                                        <span className="text-xs font-bold text-gray-400">天</span>
+                                        <span className="text-2xl font-extrabold text-foreground">{today.consecutiveDays || 0}</span>
+                                        <span className="text-xs font-bold text-muted-foreground">天</span>
                                     </div>
                                 </div>
                             </div>
@@ -148,29 +148,29 @@ export default function ElderStatsPage() {
 
                 {/* Section Divider */}
                 <div className="flex items-center gap-2 px-2">
-                    <span className="w-1.5 h-6 bg-blue-500 rounded-full"></span>
-                    <h3 className="font-bold text-gray-900 text-lg">🥌 地壺球賽事表現</h3>
+                    <span className="w-1.5 h-6 bg-primary/100 rounded-full"></span>
+                    <h3 className="font-bold text-foreground text-lg">🥌 地壺球賽事表現</h3>
                 </div>
 
                 {/* Summary Cards */}
                 <div className="grid grid-cols-3 gap-4">
-                    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center">
-                        <p className="text-gray-500 text-sm mb-1">本週場次</p>
-                        <p className="text-3xl font-bold text-blue-600">{stats?.weeklyMatches || 0}</p>
+                    <div className="bg-card p-4 rounded-xl shadow-card border border-border/50 text-center">
+                        <p className="text-muted-foreground text-sm mb-1">本週場次</p>
+                        <p className="text-3xl font-bold text-primary">{stats?.weeklyMatches || 0}</p>
                     </div>
-                    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center">
-                        <p className="text-gray-500 text-sm mb-1">🏅 榮譽積分</p>
+                    <div className="bg-card p-4 rounded-xl shadow-card border border-border/50 text-center">
+                        <p className="text-muted-foreground text-sm mb-1">🏅 榮譽積分</p>
                         <p className="text-3xl font-bold text-orange-500">{stats?.globalPoints || 0}</p>
                     </div>
-                    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center">
-                        <p className="text-gray-500 text-sm mb-1">💰 兌換積分</p>
+                    <div className="bg-card p-4 rounded-xl shadow-card border border-border/50 text-center">
+                        <p className="text-muted-foreground text-sm mb-1">💰 兌換積分</p>
                         <p className="text-3xl font-bold text-green-500">{stats?.localPoints || 0}</p>
                     </div>
                 </div>
 
                 {/* Chart */}
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                    <h3 className="font-bold text-gray-900 mb-4">近期表現 (積分趨勢)</h3>
+                <div className="bg-card p-6 rounded-2xl shadow-card border border-border/50">
+                    <h3 className="font-bold text-foreground mb-4">近期表現 (積分趨勢)</h3>
                     <div className="h-64">
                         <ResponsiveContainer width="100%" height="100%">
                             <LineChart data={stats?.history || []}>
@@ -185,25 +185,25 @@ export default function ElderStatsPage() {
                 </div>
 
                 {/* History List */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div className="p-4 border-b border-gray-100">
-                        <h3 className="font-bold text-gray-900">詳細紀錄</h3>
+                <div className="bg-card rounded-2xl shadow-card border border-border/50 overflow-hidden">
+                    <div className="p-4 border-b border-border/50">
+                        <h3 className="font-bold text-foreground">詳細紀錄</h3>
                     </div>
                     <div className="divide-y divide-gray-100">
                         {stats?.recentMatches?.map((match: any, index: number) => (
                             <div key={index} className="p-4 flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg ${match.result === 'win' ? 'bg-yellow-100 text-yellow-600' : match.result === 'loss' ? 'bg-gray-100 text-gray-500' : 'bg-blue-50 text-blue-500'}`}>
+                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg ${match.result === 'win' ? 'bg-yellow-100 text-yellow-600' : match.result === 'loss' ? 'bg-muted text-muted-foreground' : 'bg-primary/10 text-blue-500'}`}>
                                         {match.result === 'win' ? '🏆' : match.result === 'loss' ? '💪' : '🤝'}
                                     </div>
                                     <div>
-                                        <p className="font-medium text-gray-900">{match.date}</p>
-                                        <p className="text-xs text-gray-500">{match.result === 'win' ? '勝利' : match.result === 'loss' ? '完賽' : '平局'}</p>
+                                        <p className="font-medium text-foreground">{match.date}</p>
+                                        <p className="text-xs text-muted-foreground">{match.result === 'win' ? '勝利' : match.result === 'loss' ? '完賽' : '平局'}</p>
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                    <p className="font-bold text-gray-900">+{match.points}</p>
-                                    <p className="text-xs text-gray-500">積分</p>
+                                    <p className="font-bold text-foreground">+{match.points}</p>
+                                    <p className="text-xs text-muted-foreground">積分</p>
                                 </div>
                             </div>
                         ))}
@@ -213,34 +213,34 @@ export default function ElderStatsPage() {
                 {/* ============ 地板滾球 Section ============ */}
                 <div className="flex items-center gap-2 px-2 mt-2">
                     <span className="w-1.5 h-6 bg-orange-500 rounded-full"></span>
-                    <h3 className="font-bold text-gray-900 text-lg">🎯 地板滾球賽事表現</h3>
+                    <h3 className="font-bold text-foreground text-lg">🎯 地板滾球賽事表現</h3>
                 </div>
 
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div className="p-4 border-b border-gray-100">
-                        <h3 className="font-bold text-gray-900">詳細紀錄</h3>
+                <div className="bg-card rounded-2xl shadow-card border border-border/50 overflow-hidden">
+                    <div className="p-4 border-b border-border/50">
+                        <h3 className="font-bold text-foreground">詳細紀錄</h3>
                     </div>
                     <div className="divide-y divide-gray-100">
                         {!stats?.recentBocciaMatches || stats.recentBocciaMatches.length === 0 ? (
-                            <div className="p-8 text-center text-gray-500">尚未有地板滾球比賽紀錄</div>
+                            <div className="p-8 text-center text-muted-foreground">尚未有地板滾球比賽紀錄</div>
                         ) : (
                             stats.recentBocciaMatches.map((match: any, index: number) => (
                                 <div key={index} className="p-4 flex items-center justify-between">
                                     <div className="flex items-center gap-3">
-                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg ${match.result === 'win' ? 'bg-yellow-100 text-yellow-600' : match.result === 'loss' ? 'bg-gray-100 text-gray-500' : 'bg-blue-50 text-blue-500'}`}>
+                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg ${match.result === 'win' ? 'bg-yellow-100 text-yellow-600' : match.result === 'loss' ? 'bg-muted text-muted-foreground' : 'bg-primary/10 text-blue-500'}`}>
                                             {match.result === 'win' ? '🏆' : match.result === 'loss' ? '💪' : '🤝'}
                                         </div>
                                         <div>
-                                            <p className="font-medium text-gray-900">{match.date}</p>
-                                            <p className="text-xs text-gray-500">
+                                            <p className="font-medium text-foreground">{match.date}</p>
+                                            <p className="text-xs text-muted-foreground">
                                                 {match.result === 'win' ? '勝利' : match.result === 'loss' ? '完賽' : '平局'}
                                                 <span className="ml-1 text-orange-500 font-bold">滾球</span>
                                             </p>
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <p className="font-bold text-gray-900">+{match.points}</p>
-                                        <p className="text-xs text-gray-500">積分</p>
+                                        <p className="font-bold text-foreground">+{match.points}</p>
+                                        <p className="text-xs text-muted-foreground">積分</p>
                                     </div>
                                 </div>
                             ))

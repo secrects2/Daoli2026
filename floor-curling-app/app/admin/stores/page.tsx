@@ -58,18 +58,18 @@ export default async function AdminStoresPage() {
     const isTableMissing = errorMsg && errorMsg.includes('relation "stores" does not exist')
 
     return (
-        <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
+        <div className="min-h-screen bg-background p-4 sm:p-6">
             <div className="max-w-6xl mx-auto">
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900">加盟店管理 (Franchise Control)</h1>
-                        <p className="text-gray-500 text-sm sm:text-base">管理各分店的營運狀態與權限</p>
+                        <h1 className="text-2xl font-bold text-foreground">加盟店管理 (Franchise Control)</h1>
+                        <p className="text-muted-foreground text-sm sm:text-base">管理各分店的營運狀態與權限</p>
                     </div>
                     <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
-                        <Link href="/admin/stores/new" className="flex-1 sm:flex-none text-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors">
+                        <Link href="/admin/stores/new" className="flex-1 sm:flex-none text-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 font-medium transition-colors">
                             + 新增加盟店
                         </Link>
-                        <Link href="/admin" className="px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg hover:text-gray-900 transition-colors">
+                        <Link href="/admin" className="px-4 py-2 bg-muted text-gray-700 hover:bg-accent rounded-lg hover:text-foreground transition-colors">
                             ← 返回
                         </Link>
                     </div>
@@ -101,34 +101,34 @@ export default async function AdminStoresPage() {
                         </div>
                     </div>
                 ) : (
-                    <div className="bg-white shadow overflow-x-auto sm:rounded-lg">
+                    <div className="bg-card shadow overflow-x-auto sm:rounded-lg">
                         <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
+                            <thead className="bg-background">
                                 <tr>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                                         店鋪 ID / 名稱
                                     </th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                                         狀態 (Status)
                                     </th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                                         聯絡人 / 電話
                                     </th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                                         地址
                                     </th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                                         成員數
                                     </th>
-                                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
                                         操作
                                     </th>
                                 </tr>
                             </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
+                            <tbody className="bg-card divide-y divide-gray-200">
                                 {stores.length === 0 ? (
                                     <tr>
-                                        <td colSpan={4} className="px-6 py-4 text-center text-gray-500">
+                                        <td colSpan={4} className="px-6 py-4 text-center text-muted-foreground">
                                             目前沒有任何加盟店資料
                                         </td>
                                     </tr>
@@ -136,8 +136,8 @@ export default async function AdminStoresPage() {
                                     stores.map((store: any) => (
                                         <tr key={store.id}>
                                             <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="text-sm font-medium text-gray-900">{store.name}</div>
-                                                <div className="text-sm text-gray-500">{store.id}</div>
+                                                <div className="text-sm font-medium text-foreground">{store.name}</div>
+                                                <div className="text-sm text-muted-foreground">{store.id}</div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${store.status === 'active'
@@ -148,13 +148,13 @@ export default async function AdminStoresPage() {
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="text-sm text-gray-900">{store.contact_name || '-'}</div>
-                                                <div className="text-sm text-gray-500">{store.phone || '-'}</div>
+                                                <div className="text-sm text-foreground">{store.contact_name || '-'}</div>
+                                                <div className="text-sm text-muted-foreground">{store.phone || '-'}</div>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap max-w-[200px] truncate text-sm text-gray-500" title={store.address}>
+                                            <td className="px-6 py-4 whitespace-nowrap max-w-[200px] truncate text-sm text-muted-foreground" title={store.address}>
                                                 {store.address || '-'}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                                                 {store.profiles && store.profiles[0] ? store.profiles[0].count : '-'}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex justify-end gap-2 items-center">

@@ -104,8 +104,8 @@ export default function GuidePage() {
                             key={role.id}
                             onClick={() => setSelectedRole(role)}
                             className={`text-left p-6 rounded-2xl border-2 transition-all duration-300 ${selectedRole?.id === role.id
-                                ? 'bg-white border-white shadow-2xl scale-[1.02]'
-                                : 'bg-white/10 border-white/20 hover:bg-white/20 hover:border-white/40'
+                                ? 'bg-card border-white shadow-2xl scale-[1.02]'
+                                : 'bg-card/10 border-white/20 hover:bg-card/20 hover:border-white/40'
                                 }`}
                         >
                             <div className="flex items-start gap-4">
@@ -113,7 +113,7 @@ export default function GuidePage() {
                                     {role.icon}
                                 </div>
                                 <div className="flex-1">
-                                    <h3 className={`text-2xl font-bold mb-2 ${selectedRole?.id === role.id ? 'text-gray-900' : 'text-white'
+                                    <h3 className={`text-2xl font-bold mb-2 ${selectedRole?.id === role.id ? 'text-foreground' : 'text-white'
                                         }`}>
                                         {role.title}
                                     </h3>
@@ -142,24 +142,24 @@ export default function GuidePage() {
 
                 {/* 選中角色後顯示操作區 */}
                 {selectedRole && (
-                    <div className="bg-white rounded-2xl shadow-2xl p-8 animate-fadeIn">
+                    <div className="bg-card rounded-2xl shadow-2xl p-8 animate-fadeIn">
                         <div className="flex items-center gap-4 mb-6">
                             <span className="text-4xl">{selectedRole.icon}</span>
                             <div>
-                                <h3 className="text-2xl font-bold text-gray-900">
+                                <h3 className="text-2xl font-bold text-foreground">
                                     以 {selectedRole.title} 身份體驗
                                 </h3>
-                                <p className="text-gray-500">使用測試帳號登入系統</p>
+                                <p className="text-muted-foreground">使用測試帳號登入系統</p>
                             </div>
                         </div>
 
                         {/* 測試帳號資訊 */}
-                        <div className="bg-gray-50 rounded-xl p-6 mb-6">
+                        <div className="bg-background rounded-xl p-6 mb-6">
                             <div className="flex items-center justify-between mb-4">
-                                <h4 className="font-semibold text-gray-900">測試帳號</h4>
+                                <h4 className="font-semibold text-foreground">測試帳號</h4>
                                 <button
                                     onClick={() => setShowCredentials(!showCredentials)}
-                                    className="text-sm text-blue-600 hover:text-blue-700"
+                                    className="text-sm text-primary hover:text-blue-700"
                                 >
                                     {showCredentials ? '隱藏' : '顯示'}
                                 </button>
@@ -167,27 +167,27 @@ export default function GuidePage() {
 
                             {showCredentials ? (
                                 <div className="space-y-3">
-                                    <div className="flex items-center justify-between p-3 bg-white rounded-lg">
+                                    <div className="flex items-center justify-between p-3 bg-card rounded-lg">
                                         <div>
-                                            <p className="text-xs text-gray-500">Email</p>
-                                            <p className="font-mono text-gray-900">{selectedRole.credentials.email}</p>
+                                            <p className="text-xs text-muted-foreground">Email</p>
+                                            <p className="font-mono text-foreground">{selectedRole.credentials.email}</p>
                                         </div>
                                         <button
                                             onClick={() => copyToClipboard(selectedRole.credentials.email)}
-                                            className="p-2 text-gray-400 hover:text-gray-600"
+                                            className="p-2 text-muted-foreground hover:text-gray-600"
                                             title="複製"
                                         >
                                             📋
                                         </button>
                                     </div>
-                                    <div className="flex items-center justify-between p-3 bg-white rounded-lg">
+                                    <div className="flex items-center justify-between p-3 bg-card rounded-lg">
                                         <div>
-                                            <p className="text-xs text-gray-500">密碼</p>
-                                            <p className="font-mono text-gray-900">{selectedRole.credentials.password}</p>
+                                            <p className="text-xs text-muted-foreground">密碼</p>
+                                            <p className="font-mono text-foreground">{selectedRole.credentials.password}</p>
                                         </div>
                                         <button
                                             onClick={() => copyToClipboard(selectedRole.credentials.password)}
-                                            className="p-2 text-gray-400 hover:text-gray-600"
+                                            className="p-2 text-muted-foreground hover:text-gray-600"
                                             title="複製"
                                         >
                                             📋
@@ -195,7 +195,7 @@ export default function GuidePage() {
                                     </div>
                                 </div>
                             ) : (
-                                <p className="text-gray-500 text-sm">點擊「顯示」查看登入資訊</p>
+                                <p className="text-muted-foreground text-sm">點擊「顯示」查看登入資訊</p>
                             )}
                         </div>
 
@@ -209,7 +209,7 @@ export default function GuidePage() {
                             </Link>
                             <Link
                                 href={`${selectedRole.loginUrl}?email=${encodeURIComponent(selectedRole.credentials.email)}&password=${encodeURIComponent(selectedRole.credentials.password)}&role=${selectedRole.id}`}
-                                className="px-6 py-4 rounded-xl border-2 border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
+                                className="px-6 py-4 rounded-xl border-2 border-gray-300 text-gray-700 font-semibold hover:bg-background transition-colors"
                             >
                                 直接登入
                             </Link>
@@ -223,21 +223,21 @@ export default function GuidePage() {
                         系統核心機制
                     </h3>
                     <div className="grid md:grid-cols-3 gap-6">
-                        <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+                        <div className="bg-card/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
                             <div className="text-3xl mb-3">🔐</div>
                             <h4 className="text-lg font-semibold text-white mb-2">雙帳戶系統</h4>
                             <p className="text-white/70 text-sm">
                                 Global Points（榮譽積分）不可兌換，Local Points（兌換積分）可在店內使用
                             </p>
                         </div>
-                        <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+                        <div className="bg-card/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
                             <div className="text-3xl mb-3">📸</div>
                             <h4 className="text-lg font-semibold text-white mb-2">雙機流協議</h4>
                             <p className="text-white/70 text-sm">
                                 每回合必須上傳證據照片，確保積分發放有據可查
                             </p>
                         </div>
-                        <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+                        <div className="bg-card/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
                             <div className="text-3xl mb-3">👨‍👩‍👧</div>
                             <h4 className="text-lg font-semibold text-white mb-2">S2B2C 連線</h4>
                             <p className="text-white/70 text-sm">

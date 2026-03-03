@@ -310,7 +310,7 @@ export default function BocciaCam({
 
         // --- PATENT LOGIC: "The Brain" Diagnostic Rules ---
         let diagText = null
-        let diagColor = 'text-gray-400'
+        let diagColor = 'text-muted-foreground'
 
         // 偵測到真實出手瞬間！(最高優先級顯示)
         if (bio.isReleaseFrame) {
@@ -689,36 +689,36 @@ export default function BocciaCam({
     if (sessionReport) {
         return (
             <div className={`relative bg-gray-900 flex flex-col items-center justify-start p-4 pt-8 h-full overflow-y-auto ${className}`}>
-                <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-5 animate-fade-in-up">
-                    <div className="text-center border-b pb-4 border-gray-100">
-                        <h3 className="text-2xl font-black text-gray-900">📊 AI 檢測報告</h3>
-                        <p className="text-sm text-gray-500 mt-1">Detection Complete — 3D 空間向量分析</p>
+                <div className="bg-card rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-5 animate-fade-in-up">
+                    <div className="text-center border-b pb-4 border-border/50">
+                        <h3 className="text-2xl font-extrabold text-foreground">📊 AI 檢測報告</h3>
+                        <p className="text-sm text-muted-foreground mt-1">Detection Complete — 3D 空間向量分析</p>
                     </div>
 
                     {/* 3 Metrics Grid */}
                     <div className="grid grid-cols-3 gap-3">
-                        <div className="text-center p-3 bg-gray-50 rounded-xl">
-                            <p className="text-xs text-gray-500 mb-1">手肘 ROM</p>
-                            <p className={`text-2xl font-black ${sessionReport.metrics.avg_rom < 160 ? 'text-orange-500' : 'text-gray-900'}`}>
+                        <div className="text-center p-3 bg-background rounded-xl">
+                            <p className="text-xs text-muted-foreground mb-1">手肘 ROM</p>
+                            <p className={`text-2xl font-extrabold ${sessionReport.metrics.avg_rom < 160 ? 'text-orange-500' : 'text-foreground'}`}>
                                 {sessionReport.metrics.avg_rom}°
                             </p>
                         </div>
-                        <div className="text-center p-3 bg-gray-50 rounded-xl">
-                            <p className="text-xs text-gray-500 mb-1">軀幹傾斜</p>
-                            <p className={`text-2xl font-black ${sessionReport.metrics.avg_trunk_tilt > 15 ? 'text-red-500' : 'text-gray-900'}`}>
+                        <div className="text-center p-3 bg-background rounded-xl">
+                            <p className="text-xs text-muted-foreground mb-1">軀幹傾斜</p>
+                            <p className={`text-2xl font-extrabold ${sessionReport.metrics.avg_trunk_tilt > 15 ? 'text-red-500' : 'text-foreground'}`}>
                                 {sessionReport.metrics.avg_trunk_tilt}°
                             </p>
                         </div>
-                        <div className="text-center p-3 bg-gray-50 rounded-xl">
-                            <p className="text-xs text-gray-500 mb-1">出手速度</p>
-                            <p className="text-2xl font-black text-emerald-600">
+                        <div className="text-center p-3 bg-background rounded-xl">
+                            <p className="text-xs text-muted-foreground mb-1">出手速度</p>
+                            <p className="text-2xl font-extrabold text-emerald-600">
                                 {sessionReport.metrics.avg_velocity}
                             </p>
                         </div>
                     </div>
 
                     {/* 穩定率 */}
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                    <div className="flex items-center justify-between p-3 bg-background rounded-xl">
                         <span className="text-sm font-bold text-gray-600">動作穩定率</span>
                         <div className="flex items-center gap-2">
                             <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
@@ -727,41 +727,41 @@ export default function BocciaCam({
                                     style={{ width: `${sessionReport.metrics.stable_ratio || 0}%` }}
                                 />
                             </div>
-                            <span className="text-lg font-black text-gray-900">{sessionReport.metrics.stable_ratio || 0}%</span>
+                            <span className="text-lg font-extrabold text-foreground">{sessionReport.metrics.stable_ratio || 0}%</span>
                         </div>
                     </div>
 
                     {/* 進階生物力學數據 */}
-                    <div className="rounded-xl border border-gray-200 overflow-hidden">
-                        <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
-                            <h5 className="text-xs font-bold text-gray-500 uppercase tracking-widest">進階生物力學數據</h5>
+                    <div className="rounded-xl border border-border overflow-hidden">
+                        <div className="bg-background px-4 py-2 border-b border-border">
+                            <h5 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">進階生物力學數據</h5>
                         </div>
                         <div className="p-3 space-y-2">
                             <div className="grid grid-cols-2 gap-2">
-                                <div className="p-2 bg-gray-50 rounded-lg text-center">
-                                    <p className="text-[10px] text-gray-500">中軸偏移</p>
+                                <div className="p-2 bg-background rounded-lg text-center">
+                                    <p className="text-[10px] text-muted-foreground">中軸偏移</p>
                                     <p className={`text-lg font-bold ${(sessionReport.metrics.core_stability_angle || 0) > 15 ? 'text-red-500' : 'text-cyan-600'}`}>
                                         {sessionReport.metrics.core_stability_angle ?? '--'}°
                                     </p>
                                 </div>
-                                <div className="p-2 bg-gray-50 rounded-lg text-center">
-                                    <p className="text-[10px] text-gray-500">震顫</p>
+                                <div className="p-2 bg-background rounded-lg text-center">
+                                    <p className="text-[10px] text-muted-foreground">震顫</p>
                                     <p className={`text-lg font-bold ${(sessionReport.metrics.tremor_detected_ratio || 0) > 0 ? 'text-red-500' : 'text-green-600'}`}>
                                         {sessionReport.metrics.tremor_detected_ratio != null ? `${sessionReport.metrics.tremor_detected_ratio}%` : '無'}
                                     </p>
                                 </div>
                             </div>
                             <div className="grid grid-cols-3 gap-2">
-                                <div className="p-2 bg-gray-50 rounded-lg text-center">
-                                    <p className="text-[10px] text-gray-500">肩角速</p>
+                                <div className="p-2 bg-background rounded-lg text-center">
+                                    <p className="text-[10px] text-muted-foreground">肩角速</p>
                                     <p className="text-sm font-bold text-purple-600">{sessionReport.metrics.avg_shoulder_angular_vel ?? '--'}°/s</p>
                                 </div>
-                                <div className="p-2 bg-gray-50 rounded-lg text-center">
-                                    <p className="text-[10px] text-gray-500">肘角速</p>
+                                <div className="p-2 bg-background rounded-lg text-center">
+                                    <p className="text-[10px] text-muted-foreground">肘角速</p>
                                     <p className="text-sm font-bold text-purple-600">{sessionReport.metrics.avg_elbow_angular_vel ?? '--'}°/s</p>
                                 </div>
-                                <div className="p-2 bg-gray-50 rounded-lg text-center">
-                                    <p className="text-[10px] text-gray-500">腕角速</p>
+                                <div className="p-2 bg-background rounded-lg text-center">
+                                    <p className="text-[10px] text-muted-foreground">腕角速</p>
                                     <p className="text-sm font-bold text-purple-600">{sessionReport.metrics.avg_wrist_angular_vel ?? '--'}°/s</p>
                                 </div>
                             </div>
@@ -799,14 +799,14 @@ export default function BocciaCam({
                     )}
 
                     {/* AI 處方卡片 */}
-                    <div className={`p-5 rounded-xl border-l-4 ${sessionReport.prescription.color} bg-white shadow-sm`}>
+                    <div className={`p-5 rounded-xl border-l-4 ${sessionReport.prescription.color} bg-card shadow-sm`}>
                         <h4 className="font-bold text-lg mb-2">{sessionReport.prescription.title}</h4>
                         <p className="text-sm opacity-90">{sessionReport.prescription.content}</p>
                         {sessionReport.prescription.references && sessionReport.prescription.references.length > 0 && (
-                            <div className="mt-3 pt-3 border-t border-gray-100">
-                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">📚 學術依據 References</p>
+                            <div className="mt-3 pt-3 border-t border-border/50">
+                                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1">📚 學術依據 References</p>
                                 {sessionReport.prescription.references.map((ref: string, idx: number) => (
-                                    <p key={idx} className="text-[10px] text-gray-400 leading-relaxed">[{idx + 1}] {ref}</p>
+                                    <p key={idx} className="text-[10px] text-muted-foreground leading-relaxed">[{idx + 1}] {ref}</p>
                                 ))}
                             </div>
                         )}
@@ -814,17 +814,17 @@ export default function BocciaCam({
 
                     {/* AI 智能推薦 - 與長者詳情頁一致 */}
                     {sessionReport.prescription.recommendedProducts && sessionReport.prescription.recommendedProducts.length > 0 && (
-                        <div className="p-5 rounded-xl border border-indigo-100 bg-gradient-to-br from-indigo-50 to-purple-50 shadow-sm relative overflow-hidden">
+                        <div className="p-5 rounded-xl border border-indigo-100 bg-gradient-to-br from-indigo-50 to-purple-50 shadow-card relative overflow-hidden">
                             <div className="absolute -top-4 -right-4 text-7xl opacity-5">💡</div>
                             <h4 className="font-bold text-base text-indigo-900 mb-3 flex items-center gap-2 relative z-10">
                                 <span>✨</span> AI 智能推薦
                             </h4>
                             <div className="space-y-2 relative z-10">
                                 {sessionReport.prescription.recommendedProducts.map((product: any, idx: number) => (
-                                    <div key={idx} className="bg-white/90 backdrop-blur-sm p-3 rounded-xl flex items-center gap-3 shadow-sm border border-indigo-50">
+                                    <div key={idx} className="bg-card/90 backdrop-blur-sm p-3 rounded-xl flex items-center gap-3 shadow-card border border-indigo-50">
                                         <div className="text-2xl bg-indigo-50/50 w-10 h-10 flex items-center justify-center rounded-lg flex-shrink-0">{product.icon}</div>
                                         <div className="min-w-0">
-                                            <p className="font-bold text-gray-900 text-sm">{product.name}</p>
+                                            <p className="font-bold text-foreground text-sm">{product.name}</p>
                                             <p className="text-xs text-gray-600 mt-0.5">{product.reason}</p>
                                         </div>
                                     </div>
@@ -853,7 +853,7 @@ export default function BocciaCam({
             <div className={`absolute top-0 left-0 right-0 z-20 p-4 flex justify-end items-start bg-gradient-to-b from-black/80 to-transparent pointer-events-none`}>
                 {/* Team Badge - Move to right */}
                 <div className={`px-3 py-1 bg-black/50 backdrop-blur rounded-full border border-white/10 flex items-center gap-2`}>
-                    <div className={`w-2 h-2 rounded-full ${side === 'red' ? 'bg-red-500' : 'bg-blue-500'}`} />
+                    <div className={`w-2 h-2 rounded-full ${side === 'red' ? 'bg-red-500' : 'bg-primary/100'}`} />
                     <span className="text-white font-mono text-xs opacity-70">{elderId.slice(0, 4)}...</span>
                 </div>
             </div>
@@ -904,7 +904,7 @@ export default function BocciaCam({
                 {saved && (
                     <div className="absolute inset-0 bg-green-900/90 flex flex-col items-center justify-center text-white z-50">
                         <span className="text-6xl mb-4">✅</span>
-                        <p className="text-xl font-black">數據已儲存！</p>
+                        <p className="text-xl font-extrabold">數據已儲存！</p>
                     </div>
                 )}
 
@@ -919,7 +919,7 @@ export default function BocciaCam({
             <div className="p-3 bg-gray-800 space-y-3 overflow-y-auto" style={{ maxHeight: '40vh' }}>
                 {/* Phase 2: 主体锁定 & 坐姿状态指示器 */}
                 <div className="flex items-center justify-between">
-                    <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Medical Rehab Data (即時醫療數據)</p>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Medical Rehab Data (即時醫療數據)</p>
                     <div className="flex items-center gap-2">
                         {metrics.subjectLocked && (
                             <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-900/50 text-green-400 border border-green-800 flex items-center gap-1">
@@ -935,22 +935,22 @@ export default function BocciaCam({
                 </div>
                 <div className="grid grid-cols-3 gap-3">
                     <div className={`rounded-xl p-2 text-center min-w-0 ${metrics.isArmExtended ? sideColors.bg : 'bg-red-900/50'}`}>
-                        <p className="text-[10px] text-gray-400 mb-0.5 truncate">肘部 ROM</p>
-                        <p className={`text-xl font-black ${metrics.isArmExtended ? sideColors.text : 'text-red-400'}`}>
+                        <p className="text-[10px] text-muted-foreground mb-0.5 truncate">肘部 ROM</p>
+                        <p className={`text-xl font-extrabold ${metrics.isArmExtended ? sideColors.text : 'text-red-400'}`}>
                             {metrics.elbowROM !== null ? `${metrics.elbowROM}°` : '--'}
                         </p>
                     </div>
 
                     <div className={`rounded-xl p-2 text-center min-w-0 ${metrics.isTrunkStable ? sideColors.bg : 'bg-red-900/50'}`}>
-                        <p className="text-[10px] text-gray-400 mb-0.5 truncate">軀幹傾斜</p>
-                        <p className={`text-xl font-black ${metrics.isTrunkStable ? sideColors.text : 'text-red-400'}`}>
+                        <p className="text-[10px] text-muted-foreground mb-0.5 truncate">軀幹傾斜</p>
+                        <p className={`text-xl font-extrabold ${metrics.isTrunkStable ? sideColors.text : 'text-red-400'}`}>
                             {metrics.trunkStability !== null ? `${metrics.trunkStability}°` : '--'}
                         </p>
                     </div>
 
                     <div className="rounded-xl p-2 text-center min-w-0 bg-gray-700/50">
-                        <p className="text-[10px] text-gray-400 mb-0.5 truncate">出手速度</p>
-                        <p className="text-xl font-black text-emerald-400 truncate">
+                        <p className="text-[10px] text-muted-foreground mb-0.5 truncate">出手速度</p>
+                        <p className="text-xl font-extrabold text-emerald-400 truncate">
                             {metrics.velocity ? metrics.velocity.toFixed(2) : '--'}
                         </p>
                     </div>
@@ -961,8 +961,8 @@ export default function BocciaCam({
                     onClick={() => setShowAdvanced(!showAdvanced)}
                     className="w-full flex items-center justify-between py-2 px-3 rounded-lg bg-gray-700/30 hover:bg-gray-700/50 transition-colors"
                 >
-                    <span className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Advanced Bio-metrics (进阶指标)</span>
-                    <span className="text-gray-500 text-xs">{showAdvanced ? '▲' : '▼'}</span>
+                    <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Advanced Bio-metrics (进阶指标)</span>
+                    <span className="text-muted-foreground text-xs">{showAdvanced ? '▲' : '▼'}</span>
                 </button>
 
                 {showAdvanced && bioMetrics && (
@@ -970,13 +970,13 @@ export default function BocciaCam({
                         {/* 中轴稳定度 */}
                         <div className="grid grid-cols-2 gap-2">
                             <div className="rounded-lg p-2 bg-gray-700/30 text-center">
-                                <p className="text-[10px] text-gray-500">中轴偏移</p>
+                                <p className="text-[10px] text-muted-foreground">中轴偏移</p>
                                 <p className={`text-lg font-bold ${(bioMetrics.coreStabilityAngle || 0) > 15 ? 'text-red-400' : 'text-cyan-400'}`}>
                                     {bioMetrics.coreStabilityAngle ?? '--'}°
                                 </p>
                             </div>
                             <div className="rounded-lg p-2 bg-gray-700/30 text-center">
-                                <p className="text-[10px] text-gray-500">震颤</p>
+                                <p className="text-[10px] text-muted-foreground">震颤</p>
                                 <p className={`text-lg font-bold ${bioMetrics.tremorDetected ? 'text-red-400' : 'text-green-400'}`}>
                                     {bioMetrics.tremorDetected ? `${bioMetrics.tremorFrequency} Hz` : '无'}
                                 </p>
@@ -986,15 +986,15 @@ export default function BocciaCam({
                         {/* 角速度 */}
                         <div className="grid grid-cols-3 gap-2">
                             <div className="rounded-lg p-2 bg-gray-700/30 text-center">
-                                <p className="text-[10px] text-gray-500">肩角速</p>
+                                <p className="text-[10px] text-muted-foreground">肩角速</p>
                                 <p className="text-sm font-bold text-purple-400">{bioMetrics.shoulderAngularVel ?? '--'}°/s</p>
                             </div>
                             <div className="rounded-lg p-2 bg-gray-700/30 text-center">
-                                <p className="text-[10px] text-gray-500">肘角速</p>
+                                <p className="text-[10px] text-muted-foreground">肘角速</p>
                                 <p className="text-sm font-bold text-purple-400">{bioMetrics.elbowAngularVel ?? '--'}°/s</p>
                             </div>
                             <div className="rounded-lg p-2 bg-gray-700/30 text-center">
-                                <p className="text-[10px] text-gray-500">腕角速</p>
+                                <p className="text-[10px] text-muted-foreground">腕角速</p>
                                 <p className="text-sm font-bold text-purple-400">{bioMetrics.wristAngularVel ?? '--'}°/s</p>
                             </div>
                         </div>
@@ -1051,7 +1051,7 @@ export default function BocciaCam({
                     <span className="text-xl">📌</span>
                     <span>標記這一球</span>
                     {throwMarkCount > 0 && (
-                        <span className="ml-1 bg-white/20 px-2 py-0.5 rounded-full text-xs">{throwMarkCount}</span>
+                        <span className="ml-1 bg-card/20 px-2 py-0.5 rounded-full text-xs">{throwMarkCount}</span>
                     )}
                 </button>
 
@@ -1068,7 +1068,7 @@ export default function BocciaCam({
                     </button>
                     {/* Sitting Optimization Badge */}
                     <div className="absolute top-16 right-4 bg-gray-900/60 backdrop-blur border border-white/20 rounded-lg px-3 py-1.5 flex flex-col items-end pointer-events-none">
-                        <p className="text-[10px] text-gray-400 uppercase tracking-widest mb-0.5">Patent Config</p>
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-0.5">Patent Config</p>
                         <p className="text-xs font-bold text-white flex items-center gap-1">
                             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                             🪑 坐姿穩定追蹤 (Seated)
@@ -1078,7 +1078,7 @@ export default function BocciaCam({
                     {onClose && (
                         <button
                             onClick={onClose}
-                            className="px-6 py-3 rounded-xl font-bold text-gray-400 bg-gray-800 hover:bg-gray-700 transition-colors"
+                            className="px-6 py-3 rounded-xl font-bold text-muted-foreground bg-gray-800 hover:bg-gray-700 transition-colors"
                         >
                             取消
                         </button>

@@ -93,7 +93,7 @@ function CheckoutConfirmContent() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+            <div className="min-h-screen bg-background flex items-center justify-center">
                 <div className="animate-spin h-10 w-10 border-4 border-blue-600 border-t-transparent rounded-full"></div>
             </div>
         )
@@ -101,14 +101,14 @@ function CheckoutConfirmContent() {
 
     if (error) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-                <div className="bg-white rounded-xl p-8 shadow-lg text-center max-w-md">
+            <div className="min-h-screen bg-background flex items-center justify-center p-4">
+                <div className="bg-card rounded-xl p-8 shadow-lg text-center max-w-md">
                     <div className="text-red-500 text-5xl mb-4">⚠️</div>
-                    <h2 className="text-xl font-bold text-gray-900 mb-2">發生錯誤</h2>
+                    <h2 className="text-xl font-bold text-foreground mb-2">發生錯誤</h2>
                     <p className="text-gray-600 mb-4">{error}</p>
                     <button
                         onClick={() => router.push('/family/shop')}
-                        className="px-6 py-2 bg-blue-600 text-white rounded-lg"
+                        className="px-6 py-2 bg-primary text-white rounded-lg"
                     >
                         返回商店
                     </button>
@@ -118,11 +118,11 @@ function CheckoutConfirmContent() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-20">
+        <div className="min-h-screen bg-background pb-20">
             {/* Header */}
-            <div className="bg-white shadow-sm py-4 px-4 sticky top-0 z-10">
+            <div className="bg-card shadow-card py-4 px-4 sticky top-0 z-10">
                 <div className="max-w-lg mx-auto flex items-center gap-3">
-                    <button onClick={handleCancel} className="p-2 hover:bg-gray-100 rounded-full" aria-label="返回">
+                    <button onClick={handleCancel} className="p-2 hover:bg-muted rounded-full" aria-label="返回">
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                         </svg>
@@ -133,13 +133,13 @@ function CheckoutConfirmContent() {
 
             <div className="max-w-lg mx-auto p-4 space-y-4">
                 {/* 訂單資訊 */}
-                <div className="bg-white rounded-xl shadow-sm p-5">
+                <div className="bg-card rounded-xl shadow-card p-5">
                     <div className="flex justify-between items-center mb-4">
-                        <span className="text-sm text-gray-500">訂單編號</span>
+                        <span className="text-sm text-muted-foreground">訂單編號</span>
                         <span className="font-mono text-sm">{order?.order_number}</span>
                     </div>
                     <div className="flex justify-between items-center mb-4">
-                        <span className="text-sm text-gray-500">收禮者</span>
+                        <span className="text-sm text-muted-foreground">收禮者</span>
                         <span className="font-medium">{order?.recipient_name}</span>
                     </div>
                     {order?.note && (
@@ -150,14 +150,14 @@ function CheckoutConfirmContent() {
                 </div>
 
                 {/* 商品列表 */}
-                <div className="bg-white rounded-xl shadow-sm p-5">
+                <div className="bg-card rounded-xl shadow-card p-5">
                     <h3 className="font-medium text-gray-700 mb-3">購買商品</h3>
                     <div className="space-y-3">
                         {order?.items.map((item, idx) => (
                             <div key={idx} className="flex justify-between items-center">
                                 <div>
-                                    <span className="text-gray-900">{item.product_name}</span>
-                                    <span className="text-gray-400 text-sm ml-2">x{item.quantity}</span>
+                                    <span className="text-foreground">{item.product_name}</span>
+                                    <span className="text-muted-foreground text-sm ml-2">x{item.quantity}</span>
                                 </div>
                                 <span className="font-medium">NT$ {item.unit_price * item.quantity}</span>
                             </div>
@@ -170,15 +170,15 @@ function CheckoutConfirmContent() {
                 </div>
 
                 {/* 付款方式 */}
-                <div className="bg-white rounded-xl shadow-sm p-5">
+                <div className="bg-card rounded-xl shadow-card p-5">
                     <h3 className="font-medium text-gray-700 mb-3">付款方式</h3>
                     <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg border-2 border-green-500">
                         <div className="w-10 h-10 bg-[#06C755] rounded-lg flex items-center justify-center">
                             <span className="text-white font-bold text-sm">LINE</span>
                         </div>
                         <div>
-                            <p className="font-medium text-gray-900">LINE Pay</p>
-                            <p className="text-xs text-gray-500">模擬付款（測試環境）</p>
+                            <p className="font-medium text-foreground">LINE Pay</p>
+                            <p className="text-xs text-muted-foreground">模擬付款（測試環境）</p>
                         </div>
                     </div>
                 </div>
@@ -203,7 +203,7 @@ function CheckoutConfirmContent() {
 
                 <button
                     onClick={handleCancel}
-                    className="w-full py-3 text-gray-500 hover:text-gray-700"
+                    className="w-full py-3 text-muted-foreground hover:text-gray-700"
                 >
                     取消訂單
                 </button>
@@ -215,7 +215,7 @@ function CheckoutConfirmContent() {
 export default function CheckoutConfirmPage() {
     return (
         <Suspense fallback={
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+            <div className="min-h-screen bg-background flex items-center justify-center">
                 <div className="animate-spin h-10 w-10 border-4 border-blue-600 border-t-transparent rounded-full"></div>
             </div>
         }>

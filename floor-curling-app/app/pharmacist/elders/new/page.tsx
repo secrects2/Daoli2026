@@ -41,23 +41,23 @@ export default function CreateElderPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col">
+        <div className="min-h-screen bg-background flex flex-col">
             {/* Header */}
-            <div className="bg-white border-b border-gray-200">
+            <div className="bg-card border-b border-border">
                 <div className="max-w-2xl mx-auto px-4 py-4 flex items-center">
-                    <button onClick={() => router.back()} className="text-gray-500 hover:text-gray-900 mr-4">
+                    <button onClick={() => router.back()} className="text-muted-foreground hover:text-foreground mr-4">
                         &larr; 返回
                     </button>
-                    <h1 className="text-xl font-bold text-gray-900">新增長輩 (手動註冊)</h1>
+                    <h1 className="text-xl font-bold text-foreground">新增長輩 (手動註冊)</h1>
                 </div>
             </div>
 
             <main className="flex-1 max-w-2xl w-full mx-auto px-4 py-8">
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+                <div className="bg-card rounded-2xl shadow-card border border-border/50 p-8">
                     <div className="mb-8 text-center">
                         <span className="text-4xl mb-2 block">👴</span>
-                        <h2 className="text-2xl font-bold text-gray-900">建立新長輩帳號</h2>
-                        <p className="text-gray-500 text-sm mt-1">
+                        <h2 className="text-2xl font-bold text-foreground">建立新長輩帳號</h2>
+                        <p className="text-muted-foreground text-sm mt-1">
                             此功能適用於**沒有手機**的長輩。<br />
                             系統將自動建立帳號，請您隨後協助列印 QR Code 給長輩。
                         </p>
@@ -114,14 +114,14 @@ export default function CreateElderPage() {
                             <button
                                 type="button"
                                 onClick={() => router.back()}
-                                className="w-1/3 py-3 px-4 border border-gray-300 rounded-xl text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+                                className="w-1/3 py-3 px-4 border border-gray-300 rounded-xl text-gray-700 font-medium hover:bg-background transition-colors"
                             >
                                 取消
                             </button>
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="w-2/3 py-3 px-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                                className="w-2/3 py-3 px-4 bg-primary text-white rounded-xl font-bold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                             >
                                 {loading ? (
                                     <>

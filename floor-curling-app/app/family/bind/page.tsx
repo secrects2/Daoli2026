@@ -93,36 +93,36 @@ function BindingContent() {
     if (error) {
         return (
             <div className="min-h-screen flex items-center justify-center p-4">
-                <div className="bg-white p-8 rounded-2xl shadow-lg max-w-md w-full text-center">
+                <div className="bg-card p-8 rounded-2xl shadow-lg max-w-md w-full text-center">
                     <div className="text-red-500 text-5xl mb-4">⚠️</div>
-                    <h1 className="text-xl font-bold text-gray-900 mb-2">無法進行綁定</h1>
+                    <h1 className="text-xl font-bold text-foreground mb-2">無法進行綁定</h1>
                     <p className="text-gray-600 mb-6">{error}</p>
-                    <button onClick={() => router.push('/')} className="w-full py-3 bg-gray-100 rounded-xl font-bold text-gray-700">回首頁</button>
+                    <button onClick={() => router.push('/')} className="w-full py-3 bg-muted rounded-xl font-bold text-gray-700">回首頁</button>
                 </div>
             </div>
         )
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-            <div className="bg-white p-8 rounded-2xl shadow-lg max-w-md w-full text-center space-y-6">
+        <div className="min-h-screen bg-background flex items-center justify-center p-4">
+            <div className="bg-card p-8 rounded-2xl shadow-lg max-w-md w-full text-center space-y-6">
                 <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto text-4xl">
                     🔗
                 </div>
 
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">確認綁定長輩</h1>
-                    <p className="text-gray-500 mt-2">您即將綁定以下長輩帳號：</p>
+                    <h1 className="text-2xl font-bold text-foreground">確認綁定長輩</h1>
+                    <p className="text-muted-foreground mt-2">您即將綁定以下長輩帳號：</p>
                 </div>
 
-                <div className="bg-blue-50 p-6 rounded-xl border border-blue-100">
+                <div className="bg-primary/10 p-6 rounded-xl border border-blue-100">
                     <p className="text-3xl font-bold text-blue-800 mb-1">
                         {elder?.nickname || elder?.full_name}
                     </p>
-                    <p className="text-sm text-blue-600 font-mono">ID: {elder?.id?.slice(0, 8)}</p>
+                    <p className="text-sm text-primary font-mono">ID: {elder?.id?.slice(0, 8)}</p>
                 </div>
 
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-muted-foreground">
                     綁定後，您將可以查看長輩的健康數據、比賽照片與積分紀錄。
                 </p>
 
@@ -130,13 +130,13 @@ function BindingContent() {
                     <button
                         onClick={handleBind}
                         disabled={binding}
-                        className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-lg shadow-lg shadow-blue-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full py-3 bg-primary hover:bg-blue-700 text-white rounded-xl font-bold text-lg shadow-lg shadow-blue-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {binding ? '綁定中...' : '確認綁定'}
                     </button>
                     <button
                         onClick={() => router.push('/family/portal')}
-                        className="w-full py-3 bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-xl font-medium"
+                        className="w-full py-3 bg-card border border-border text-gray-600 hover:bg-background rounded-xl font-medium"
                     >
                         取消
                     </button>

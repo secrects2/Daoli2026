@@ -137,7 +137,7 @@ export default function MatchHistoryPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-100">
+            <div className="min-h-screen flex items-center justify-center bg-muted">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
                     <p className="mt-4 text-gray-600">{t('common.loading')}</p> {/* Updated */}
@@ -147,15 +147,15 @@ export default function MatchHistoryPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-100">
+        <div className="min-h-screen bg-muted">
             {/* 導航欄 */}
-            <nav className="bg-white shadow-sm">
+            <nav className="bg-card shadow-card">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16">
                         <div className="flex items-center">
                             <button
                                 onClick={() => router.push('/pharmacist/dashboard')}
-                                className="mr-4 text-gray-600 hover:text-gray-900"
+                                className="mr-4 text-gray-600 hover:text-foreground"
                                 title="返回"
                                 aria-label="返回"
                             >
@@ -163,7 +163,7 @@ export default function MatchHistoryPage() {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                                 </svg>
                             </button>
-                            <h1 className="text-2xl font-bold text-blue-600">{t('matchHistory.title')}</h1> {/* Updated */}
+                            <h1 className="text-2xl font-bold text-primary">{t('matchHistory.title')}</h1> {/* Updated */}
                         </div>
                         <div className="flex items-center gap-4">
                             {/* 語言切換 */}
@@ -171,7 +171,7 @@ export default function MatchHistoryPage() {
 
                             <Link
                                 href="/pharmacist/match/new"
-                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+                                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
                             >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -190,8 +190,8 @@ export default function MatchHistoryPage() {
                     <button
                         onClick={() => setFilter('all')}
                         className={`px-4 py-2 rounded-lg font-medium transition-colors ${filter === 'all'
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-white text-gray-600 hover:bg-gray-50'
+                            ? 'bg-primary text-white'
+                            : 'bg-card text-gray-600 hover:bg-background'
                             }`}
                     >
                         {t('matchHistory.filter.all')} ({matches.length}) {/* Updated */}
@@ -200,7 +200,7 @@ export default function MatchHistoryPage() {
                         onClick={() => setFilter('in_progress')}
                         className={`px-4 py-2 rounded-lg font-medium transition-colors ${filter === 'in_progress'
                             ? 'bg-yellow-500 text-white'
-                            : 'bg-white text-gray-600 hover:bg-gray-50'
+                            : 'bg-card text-gray-600 hover:bg-background'
                             }`}
                     >
                         {t('matchHistory.filter.inProgress')} ({matches.filter(m => m.status === 'in_progress').length}) {/* Updated */}
@@ -209,7 +209,7 @@ export default function MatchHistoryPage() {
                         onClick={() => setFilter('completed')}
                         className={`px-4 py-2 rounded-lg font-medium transition-colors ${filter === 'completed'
                             ? 'bg-green-600 text-white'
-                            : 'bg-white text-gray-600 hover:bg-gray-50'
+                            : 'bg-card text-gray-600 hover:bg-background'
                             }`}
                     >
                         {t('matchHistory.filter.completed')} ({matches.filter(m => m.status === 'completed').length}) {/* Updated */}
@@ -218,15 +218,15 @@ export default function MatchHistoryPage() {
 
                 {/* 比賽列表 */}
                 {filteredMatches.length === 0 ? (
-                    <div className="bg-white rounded-xl shadow-sm p-12 text-center">
+                    <div className="bg-card rounded-xl shadow-card p-12 text-center">
                         <svg className="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                         </svg>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('matchHistory.empty.title')}</h3> {/* Updated */}
-                        <p className="text-gray-500 mb-4">{t('matchHistory.empty.desc')}</p> {/* Updated */}
+                        <h3 className="text-lg font-semibold text-foreground mb-2">{t('matchHistory.empty.title')}</h3> {/* Updated */}
+                        <p className="text-muted-foreground mb-4">{t('matchHistory.empty.desc')}</p> {/* Updated */}
                         <Link
                             href="/pharmacist/match/new"
-                            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700"
                         >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -243,7 +243,7 @@ export default function MatchHistoryPage() {
                             return (
                                 <div
                                     key={match.id}
-                                    className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow"
+                                    className="bg-card rounded-xl shadow-card p-6 hover:shadow-md transition-shadow"
                                 >
                                     <div className="flex justify-between items-start mb-4">
                                         <div>
@@ -252,7 +252,7 @@ export default function MatchHistoryPage() {
                                                     ? 'bg-green-100 text-green-700'
                                                     : match.status === 'in_progress'
                                                         ? 'bg-yellow-100 text-yellow-700'
-                                                        : 'bg-gray-100 text-gray-700'
+                                                        : 'bg-muted text-gray-700'
                                                     }`}>
                                                     {match.status === 'completed' ? t('matchHistory.status.completed') :
                                                         match.status === 'in_progress' ? t('matchHistory.status.inProgress') : match.status} {/* Updated */}
@@ -266,11 +266,11 @@ export default function MatchHistoryPage() {
                                                     </span>
                                                 )}
                                             </div>
-                                            <p className="text-sm text-gray-500">
+                                            <p className="text-sm text-muted-foreground">
                                                 {formatDate(match.created_at)}
                                             </p>
                                         </div>
-                                        <p className="text-sm text-gray-500">
+                                        <p className="text-sm text-muted-foreground">
                                             {t('matchHistory.store')}: {match.store_id}
                                         </p>
                                     </div>
@@ -283,12 +283,12 @@ export default function MatchHistoryPage() {
                                             }`}>
                                             <p className="text-sm text-red-600 font-medium mb-1">{t('matchHistory.red')}</p> {/* Updated */}
                                             <p className="text-3xl font-bold text-red-700">{scores.red}</p>
-                                            <p className="text-xs text-gray-500 mt-1 truncate" title={match.red_team_elder_id || ''}>
+                                            <p className="text-xs text-muted-foreground mt-1 truncate" title={match.red_team_elder_id || ''}>
                                                 {match.red_team_elder_id?.slice(0, 8) || ''}...
                                             </p>
                                         </div>
                                         <div className="flex items-center justify-center">
-                                            <span className="text-2xl font-bold text-gray-400">VS</span>
+                                            <span className="text-2xl font-bold text-muted-foreground">VS</span>
                                         </div>
                                         <div className={`text-center p-4 rounded-lg ${match.winner_color === 'yellow'
                                             ? 'bg-yellow-100 border-2 border-yellow-300'
@@ -296,7 +296,7 @@ export default function MatchHistoryPage() {
                                             }`}>
                                             <p className="text-sm text-yellow-600 font-medium mb-1">{t('matchHistory.yellow')}</p> {/* Updated */}
                                             <p className="text-3xl font-bold text-yellow-700">{scores.yellow}</p>
-                                            <p className="text-xs text-gray-500 mt-1 truncate" title={match.yellow_team_elder_id || ''}>
+                                            <p className="text-xs text-muted-foreground mt-1 truncate" title={match.yellow_team_elder_id || ''}>
                                                 {match.yellow_team_elder_id?.slice(0, 8) || ''}...
                                             </p>
                                         </div>
@@ -304,17 +304,17 @@ export default function MatchHistoryPage() {
 
                                     {/* 回合詳情 */}
                                     {ends.length > 0 && (
-                                        <div className="border-t border-gray-100 pt-4">
+                                        <div className="border-t border-border/50 pt-4">
                                             <p className="text-sm font-medium text-gray-700 mb-2">{t('matchHistory.endsDetail')}</p> {/* Updated */}
                                             <div className="flex gap-2 flex-wrap">
                                                 {ends.map((end) => (
                                                     <div
                                                         key={end.end_number}
-                                                        className="flex items-center gap-1 bg-gray-50 rounded-lg px-3 py-1"
+                                                        className="flex items-center gap-1 bg-background rounded-lg px-3 py-1"
                                                     >
-                                                        <span className="text-xs text-gray-500">{t('matchHistory.endN', { n: end.end_number })}</span> {/* Updated */}
+                                                        <span className="text-xs text-muted-foreground">{t('matchHistory.endN', { n: end.end_number })}</span> {/* Updated */}
                                                         <span className="text-sm font-medium text-red-600">{end.red_score}</span>
-                                                        <span className="text-gray-400">:</span>
+                                                        <span className="text-muted-foreground">:</span>
                                                         <span className="text-sm font-medium text-yellow-600">{end.yellow_score}</span>
                                                     </div>
                                                 ))}

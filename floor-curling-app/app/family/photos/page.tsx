@@ -59,11 +59,11 @@ export default function FamilyPhotosPage() {
     }, {} as Record<string, any[]>)
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-20">
+        <div className="min-h-screen bg-background pb-20">
             {/* Header */}
-            <div className="sticky top-0 z-10 bg-white/90 backdrop-blur-md border-b border-gray-200">
+            <div className="sticky top-0 z-10 bg-card/90 backdrop-blur-md border-b border-border">
                 <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-2">
-                    <button onClick={() => router.back()} className="text-gray-600 hover:text-gray-900">
+                    <button onClick={() => router.back()} className="text-gray-600 hover:text-foreground">
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                         </svg>
@@ -74,23 +74,23 @@ export default function FamilyPhotosPage() {
 
             <div className="max-w-3xl mx-auto p-4 space-y-8">
                 {loading ? (
-                    <div className="text-center py-20 text-gray-500">載入中...</div>
+                    <div className="text-center py-20 text-muted-foreground">載入中...</div>
                 ) : mediaList.length === 0 ? (
-                    <div className="text-center py-20 text-gray-500">
+                    <div className="text-center py-20 text-muted-foreground">
                         <p className="text-4xl mb-2">📷</p>
                         尚未有比賽紀錄
                     </div>
                 ) : (
                     Object.entries(groupedMedia).map(([date, items]) => (
                         <div key={date}>
-                            <h3 className="sticky top-16 z-0 bg-gray-50/90 backdrop-blur-sm py-2 px-1 text-sm font-bold text-gray-500 mb-2">
+                            <h3 className="sticky top-16 z-0 bg-gray-50/90 backdrop-blur-sm py-2 px-1 text-sm font-bold text-muted-foreground mb-2">
                                 {date}
                             </h3>
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                                 {(items as any[]).map((p: any) => (
                                     <div
                                         key={p.id}
-                                        className="aspect-square bg-black rounded-xl overflow-hidden cursor-pointer hover:opacity-90 transition-opacity relative group shadow-sm border border-gray-200"
+                                        className="aspect-square bg-black rounded-xl overflow-hidden cursor-pointer hover:opacity-90 transition-opacity relative group shadow-card border border-border"
                                         onClick={() => p.type === 'photo' ? setViewingPhoto(p) : null}
                                     >
                                         {p.type === 'video' ? (

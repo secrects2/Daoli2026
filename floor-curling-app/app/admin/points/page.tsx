@@ -45,18 +45,18 @@ export default function AdminPointsPage() {
         fetchData()
     }, [supabase])
 
-    if (loading) return <div className="p-8 text-center text-gray-500">載入數據中...</div>
+    if (loading) return <div className="p-8 text-center text-muted-foreground">載入數據中...</div>
 
     return (
-        <div className="min-h-screen bg-gray-50 p-6">
+        <div className="min-h-screen bg-background p-6">
             <div className="max-w-6xl mx-auto space-y-8">
                 <div className="flex items-center justify-between">
-                    <h1 className="text-2xl font-bold text-gray-900">榮譽積分流向</h1>
-                    <Link href="/admin" className="text-gray-500 hover:text-gray-900">返回總部</Link>
+                    <h1 className="text-2xl font-bold text-foreground">榮譽積分流向</h1>
+                    <Link href="/admin" className="text-muted-foreground hover:text-foreground">返回總部</Link>
                 </div>
 
                 {/* Chart Section */}
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <div className="bg-card p-6 rounded-2xl shadow-card border border-border/50">
                     <h2 className="text-lg font-bold text-gray-800 mb-6">總積分發放趨勢</h2>
                     <div className="h-[300px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
@@ -80,13 +80,13 @@ export default function AdminPointsPage() {
                 </div>
 
                 {/* Data Table */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div className="p-6 border-b border-gray-100">
+                <div className="bg-card rounded-2xl shadow-card border border-border/50 overflow-hidden">
+                    <div className="p-6 border-b border-border/50">
                         <h2 className="text-lg font-bold text-gray-800">最新積分異動</h2>
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-left text-sm text-gray-600">
-                            <thead className="bg-gray-50 text-gray-900 font-medium">
+                            <thead className="bg-background text-foreground font-medium">
                                 <tr>
                                     <th className="p-4">時間</th>
                                     <th className="p-4">長輩姓名</th>
@@ -96,11 +96,11 @@ export default function AdminPointsPage() {
                             </thead>
                             <tbody className="divide-y divide-gray-100">
                                 {transactions.map((t) => (
-                                    <tr key={t.id} className="hover:bg-gray-50 transition-colors">
+                                    <tr key={t.id} className="hover:bg-background transition-colors">
                                         <td className="p-4 whitespace-nowrap">
                                             {new Date(t.created_at).toLocaleString('zh-TW')}
                                         </td>
-                                        <td className="p-4 font-bold text-gray-900">
+                                        <td className="p-4 font-bold text-foreground">
                                             {t.wallets?.profiles?.full_name || '未知用戶'}
                                         </td>
                                         <td className="p-4">

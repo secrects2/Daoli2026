@@ -55,7 +55,7 @@ export default function EditStorePage({ params }: { params: Promise<{ id: string
                     </Link>
                 </div>
 
-                <div className="bg-white shadow rounded-lg p-6">
+                <div className="bg-card shadow rounded-lg p-6">
                     {error && (
                         <div className="bg-red-50 text-red-700 p-4 rounded-md mb-6 text-sm">
                             {error}

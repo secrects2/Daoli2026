@@ -28,7 +28,7 @@ const typeLabels: Record<string, { label: string; color: string; icon: string }>
     match_participate: { label: '比賽參與', color: 'bg-blue-100 text-blue-700', icon: '🥌' },
     local_grant: { label: '藥師發放', color: 'bg-purple-100 text-purple-700', icon: '🎁' },
     local_redeem: { label: '積分兌換', color: 'bg-orange-100 text-orange-700', icon: '🛒' },
-    adjustment: { label: '管理員調整', color: 'bg-gray-100 text-gray-700', icon: '⚙️' }
+    adjustment: { label: '管理員調整', color: 'bg-muted text-gray-700', icon: '⚙️' }
 }
 
 export default function TransactionsPage() {
@@ -125,28 +125,28 @@ export default function TransactionsPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-100">
+            <div className="min-h-screen flex items-center justify-center bg-muted">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
             </div>
         )
     }
 
     return (
-        <div className="min-h-screen bg-gray-100">
+        <div className="min-h-screen bg-muted">
             {/* 導航欄 */}
-            <nav className="bg-white shadow-sm">
+            <nav className="bg-card shadow-card">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16">
                         <div className="flex items-center">
                             <button
                                 onClick={() => router.back()}
-                                className="mr-4 text-gray-600 hover:text-gray-900"
+                                className="mr-4 text-gray-600 hover:text-foreground"
                             >
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                                 </svg>
                             </button>
-                            <h1 className="text-2xl font-bold text-blue-600">積分交易記錄</h1>
+                            <h1 className="text-2xl font-bold text-primary">積分交易記錄</h1>
                         </div>
                         <div className="flex items-center gap-4">
                             <LanguageSwitcher />
@@ -159,20 +159,20 @@ export default function TransactionsPage() {
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* 統計卡片 */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div className="bg-white rounded-xl p-4 shadow-sm">
+                    <div className="bg-card rounded-xl p-4 shadow-card">
                         <div className="flex items-center gap-3">
                             <div className="p-2 bg-blue-100 rounded-lg">
-                                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                                 </svg>
                             </div>
                             <div>
-                                <p className="text-sm text-gray-500">交易筆數</p>
-                                <p className="text-2xl font-bold text-gray-900">{stats.transactionCount}</p>
+                                <p className="text-sm text-muted-foreground">交易筆數</p>
+                                <p className="text-2xl font-bold text-foreground">{stats.transactionCount}</p>
                             </div>
                         </div>
                     </div>
-                    <div className="bg-white rounded-xl p-4 shadow-sm">
+                    <div className="bg-card rounded-xl p-4 shadow-card">
                         <div className="flex items-center gap-3">
                             <div className="p-2 bg-yellow-100 rounded-lg">
                                 <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -180,12 +180,12 @@ export default function TransactionsPage() {
                                 </svg>
                             </div>
                             <div>
-                                <p className="text-sm text-gray-500">發出 Global Points</p>
+                                <p className="text-sm text-muted-foreground">發出 Global Points</p>
                                 <p className="text-2xl font-bold text-yellow-600">+{stats.totalGlobalGranted}</p>
                             </div>
                         </div>
                     </div>
-                    <div className="bg-white rounded-xl p-4 shadow-sm">
+                    <div className="bg-card rounded-xl p-4 shadow-card">
                         <div className="flex items-center gap-3">
                             <div className="p-2 bg-green-100 rounded-lg">
                                 <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -193,7 +193,7 @@ export default function TransactionsPage() {
                                 </svg>
                             </div>
                             <div>
-                                <p className="text-sm text-gray-500">發出 Local Points</p>
+                                <p className="text-sm text-muted-foreground">發出 Local Points</p>
                                 <p className="text-2xl font-bold text-green-600">+{stats.totalLocalGranted}</p>
                             </div>
                         </div>
@@ -201,7 +201,7 @@ export default function TransactionsPage() {
                 </div>
 
                 {/* 過濾器 */}
-                <div className="bg-white rounded-xl p-4 shadow-sm mb-6">
+                <div className="bg-card rounded-xl p-4 shadow-card mb-6">
                     <div className="flex flex-wrap gap-4">
                         {/* 類型過濾 */}
                         <div>
@@ -210,8 +210,8 @@ export default function TransactionsPage() {
                                 <button
                                     onClick={() => setFilter('all')}
                                     className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${filter === 'all'
-                                        ? 'bg-blue-600 text-white'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                        ? 'bg-primary text-white'
+                                        : 'bg-muted text-gray-700 hover:bg-accent'
                                         }`}
                                 >
                                     全部
@@ -221,8 +221,8 @@ export default function TransactionsPage() {
                                         key={key}
                                         onClick={() => setFilter(key)}
                                         className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${filter === key
-                                            ? 'bg-blue-600 text-white'
-                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                            ? 'bg-primary text-white'
+                                            : 'bg-muted text-gray-700 hover:bg-accent'
                                             }`}
                                     >
                                         {icon} {label}
@@ -246,7 +246,7 @@ export default function TransactionsPage() {
                                         onClick={() => setDateRange(item.key as any)}
                                         className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${dateRange === item.key
                                             ? 'bg-green-600 text-white'
-                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                            : 'bg-muted text-gray-700 hover:bg-accent'
                                             }`}
                                     >
                                         {item.label}
@@ -258,22 +258,22 @@ export default function TransactionsPage() {
                 </div>
 
                 {/* 交易列表 */}
-                <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+                <div className="bg-card rounded-xl shadow-card overflow-hidden">
                     <table className="w-full">
-                        <thead className="bg-gray-50">
+                        <thead className="bg-background">
                             <tr>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">時間</th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">長輩</th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">類型</th>
-                                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Global</th>
-                                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Local</th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">說明</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">時間</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">長輩</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">類型</th>
+                                <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">Global</th>
+                                <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">Local</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">說明</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200">
                             {transactions.length === 0 ? (
                                 <tr>
-                                    <td colSpan={6} className="px-4 py-12 text-center text-gray-500">
+                                    <td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">
                                         <svg className="w-12 h-12 mx-auto mb-2 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                                         </svg>
@@ -282,10 +282,10 @@ export default function TransactionsPage() {
                                 </tr>
                             ) : (
                                 transactions.map(tx => {
-                                    const typeInfo = typeLabels[tx.type] || { label: tx.type, color: 'bg-gray-100 text-gray-700', icon: '📝' }
+                                    const typeInfo = typeLabels[tx.type] || { label: tx.type, color: 'bg-muted text-gray-700', icon: '📝' }
                                     return (
-                                        <tr key={tx.id} className="hover:bg-gray-50">
-                                            <td className="px-4 py-3 text-sm text-gray-500">
+                                        <tr key={tx.id} className="hover:bg-background">
+                                            <td className="px-4 py-3 text-sm text-muted-foreground">
                                                 {new Date(tx.created_at).toLocaleString('zh-TW', {
                                                     month: 'numeric',
                                                     day: 'numeric',
@@ -294,7 +294,7 @@ export default function TransactionsPage() {
                                                 })}
                                             </td>
                                             <td className="px-4 py-3">
-                                                <span className="font-medium text-gray-900">
+                                                <span className="font-medium text-foreground">
                                                     {tx.profiles?.nickname || tx.profiles?.full_name || '—'}
                                                 </span>
                                             </td>

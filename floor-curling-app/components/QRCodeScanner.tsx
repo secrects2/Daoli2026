@@ -148,7 +148,7 @@ export function QRCodeScanner({ onScan, onError, className = '' }: QRCodeScanner
                 <div className="absolute inset-0 flex items-center justify-center bg-gray-900 z-10">
                     <button
                         onClick={startScanner}
-                        className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 shadow-lg transition-transform active:scale-95"
+                        className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 shadow-lg transition-transform active:scale-95"
                     >
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
@@ -170,7 +170,7 @@ export function QRCodeScanner({ onScan, onError, className = '' }: QRCodeScanner
                         <p className="text-red-300 text-sm mt-1 mb-3">請檢查瀏覽器權限設定</p>
                         <button
                             onClick={startScanner}
-                            className="px-4 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20 text-sm"
+                            className="px-4 py-2 bg-card/10 text-white rounded-lg hover:bg-card/20 text-sm"
                         >
                             再試一次
                         </button>

@@ -31,7 +31,7 @@ export default function LanguageSwitcher() {
         <div className="relative" ref={dropdownRef}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:text-blue-600 transition-colors"
+                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:text-primary transition-colors"
                 type="button"
             >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -41,7 +41,7 @@ export default function LanguageSwitcher() {
             </button>
 
             {isOpen && (
-                <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50 animate-fadeIn">
+                <div className="absolute right-0 mt-2 w-40 bg-card rounded-lg shadow-lg border border-border/50 py-1 z-50 animate-fadeIn">
                     {languages.map((lang) => (
                         <button
                             key={lang.code}
@@ -50,8 +50,8 @@ export default function LanguageSwitcher() {
                                 setIsOpen(false)
                             }}
                             className={`w-full text-left px-4 py-2 text-sm ${language === lang.code
-                                    ? 'bg-blue-50 text-blue-600 font-medium'
-                                    : 'text-gray-700 hover:bg-gray-50'
+                                    ? 'bg-primary/10 text-primary font-medium'
+                                    : 'text-gray-700 hover:bg-background'
                                 }`}
                         >
                             {lang.name}

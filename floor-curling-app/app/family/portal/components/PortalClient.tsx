@@ -124,11 +124,11 @@ export default function PortalClient({ user, profile, elders, wallet }: PortalCl
     return (
         <div className="min-h-screen pb-20 space-y-6">
             {/* Glass Header */}
-            <div className="sticky top-0 z-20 backdrop-blur-xl bg-white/70 border-b border-white/50 px-5 pt-12 pb-4 shadow-glass transition-all duration-300">
+            <div className="sticky top-0 z-20 backdrop-blur-xl bg-card/70 border-b border-white/50 px-5 pt-12 pb-4 shadow-card transition-all duration-300">
                 <div className="flex justify-between items-center">
                     <div>
-                        <h1 className="text-3xl font-black text-gray-900 tracking-tight">家屬入口</h1>
-                        <p className="text-sm font-medium text-gray-500">
+                        <h1 className="text-3xl font-extrabold text-foreground tracking-tight">家屬入口</h1>
+                        <p className="text-sm font-medium text-muted-foreground">
                             {profile?.full_name || user?.user_metadata?.full_name || '家屬會員'}，您好
                         </p>
                     </div>
@@ -141,7 +141,7 @@ export default function PortalClient({ user, profile, elders, wallet }: PortalCl
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
                             登出
                         </button>
-                        <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden ring-2 ring-white shadow-sm">
+                        <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden ring-2 ring-white shadow-card">
                             {user?.user_metadata?.avatar_url ? (
                                 <img src={user.user_metadata.avatar_url} alt="用戶頭像" className="w-full h-full object-cover" />
                             ) : (
@@ -165,7 +165,7 @@ export default function PortalClient({ user, profile, elders, wallet }: PortalCl
                                         onClick={() => setSelectedElderIndex(idx)}
                                         className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-bold transition-all ${idx === selectedElderIndex
                                             ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200'
-                                            : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+                                            : 'bg-card text-gray-600 border border-border hover:bg-background'
                                             }`}
                                     >
                                         {e.nickname || e.elder?.nickname || e.elder?.full_name || `長輩 ${idx + 1}`}
@@ -182,10 +182,10 @@ export default function PortalClient({ user, profile, elders, wallet }: PortalCl
                         )}
 
                         {/* Linked Elder Card - Premium Gradient */}
-                        <div className="relative bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl p-8 shadow-lg shadow-indigo-500/25 overflow-hidden text-white">
+                        <div className="relative bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-8 shadow-lg shadow-indigo-500/25 overflow-hidden text-white">
                             <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
                                 <div className="flex items-center gap-4">
-                                    <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-md shadow-inner flex items-center justify-center border border-white/10 overflow-hidden">
+                                    <div className="w-16 h-16 rounded-2xl bg-card/20 backdrop-blur-md shadow-inner flex items-center justify-center border border-white/10 overflow-hidden">
                                         {currentElder?.avatar_url ? (
                                             <img src={currentElder.avatar_url} alt={currentElder.full_name || '長輩頭像'} className="w-full h-full object-cover" />
                                         ) : (
@@ -216,7 +216,7 @@ export default function PortalClient({ user, profile, elders, wallet }: PortalCl
                             {/* Unbind Button */}
                             <button
                                 onClick={() => handleUnbind(currentElder?.id)}
-                                className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white/80 hover:text-white transition-colors"
+                                className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-card/20 hover:bg-card/30 flex items-center justify-center text-white/80 hover:text-white transition-colors"
                                 title="解除綁定"
                             >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -225,7 +225,7 @@ export default function PortalClient({ user, profile, elders, wallet }: PortalCl
                             </button>
 
                             {/* Background Decor */}
-                            <div className="absolute top-0 right-0 -mr-12 -mt-12 w-48 h-48 bg-white/10 rounded-full blur-2xl"></div>
+                            <div className="absolute top-0 right-0 -mr-12 -mt-12 w-48 h-48 bg-card/10 rounded-full blur-2xl"></div>
                             <div className="absolute bottom-0 left-0 -ml-12 -mb-12 w-32 h-32 bg-purple-400/20 rounded-full blur-xl"></div>
                         </div>
 
@@ -234,7 +234,7 @@ export default function PortalClient({ user, profile, elders, wallet }: PortalCl
                             <button
                                 onClick={() => setShowScanner(true)}
                                 disabled={isBinding}
-                                className="w-full py-3 bg-white border-2 border-dashed border-gray-200 rounded-2xl text-gray-500 font-bold hover:border-indigo-300 hover:text-indigo-600 transition-all"
+                                className="w-full py-3 bg-card border-2 border-dashed border-border rounded-2xl text-muted-foreground font-bold hover:border-indigo-300 hover:text-indigo-600 transition-all"
                             >
                                 {isBinding ? '綁定中...' : '+ 新增另一位長輩'}
                             </button>
@@ -242,13 +242,13 @@ export default function PortalClient({ user, profile, elders, wallet }: PortalCl
                     </>
                 ) : (
                     /* Not Linked Alert */
-                    <div className="bg-orange-50 border border-orange-100 rounded-3xl p-6 flex flex-col items-center text-center gap-4 animate-pulse-slow">
+                    <div className="bg-orange-50 border border-orange-100 rounded-2xl p-6 flex flex-col items-center text-center gap-4 animate-pulse-slow">
                         <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center text-3xl">
                             🔗
                         </div>
                         <div>
-                            <h3 className="text-lg font-bold text-gray-900">尚未綁定長輩</h3>
-                            <p className="text-gray-500 text-sm mt-1 mb-4">
+                            <h3 className="text-lg font-bold text-foreground">尚未綁定長輩</h3>
+                            <p className="text-muted-foreground text-sm mt-1 mb-4">
                                 請掃描長輩手機上的 QR Code 進行綁定，<br />以便隨時關心長輩動態。
                             </p>
                             <button
@@ -264,59 +264,59 @@ export default function PortalClient({ user, profile, elders, wallet }: PortalCl
 
                 {/* Dashboard Grid */}
                 <div>
-                    <h3 className="ml-1 mb-3 text-xs font-bold text-gray-400 uppercase tracking-widest">功能選單</h3>
+                    <h3 className="ml-1 mb-3 text-xs font-bold text-muted-foreground uppercase tracking-widest">功能選單</h3>
                     <div className="grid grid-cols-2 gap-4">
 
                         {/* Health Passbook */}
-                        <Link href="/family/health" className="col-span-2 group bg-white rounded-3xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:border-pink-200 transition-all flex items-center gap-4">
+                        <Link href="/family/health" className="col-span-2 group bg-card rounded-2xl p-5 shadow-card border border-border/50 hover:shadow-md hover:border-pink-200 transition-all flex items-center gap-4">
                             <div className="w-12 h-12 bg-pink-50 rounded-2xl flex items-center justify-center text-pink-600 group-hover:scale-110 transition-transform duration-300">
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
                             </div>
                             <div>
-                                <h4 className="text-lg font-bold text-gray-900">健康 / 運動存摺</h4>
-                                <p className="text-xs text-gray-500">追蹤長輩的活躍指標與健康趨勢</p>
+                                <h4 className="text-lg font-bold text-foreground">健康 / 運動存摺</h4>
+                                <p className="text-xs text-muted-foreground">追蹤長輩的活躍指標與健康趨勢</p>
                             </div>
-                            <div className="ml-auto w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
+                            <div className="ml-auto w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                             </div>
                         </Link>
 
                         {/* 地板滾球比賽記錄入口 */}
-                        <Link href="/family/health" className="group bg-white rounded-3xl p-6 shadow-sm border border-gray-100 hover:shadow-md hover:border-blue-200 transition-all flex flex-col justify-between h-40">
-                            <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform duration-300">
+                        <Link href="/family/health" className="group bg-card rounded-2xl p-6 shadow-card border border-border/50 hover:shadow-md hover:border-blue-200 transition-all flex flex-col justify-between h-40">
+                            <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary group-hover:scale-110 transition-transform duration-300">
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
                             </div>
                             <div>
-                                <h4 className="text-lg font-bold text-gray-900">地板滾球紀錄</h4>
-                                <p className="text-xs text-gray-500 mt-1">查看滾球賽事數據</p>
+                                <h4 className="text-lg font-bold text-foreground">地板滾球紀錄</h4>
+                                <p className="text-xs text-muted-foreground mt-1">查看滾球賽事數據</p>
                             </div>
                         </Link>
 
                         {/* Photos */}
-                        <Link href="/family/photos" className="group bg-white rounded-3xl p-6 shadow-sm border border-gray-100 hover:shadow-md hover:border-green-200 transition-all flex flex-col justify-between h-40">
+                        <Link href="/family/photos" className="group bg-card rounded-2xl p-6 shadow-card border border-border/50 hover:shadow-md hover:border-green-200 transition-all flex flex-col justify-between h-40">
                             <div className="w-12 h-12 bg-green-50 rounded-2xl flex items-center justify-center text-green-600 group-hover:scale-110 transition-transform duration-300">
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                             </div>
                             <div>
-                                <h4 className="text-lg font-bold text-gray-900">精彩相簿</h4>
-                                <p className="text-xs text-gray-500 mt-1">活動照片影片</p>
+                                <h4 className="text-lg font-bold text-foreground">精彩相簿</h4>
+                                <p className="text-xs text-muted-foreground mt-1">活動照片影片</p>
                             </div>
                         </Link>
 
                         {/* Shop - Featured */}
-                        <Link href="/family/shop" className="col-span-2 group relative overflow-hidden bg-gradient-to-r from-pink-500 to-rose-500 rounded-3xl p-6 shadow-lg shadow-pink-500/20 text-white hover:shadow-pink-500/30 transition-all active:scale-[0.98]">
+                        <Link href="/family/shop" className="col-span-2 group relative overflow-hidden bg-gradient-to-r from-pink-500 to-rose-500 rounded-2xl p-6 shadow-lg shadow-pink-500/20 text-white hover:shadow-pink-500/30 transition-all active:scale-[0.98]">
                             <div className="relative z-10 flex items-center justify-between">
                                 <div>
-                                    <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold mb-3">
+                                    <div className="inline-flex items-center gap-2 bg-card/20 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold mb-3">
                                         <span>🛍️</span>
                                         <span>兌換積分: {wallet?.local_points || 0} ｜ 榮譽積分: {wallet?.global_points || 0}</span>
                                     </div>
-                                    <h4 className="text-2xl font-black">送禮給長輩</h4>
+                                    <h4 className="text-2xl font-extrabold">送禮給長輩</h4>
                                     <p className="text-pink-100 text-sm mt-1 max-w-[200px]">
                                         為 {currentElder?.nickname || currentElder?.full_name || '長輩'} 添購裝備，讓他在場上更神氣！
                                     </p>
                                 </div>
-                                <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center text-4xl shadow-inner backdrop-blur-md">
+                                <div className="w-16 h-16 bg-card/20 rounded-full flex items-center justify-center text-4xl shadow-inner backdrop-blur-md">
                                     🎁
                                 </div>
                             </div>
@@ -325,15 +325,15 @@ export default function PortalClient({ user, profile, elders, wallet }: PortalCl
                         </Link>
 
                         {/* Chat */}
-                        <Link href="/family/messages" className="col-span-2 group bg-white rounded-3xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:border-purple-200 transition-all flex items-center gap-4">
+                        <Link href="/family/messages" className="col-span-2 group bg-card rounded-2xl p-5 shadow-card border border-border/50 hover:shadow-md hover:border-purple-200 transition-all flex items-center gap-4">
                             <div className="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600 group-hover:scale-110 transition-transform duration-300">
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
                             </div>
                             <div>
-                                <h4 className="text-lg font-bold text-gray-900">聊天室與通知</h4>
-                                <p className="text-xs text-gray-500">查看最新消息</p>
+                                <h4 className="text-lg font-bold text-foreground">聊天室與通知</h4>
+                                <p className="text-xs text-muted-foreground">查看最新消息</p>
                             </div>
-                            <div className="ml-auto w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
+                            <div className="ml-auto w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                             </div>
                         </Link>

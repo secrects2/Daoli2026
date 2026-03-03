@@ -88,9 +88,9 @@ export default function FamilyShopClient({ user, elder, products, aiSessions = [
 
     if (!elder) {
         return (
-            <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+            <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
                 <p className="text-xl text-gray-600 mb-4">您尚未綁定長輩，無法使用商店功能。</p>
-                <button onClick={() => router.push('/family/bind')} className="text-blue-600 underline">
+                <button onClick={() => router.push('/family/bind')} className="text-primary underline">
                     前往綁定
                 </button>
             </div>
@@ -98,17 +98,17 @@ export default function FamilyShopClient({ user, elder, products, aiSessions = [
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-20">
+        <div className="min-h-screen bg-background pb-20">
             {/* Header */}
-            <div className="sticky top-0 z-10 bg-white shadow-sm pt-4 pb-4 px-4">
+            <div className="sticky top-0 z-10 bg-card shadow-card pt-4 pb-4 px-4">
                 <div className="max-w-7xl mx-auto flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <button onClick={() => router.back()} className="text-gray-600 hover:bg-gray-100 p-2 rounded-full" aria-label="返回">
+                        <button onClick={() => router.back()} className="text-gray-600 hover:bg-muted p-2 rounded-full" aria-label="返回">
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
                         </button>
                         <div>
-                            <h1 className="text-xl font-bold text-gray-900">送禮給 {elder.full_name}</h1>
-                            <p className="text-xs text-gray-500">💰 用新台幣為長輩購買禮物</p>
+                            <h1 className="text-xl font-bold text-foreground">送禮給 {elder.full_name}</h1>
+                            <p className="text-xs text-muted-foreground">💰 用新台幣為長輩購買禮物</p>
                         </div>
                     </div>
                 </div>
@@ -116,7 +116,7 @@ export default function FamilyShopClient({ user, elder, products, aiSessions = [
 
             <main className="max-w-7xl mx-auto px-4 py-6">
                 {aiSessions.length > 0 && (
-                    <div className="mb-8 p-5 rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 to-purple-50 shadow-sm relative overflow-hidden">
+                    <div className="mb-8 p-5 rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 to-purple-50 shadow-card relative overflow-hidden">
                         <div className="absolute -top-4 -right-4 text-8xl opacity-5">💡</div>
                         <h4 className="font-bold text-lg text-indigo-900 mb-2 flex items-center gap-2 relative z-10">
                             <span>✨</span> 專屬 AI 智能推薦
@@ -133,11 +133,11 @@ export default function FamilyShopClient({ user, elder, products, aiSessions = [
                                     <div
                                         key={idx}
                                         onClick={() => actualProduct && handleBuyClick(actualProduct)}
-                                        className={`bg-white/90 backdrop-blur-sm p-4 rounded-xl flex items-center gap-4 shadow-sm border border-indigo-50 transition-all group ${actualProduct ? 'hover:border-indigo-300 hover:shadow-md cursor-pointer' : 'opacity-70'}`}
+                                        className={`bg-card/90 backdrop-blur-sm p-4 rounded-xl flex items-center gap-4 shadow-card border border-indigo-50 transition-all group ${actualProduct ? 'hover:border-indigo-300 hover:shadow-md cursor-pointer' : 'opacity-70'}`}
                                     >
                                         <div className="text-4xl bg-indigo-50/50 w-16 h-16 flex items-center justify-center rounded-xl group-hover:scale-110 transition-transform">{product.icon}</div>
                                         <div className="flex-1">
-                                            <p className="font-bold text-gray-900 text-lg">{product.name}</p>
+                                            <p className="font-bold text-foreground text-lg">{product.name}</p>
                                             <p className="text-xs text-gray-600 mt-1 line-clamp-2">{product.reason}</p>
                                         </div>
                                         {actualProduct && (
@@ -154,13 +154,13 @@ export default function FamilyShopClient({ user, elder, products, aiSessions = [
 
                 {displayProducts.length === 0 ? (
                     <div className="text-center py-16">
-                        <p className="text-gray-500">目前沒有可購買的商品</p>
+                        <p className="text-muted-foreground">目前沒有可購買的商品</p>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {displayProducts.map(product => (
-                            <div key={product.id} className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-all border border-transparent hover:border-blue-200">
-                                <div className="aspect-video bg-gray-100 p-6 flex items-center justify-center">
+                            <div key={product.id} className="bg-card rounded-xl shadow-card overflow-hidden hover:shadow-md transition-all border border-transparent hover:border-blue-200">
+                                <div className="aspect-video bg-muted p-6 flex items-center justify-center">
                                     <img src={product.image_url} alt={product.name} className="w-full h-full object-contain mix-blend-multiply" />
                                 </div>
                                 <div className="p-5">
@@ -177,13 +177,13 @@ export default function FamilyShopClient({ user, elder, products, aiSessions = [
                                             NT$ {product.price_twd || product.price_points}
                                         </span>
                                     </div>
-                                    <h3 className="font-bold text-gray-900 text-lg mb-1">{product.name}</h3>
-                                    <p className="text-sm text-gray-500 mb-4 h-10 line-clamp-2">{product.description}</p>
+                                    <h3 className="font-bold text-foreground text-lg mb-1">{product.name}</h3>
+                                    <p className="text-sm text-muted-foreground mb-4 h-10 line-clamp-2">{product.description}</p>
 
                                     <button
                                         onClick={() => handleBuyClick(product)}
                                         disabled={!!purchasing}
-                                        className="w-full py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+                                        className="w-full py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors bg-primary text-white hover:bg-blue-700 disabled:opacity-50"
                                     >
                                         {purchasing === product.id ? (
                                             <>
@@ -207,10 +207,10 @@ export default function FamilyShopClient({ user, elder, products, aiSessions = [
             {/* Note Modal */}
             {showNoteModal && selectedProduct && (
                 <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4">
-                    <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
-                        <h3 className="text-xl font-bold text-gray-900 mb-4">送禮給 {elder.full_name}</h3>
+                    <div className="bg-card rounded-2xl max-w-md w-full p-6 shadow-2xl">
+                        <h3 className="text-xl font-bold text-foreground mb-4">送禮給 {elder.full_name}</h3>
 
-                        <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                        <div className="bg-background rounded-lg p-4 mb-4">
                             <div className="flex justify-between">
                                 <span className="font-medium">{selectedProduct.name}</span>
                                 <span className="text-orange-600 font-bold">NT$ {selectedProduct.price_twd || selectedProduct.price_points}</span>
@@ -236,13 +236,13 @@ export default function FamilyShopClient({ user, elder, products, aiSessions = [
                                     setSelectedProduct(null)
                                     setNote('')
                                 }}
-                                className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-lg font-medium"
+                                className="flex-1 py-3 bg-muted text-gray-700 rounded-lg font-medium"
                             >
                                 取消
                             </button>
                             <button
                                 onClick={handleConfirmPurchase}
-                                className="flex-1 py-3 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition-colors"
+                                className="flex-1 py-3 bg-primary text-white rounded-lg font-bold hover:bg-blue-700 transition-colors"
                             >
                                 💳 信用卡付款
                             </button>

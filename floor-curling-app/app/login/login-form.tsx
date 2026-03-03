@@ -89,10 +89,10 @@ export default function LoginForm() {
 
     const devButtons = [
         { role: 'admin', label: '後台', color: 'bg-red-500 hover:bg-red-600 text-white' },
-        { role: 'pharmacist', label: '加盟店', color: 'bg-blue-500 hover:bg-blue-600 text-white' },
+        { role: 'pharmacist', label: '加盟店', color: 'bg-primary/100 hover:bg-primary text-white' },
         { role: 'family', label: '家屬', color: 'bg-green-500 hover:bg-green-600 text-white' },
         { role: 'family_bound', label: '已綁家屬', color: 'bg-purple-500 hover:bg-purple-600 text-white' },
-        { role: 'elder', label: '長輩', color: 'bg-white hover:bg-gray-50 text-gray-700 border border-gray-200' },
+        { role: 'elder', label: '長輩', color: 'bg-card hover:bg-background text-gray-700 border border-border' },
     ]
 
     const [isAutoLoggingIn, setIsAutoLoggingIn] = useState(false)
@@ -117,12 +117,12 @@ export default function LoginForm() {
             <div className="flex flex-col items-center justify-center py-12 space-y-4 animate-fade-in">
                 <div className="w-12 h-12 border-4 border-[#06C755]/30 border-t-[#06C755] rounded-full animate-spin"></div>
                 <div className="text-center">
-                    <p className="text-gray-900 font-bold text-lg">正在使用 LINE 帳號登入...</p>
-                    <p className="text-gray-500 text-sm mt-1">請稍候，正在為您跳轉</p>
+                    <p className="text-foreground font-bold text-lg">正在使用 LINE 帳號登入...</p>
+                    <p className="text-muted-foreground text-sm mt-1">請稍候，正在為您跳轉</p>
                 </div>
                 <button
                     onClick={() => setIsAutoLoggingIn(false)}
-                    className="text-sm text-gray-400 hover:text-gray-600 underline mt-4"
+                    className="text-sm text-muted-foreground hover:text-gray-600 underline mt-4"
                 >
                     取消自動登入
                 </button>
@@ -135,10 +135,10 @@ export default function LoginForm() {
             {/* 全屏加載覆蓋層 - 快速登入時顯示 */}
             {loading && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center">
-                    <div className="bg-white rounded-2xl p-8 shadow-2xl flex flex-col items-center gap-4 animate-fade-in">
+                    <div className="bg-card rounded-2xl p-8 shadow-2xl flex flex-col items-center gap-4 animate-fade-in">
                         <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent"></div>
-                        <p className="text-lg font-bold text-gray-900">登入中...</p>
-                        <p className="text-sm text-gray-500">請稍候</p>
+                        <p className="text-lg font-bold text-foreground">登入中...</p>
+                        <p className="text-sm text-muted-foreground">請稍候</p>
                     </div>
                 </div>
             )}
@@ -155,7 +155,7 @@ export default function LoginForm() {
                     onClick={() => setLoginMode('family')}
                     className={clsx(
                         "flex-1 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 relative z-10",
-                        loginMode === 'family' ? "bg-white text-gray-900 shadow-sm transform scale-100" : "text-gray-500 hover:text-gray-700"
+                        loginMode === 'family' ? "bg-card text-foreground shadow-card transform scale-100" : "text-muted-foreground hover:text-gray-700"
                     )}
                 >
                     家屬登入
@@ -164,7 +164,7 @@ export default function LoginForm() {
                     onClick={() => setLoginMode('pharmacist')}
                     className={clsx(
                         "flex-1 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 relative z-10",
-                        loginMode === 'pharmacist' ? "bg-white text-gray-900 shadow-sm transform scale-100" : "text-gray-500 hover:text-gray-700"
+                        loginMode === 'pharmacist' ? "bg-card text-foreground shadow-card transform scale-100" : "text-muted-foreground hover:text-gray-700"
                     )}
                 >
                     加盟店登入
@@ -183,19 +183,19 @@ export default function LoginForm() {
                             <path d="M20.5 10c0-4.8-4.5-8.7-10-8.7S.5 5.2.5 10c0 4.3 3.6 7.9 8.5 8.6.3.1.5.2.5.5v2.2c0 .2.1.4.3.4.1 0 .2 0 .3-.1.9-.5 4.1-2.4 5.7-4.1 3-2.6 4.7-5.3 4.7-8.5z" />
                         </svg>
                         <span className="relative z-10">家屬登入 (LINE)</span>
-                        <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+                        <div className="absolute inset-0 bg-card/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
                     </button>
 
                     <div className="relative flex items-center py-2">
-                        <div className="flex-grow border-t border-gray-200"></div>
-                        <span className="flex-shrink-0 mx-4 text-gray-400 text-xs font-medium tracking-wider">或是</span>
-                        <div className="flex-grow border-t border-gray-200"></div>
+                        <div className="flex-grow border-t border-border"></div>
+                        <span className="flex-shrink-0 mx-4 text-muted-foreground text-xs font-medium tracking-wider">或是</span>
+                        <div className="flex-grow border-t border-border"></div>
                     </div>
 
                     <button
                         type="button"
                         onClick={() => handleLineLogin('elder')}
-                        className="w-full py-4 rounded-2xl bg-white border border-gray-200 hover:bg-gray-50 text-[#06C755] font-bold text-lg shadow-sm hover:shadow-md transition-all transform active:scale-95 flex items-center justify-center gap-3"
+                        className="w-full py-4 rounded-2xl bg-card border border-border hover:bg-background text-[#06C755] font-bold text-lg shadow-card hover:shadow-md transition-all transform active:scale-95 flex items-center justify-center gap-3"
                     >
                         <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M20.5 10c0-4.8-4.5-8.7-10-8.7S.5 5.2.5 10c0 4.3 3.6 7.9 8.5 8.6.3.1.5.2.5.5v2.2c0 .2.1.4.3.4.1 0 .2 0 .3-.1.9-.5 4.1-2.4 5.7-4.1 3-2.6 4.7-5.3 4.7-8.5z" />
@@ -203,7 +203,7 @@ export default function LoginForm() {
                         長輩登入 (LINE)
                     </button>
 
-                    <p className="text-center text-xs text-gray-400 mt-4 leading-relaxed">
+                    <p className="text-center text-xs text-muted-foreground mt-4 leading-relaxed">
                         綁定長輩帳號後，您將可以即時查看長輩的<br />比賽成績與健康數據。
                     </p>
                 </div>
@@ -214,27 +214,27 @@ export default function LoginForm() {
                 <div className="space-y-4 animate-slide-in-right">
                     <form className="space-y-4" onSubmit={handleLogin}>
                         <div className="space-y-1">
-                            <label className="text-xs font-bold text-gray-500 ml-1 uppercase">Email</label>
+                            <label className="text-xs font-bold text-muted-foreground ml-1 uppercase">Email</label>
                             <input
                                 name="email"
                                 type="email"
                                 required
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all font-medium"
+                                className="w-full px-4 py-3 rounded-xl bg-background border border-border focus:bg-card focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all font-medium"
                                 placeholder="店長信箱"
                             />
                         </div>
 
                         <div className="space-y-1">
-                            <label className="text-xs font-bold text-gray-500 ml-1 uppercase">Password</label>
+                            <label className="text-xs font-bold text-muted-foreground ml-1 uppercase">Password</label>
                             <input
                                 name="password"
                                 type="password"
                                 required
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all font-medium"
+                                className="w-full px-4 py-3 rounded-xl bg-background border border-border focus:bg-card focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all font-medium"
                                 placeholder="••••••••"
                             />
                         </div>
@@ -259,9 +259,9 @@ export default function LoginForm() {
             <div className="pt-8 mt-6">
                 <div className="relative flex items-center justify-center mb-4">
                     <div className="absolute inset-0 flex items-center">
-                        <div className="w-full border-t border-gray-100"></div>
+                        <div className="w-full border-t border-border/50"></div>
                     </div>
-                    <span className="relative bg-white px-2 py-0.5 rounded text-[10px] uppercase font-bold text-gray-300">Development Mode</span>
+                    <span className="relative bg-card px-2 py-0.5 rounded text-[10px] uppercase font-bold text-gray-300">Development Mode</span>
                 </div>
                 <div className="grid grid-cols-5 gap-2">
                     {devButtons.map(btn => (
@@ -269,7 +269,7 @@ export default function LoginForm() {
                             key={btn.role}
                             onClick={() => handleQuickLogin(btn.role as any)}
                             className={clsx(
-                                "py-2 rounded-lg text-[10px] font-bold transition-transform active:scale-95 uppercase tracking-tight shadow-sm",
+                                "py-2 rounded-lg text-[10px] font-bold transition-transform active:scale-95 uppercase tracking-tight shadow-card",
                                 btn.color
                             )}
                         >
@@ -278,7 +278,7 @@ export default function LoginForm() {
                     ))}
                 </div>
                 <div className="text-center mt-3">
-                    <a href="/logout" className="text-[10px] text-gray-400 hover:text-blue-500 transition-colors">
+                    <a href="/logout" className="text-[10px] text-muted-foreground hover:text-blue-500 transition-colors">
                         Clear Cache & Reset
                     </a>
                 </div>

@@ -103,7 +103,7 @@ export default function ElderSearchInput({
     return (
         <div ref={containerRef} className={`relative ${className}`}>
             <div className="relative">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
@@ -115,33 +115,33 @@ export default function ElderSearchInput({
                     onFocus={() => results.length > 0 && setShowDropdown(true)}
                     placeholder={placeholder}
                     disabled={disabled}
-                    className="w-full pl-9 pr-4 py-2.5 border rounded-xl text-sm bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none transition-all disabled:opacity-50 disabled:bg-gray-50"
+                    className="w-full pl-9 pr-4 py-2.5 border rounded-xl text-sm bg-card focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none transition-all disabled:opacity-50 disabled:bg-background"
                 />
                 {loading && (
                     <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                        <div className="w-4 h-4 border-2 border-gray-200 border-t-blue-500 rounded-full animate-spin" />
+                        <div className="w-4 h-4 border-2 border-border border-t-blue-500 rounded-full animate-spin" />
                     </div>
                 )}
             </div>
 
             {/* 自动补全下拉 */}
             {showDropdown && (
-                <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden max-h-52 overflow-y-auto">
+                <div className="absolute z-50 w-full mt-1 bg-card border border-border rounded-xl shadow-lg overflow-hidden max-h-52 overflow-y-auto">
                     {results.map(elder => (
                         <button
                             key={elder.id}
                             type="button"
                             onClick={() => handleSelect(elder)}
-                            className="w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors flex items-center gap-3 border-b border-gray-50 last:border-0"
+                            className="w-full text-left px-4 py-3 hover:bg-primary/10 transition-colors flex items-center gap-3 border-b border-gray-50 last:border-0"
                         >
                             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center text-sm">
                                 👴
                             </div>
                             <div className="flex-1 min-w-0">
-                                <p className="font-bold text-gray-900 text-sm truncate">
+                                <p className="font-bold text-foreground text-sm truncate">
                                     {elder.nickname || elder.full_name || '未命名'}
                                 </p>
-                                <p className="text-xs text-gray-400 font-mono truncate">
+                                <p className="text-xs text-muted-foreground font-mono truncate">
                                     {elder.id.slice(0, 8)}...
                                 </p>
                             </div>

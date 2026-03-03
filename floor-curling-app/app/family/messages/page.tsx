@@ -117,22 +117,22 @@ export default function MessagesPage() {
         }
     }
 
-    if (loading) return <div className="p-8 text-center text-gray-500">載入中...</div>
+    if (loading) return <div className="p-8 text-center text-muted-foreground">載入中...</div>
 
     // CONTACT LIST VIEW
     if (!activeContact) {
         return (
-            <div className="min-h-screen bg-gray-50 flex flex-col">
-                <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-3 sticky top-0">
-                    <Link href="/family/dashboard" className="text-blue-600">
+            <div className="min-h-screen bg-background flex flex-col">
+                <div className="bg-card border-b border-border px-4 py-3 flex items-center gap-3 sticky top-0">
+                    <Link href="/family/dashboard" className="text-primary">
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path></svg>
                     </Link>
-                    <h1 className="font-bold text-gray-900 text-lg">訊息中心</h1>
+                    <h1 className="font-bold text-foreground text-lg">訊息中心</h1>
                 </div>
 
                 <div className="p-4 space-y-4">
                     {contacts.length === 0 ? (
-                        <div className="text-center text-gray-500 mt-10">
+                        <div className="text-center text-muted-foreground mt-10">
                             暫無聯絡人 (需先綁定長輩或加入店家)
                         </div>
                     ) : (
@@ -140,15 +140,15 @@ export default function MessagesPage() {
                             <div
                                 key={contact.id}
                                 onClick={() => setActiveContact(contact)}
-                                className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-4 active:scale-98 transition-transform cursor-pointer"
+                                className="bg-card p-4 rounded-xl shadow-card flex items-center gap-4 active:scale-98 transition-transform cursor-pointer"
                             >
                                 <img
                                     src={contact.avatar_url || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + contact.id}
                                     className="w-12 h-12 rounded-full bg-gray-200"
                                 />
                                 <div className="flex-1">
-                                    <h3 className="font-bold text-gray-900">{contact.full_name}</h3>
-                                    <p className="text-xs text-gray-500">
+                                    <h3 className="font-bold text-foreground">{contact.full_name}</h3>
+                                    <p className="text-xs text-muted-foreground">
                                         {contact.role === 'elder' ? '長輩' :
                                             contact.role === 'pharmacist' ? '店長' : '管理員'}
                                     </p>
@@ -164,10 +164,10 @@ export default function MessagesPage() {
 
     // CHAT VIEW
     return (
-        <div className="flex flex-col h-screen bg-gray-100">
+        <div className="flex flex-col h-screen bg-muted">
             {/* Header */}
-            <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-3 shadow-sm z-10 sticky top-0">
-                <button onClick={() => setActiveContact(null)} className="text-blue-600">
+            <div className="bg-card border-b border-border px-4 py-3 flex items-center gap-3 shadow-card z-10 sticky top-0">
+                <button onClick={() => setActiveContact(null)} className="text-primary">
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path></svg>
                 </button>
                 <div className="flex items-center gap-3 flex-1">
@@ -176,7 +176,7 @@ export default function MessagesPage() {
                         className="w-8 h-8 rounded-full bg-gray-200"
                     />
                     <div>
-                        <h1 className="font-bold text-gray-900 text-base">{activeContact.full_name}</h1>
+                        <h1 className="font-bold text-foreground text-base">{activeContact.full_name}</h1>
                         <p className="text-xs text-green-600 flex items-center gap-1">
                             <span className="w-2 h-2 rounded-full bg-green-500"></span>
                             {activeContact.role === 'elder' ? '長輩' : '店長'}
@@ -197,12 +197,12 @@ export default function MessagesPage() {
                                     className="w-8 h-8 rounded-full bg-gray-200 mr-2 self-end mb-1"
                                 />
                             )}
-                            <div className={`max-w-[75%] rounded-2xl px-4 py-2 shadow-sm relative ${isMe
-                                ? 'bg-blue-600 text-white rounded-br-none'
-                                : 'bg-white text-gray-900 rounded-bl-none'
+                            <div className={`max-w-[75%] rounded-2xl px-4 py-2 shadow-card relative ${isMe
+                                ? 'bg-primary text-white rounded-br-none'
+                                : 'bg-card text-foreground rounded-bl-none'
                                 }`}>
                                 <p className="text-[15px] leading-relaxed break-words">{msg.content}</p>
-                                <span className={`text-[10px] block text-right mt-1 ${isMe ? 'text-blue-200' : 'text-gray-400'}`}>
+                                <span className={`text-[10px] block text-right mt-1 ${isMe ? 'text-blue-200' : 'text-muted-foreground'}`}>
                                     {new Date(msg.created_at).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })}
                                 </span>
                             </div>
@@ -213,7 +213,7 @@ export default function MessagesPage() {
             </div>
 
             {/* Input Area */}
-            <div className="bg-white border-t border-gray-200 p-4 pb-8">
+            <div className="bg-card border-t border-border p-4 pb-8">
                 <div className="flex gap-2 max-w-3xl mx-auto">
                     <input
                         type="text"
@@ -221,12 +221,12 @@ export default function MessagesPage() {
                         onChange={e => setInput(e.target.value)}
                         onKeyDown={e => e.key === 'Enter' && handleSend()}
                         placeholder="輸入訊息..."
-                        className="flex-1 bg-gray-100 text-gray-900 rounded-full px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-sans"
+                        className="flex-1 bg-muted text-foreground rounded-full px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-sans"
                     />
                     <button
                         onClick={handleSend}
                         disabled={!input.trim()}
-                        className="bg-blue-600 text-white rounded-full w-12 h-12 flex items-center justify-center hover:bg-blue-700 disabled:opacity-50 disabled:scale-95 transition-all shadow-md"
+                        className="bg-primary text-white rounded-full w-12 h-12 flex items-center justify-center hover:bg-blue-700 disabled:opacity-50 disabled:scale-95 transition-all shadow-md"
                     >
                         ➤
                     </button>

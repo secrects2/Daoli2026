@@ -164,28 +164,28 @@ export default function GrantPointsPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-100">
+            <div className="min-h-screen flex items-center justify-center bg-muted">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
             </div>
         )
     }
 
     return (
-        <div className="min-h-screen bg-gray-100">
+        <div className="min-h-screen bg-muted">
             {/* 導航欄 */}
-            <nav className="bg-white shadow-sm">
+            <nav className="bg-card shadow-card">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16">
                         <div className="flex items-center">
                             <button
                                 onClick={() => router.back()}
-                                className="mr-4 text-gray-600 hover:text-gray-900"
+                                className="mr-4 text-gray-600 hover:text-foreground"
                             >
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                                 </svg>
                             </button>
-                            <h1 className="text-2xl font-bold text-blue-600">Local Points 發放</h1>
+                            <h1 className="text-2xl font-bold text-primary">Local Points 發放</h1>
                         </div>
                         <div className="flex items-center gap-4">
                             <LanguageSwitcher />
@@ -206,8 +206,8 @@ export default function GrantPointsPage() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     {/* 發放表單 */}
-                    <div className="bg-white rounded-xl shadow-sm p-6">
-                        <h2 className="text-lg font-semibold text-gray-900 mb-4">發放積分</h2>
+                    <div className="bg-card rounded-xl shadow-card p-6">
+                        <h2 className="text-lg font-semibold text-foreground mb-4">發放積分</h2>
 
                         <form onSubmit={handleSubmit} className="space-y-6">
                             {/* 選擇長輩 */}
@@ -217,7 +217,7 @@ export default function GrantPointsPage() {
                                 </label>
                                 <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-2">
                                     {elders.length === 0 ? (
-                                        <p className="text-gray-500 text-center py-4">尚無長輩資料</p>
+                                        <p className="text-muted-foreground text-center py-4">尚無長輩資料</p>
                                     ) : (
                                         elders.map(elder => (
                                             <button
@@ -225,8 +225,8 @@ export default function GrantPointsPage() {
                                                 type="button"
                                                 onClick={() => setSelectedElder(elder)}
                                                 className={`w-full text-left p-3 rounded-lg border-2 transition-all ${selectedElder?.id === elder.id
-                                                        ? 'border-blue-500 bg-blue-50'
-                                                        : 'border-gray-200 hover:border-blue-300'
+                                                        ? 'border-blue-500 bg-primary/10'
+                                                        : 'border-border hover:border-blue-300'
                                                     }`}
                                             >
                                                 <div className="flex items-center justify-between">
@@ -234,7 +234,7 @@ export default function GrantPointsPage() {
                                                         <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-teal-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
                                                             {(elder.nickname || elder.full_name || '?')[0]}
                                                         </div>
-                                                        <span className="font-medium text-gray-900">
+                                                        <span className="font-medium text-foreground">
                                                             {elder.nickname || elder.full_name || '未命名'}
                                                         </span>
                                                     </div>
@@ -261,7 +261,7 @@ export default function GrantPointsPage() {
                                             onClick={() => setPoints(amount)}
                                             className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${points === amount
                                                     ? 'bg-green-600 text-white'
-                                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                    : 'bg-muted text-gray-700 hover:bg-accent'
                                                 }`}
                                         >
                                             {amount}
@@ -274,7 +274,7 @@ export default function GrantPointsPage() {
                                     onChange={(e) => setPoints(Math.max(1, parseInt(e.target.value) || 0))}
                                     min={1}
                                     max={10000}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-foreground"
                                 />
                             </div>
 
@@ -288,11 +288,11 @@ export default function GrantPointsPage() {
                                     onChange={(e) => setDescription(e.target.value)}
                                     rows={3}
                                     maxLength={200}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-foreground"
                                     placeholder="例如：週年慶促銷活動獎勵、生日禮物..."
                                     required
                                 />
-                                <p className="text-xs text-gray-500 mt-1">{description.length}/200</p>
+                                <p className="text-xs text-muted-foreground mt-1">{description.length}/200</p>
                             </div>
 
                             {/* 提交按鈕 */}
@@ -319,11 +319,11 @@ export default function GrantPointsPage() {
                     </div>
 
                     {/* 最近發放記錄 */}
-                    <div className="bg-white rounded-xl shadow-sm p-6">
-                        <h2 className="text-lg font-semibold text-gray-900 mb-4">最近發放記錄</h2>
+                    <div className="bg-card rounded-xl shadow-card p-6">
+                        <h2 className="text-lg font-semibold text-foreground mb-4">最近發放記錄</h2>
 
                         {recentGrants.length === 0 ? (
-                            <div className="text-center py-8 text-gray-500">
+                            <div className="text-center py-8 text-muted-foreground">
                                 <svg className="w-12 h-12 mx-auto mb-2 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                                 </svg>
@@ -334,10 +334,10 @@ export default function GrantPointsPage() {
                                 {recentGrants.map(grant => (
                                     <div
                                         key={grant.id}
-                                        className="p-3 border border-gray-200 rounded-lg"
+                                        className="p-3 border border-border rounded-lg"
                                     >
                                         <div className="flex items-center justify-between mb-1">
-                                            <span className="font-medium text-gray-900">
+                                            <span className="font-medium text-foreground">
                                                 {grant.profiles?.nickname || grant.profiles?.full_name || '長輩'}
                                             </span>
                                             <span className="text-green-600 font-bold">
@@ -345,7 +345,7 @@ export default function GrantPointsPage() {
                                             </span>
                                         </div>
                                         <p className="text-sm text-gray-600">{grant.description}</p>
-                                        <p className="text-xs text-gray-400 mt-1">
+                                        <p className="text-xs text-muted-foreground mt-1">
                                             {new Date(grant.created_at).toLocaleString('zh-TW')}
                                         </p>
                                     </div>

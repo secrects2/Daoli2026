@@ -33,18 +33,18 @@ export default function AdminLocationsPage() {
         fetchStats()
     }, [])
 
-    if (loading) return <div className="p-8 text-center text-gray-500">載入數據中...</div>
+    if (loading) return <div className="p-8 text-center text-muted-foreground">載入數據中...</div>
 
     return (
-        <div className="min-h-screen bg-gray-50 p-6">
+        <div className="min-h-screen bg-background p-6">
             <div className="max-w-6xl mx-auto space-y-8">
                 <div className="flex items-center justify-between">
-                    <h1 className="text-2xl font-bold text-gray-900">據點營運排行</h1>
-                    <Link href="/admin" className="text-gray-500 hover:text-gray-900">返回總部</Link>
+                    <h1 className="text-2xl font-bold text-foreground">據點營運排行</h1>
+                    <Link href="/admin" className="text-muted-foreground hover:text-foreground">返回總部</Link>
                 </div>
 
                 {/* Chart Section */}
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <div className="bg-card p-6 rounded-2xl shadow-card border border-border/50">
                     <h2 className="text-lg font-bold text-gray-800 mb-6">各據點比賽熱度</h2>
                     <div className="h-[400px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
@@ -72,13 +72,13 @@ export default function AdminLocationsPage() {
                 </div>
 
                 {/* Data Table */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div className="p-6 border-b border-gray-100">
+                <div className="bg-card rounded-2xl shadow-card border border-border/50 overflow-hidden">
+                    <div className="p-6 border-b border-border/50">
                         <h2 className="text-lg font-bold text-gray-800">加盟店詳細清單</h2>
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-left text-sm text-gray-600">
-                            <thead className="bg-gray-50 text-gray-900 font-medium">
+                            <thead className="bg-background text-foreground font-medium">
                                 <tr>
                                     <th className="p-4 w-16">排名</th>
                                     <th className="p-4">店鋪名稱</th>
@@ -89,17 +89,17 @@ export default function AdminLocationsPage() {
                             </thead>
                             <tbody className="divide-y divide-gray-100">
                                 {stores.map((store, index) => (
-                                    <tr key={store.id} className="hover:bg-gray-50 transition-colors">
+                                    <tr key={store.id} className="hover:bg-background transition-colors">
                                         <td className="p-4">
                                             <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs
                                                 ${index === 0 ? 'bg-yellow-100 text-yellow-700' :
                                                     index === 1 ? 'bg-gray-200 text-gray-700' :
-                                                        index === 2 ? 'bg-orange-100 text-orange-800' : 'bg-gray-50 text-gray-500'}
+                                                        index === 2 ? 'bg-orange-100 text-orange-800' : 'bg-background text-muted-foreground'}
                                             `}>
                                                 {index + 1}
                                             </div>
                                         </td>
-                                        <td className="p-4 font-bold text-gray-900">
+                                        <td className="p-4 font-bold text-foreground">
                                             {store.name}
                                         </td>
                                         <td className="p-4">
@@ -112,7 +112,7 @@ export default function AdminLocationsPage() {
                                                 {store.status === 'active' ? '營運中' : '暫停'}
                                             </span>
                                         </td>
-                                        <td className="p-4 text-right font-mono font-bold text-blue-600">
+                                        <td className="p-4 text-right font-mono font-bold text-primary">
                                             {store.match_count}
                                         </td>
                                     </tr>

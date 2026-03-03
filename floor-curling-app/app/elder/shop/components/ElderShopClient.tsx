@@ -63,7 +63,7 @@ export default function ElderShopClient({ user, points: initialPoints, products 
     return (
         <div className="min-h-screen bg-background pb-20">
             {/* Header */}
-            <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-xl pt-5 pb-2 px-4 border-b border-border shadow-soft">
+            <div className="sticky top-0 z-10 bg-card/80 backdrop-blur-xl pt-5 pb-2 px-4 border-b border-border shadow-soft">
                 <div className="flex items-center justify-between">
                     <button onClick={() => router.back()} className="text-2xl">⬅️</button>
                     <h1 className="text-lg font-extrabold text-foreground">榮譽商店</h1>

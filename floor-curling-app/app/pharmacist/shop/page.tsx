@@ -139,11 +139,11 @@ export default function ShopPage() {
     // 稀有度顏色
     const getRarityColor = (rarity: string) => {
         switch (rarity) {
-            case 'common': return 'bg-gray-100 text-gray-700 border-gray-300'
+            case 'common': return 'bg-muted text-gray-700 border-gray-300'
             case 'rare': return 'bg-blue-100 text-blue-700 border-blue-300'
             case 'epic': return 'bg-purple-100 text-purple-700 border-purple-300'
             case 'legendary': return 'bg-yellow-100 text-yellow-700 border-yellow-400'
-            default: return 'bg-gray-100 text-gray-700 border-gray-300'
+            default: return 'bg-muted text-gray-700 border-gray-300'
         }
     }
 
@@ -166,7 +166,7 @@ export default function ShopPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-100">
+            <div className="min-h-screen flex items-center justify-center bg-muted">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
                     <p className="mt-4 text-gray-600">{t('common.loading')}</p> {/* Updated */}
@@ -178,19 +178,19 @@ export default function ShopPage() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50">
             {/* 導航欄 */}
-            <nav className="bg-white shadow-sm">
+            <nav className="bg-card shadow-card">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16">
                         <div className="flex items-center">
                             <button
                                 onClick={() => router.push('/pharmacist/dashboard')}
-                                className="mr-4 text-gray-600 hover:text-gray-900"
+                                className="mr-4 text-gray-600 hover:text-foreground"
                             >
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                                 </svg>
                             </button>
-                            <h1 className="text-2xl font-bold text-blue-600">{t('shop.title')}</h1> {/* Updated */}
+                            <h1 className="text-2xl font-bold text-primary">{t('shop.title')}</h1> {/* Updated */}
                         </div>
                         {/* 積分顯示 */}
                         <div className="flex items-center gap-4">
@@ -225,12 +225,12 @@ export default function ShopPage() {
                             key={rarity}
                             onClick={() => setSelectedRarity(rarity)}
                             className={`px-4 py-2 rounded-lg font-medium transition-colors ${selectedRarity === rarity
-                                ? rarity === 'all' ? 'bg-blue-600 text-white' :
+                                ? rarity === 'all' ? 'bg-primary text-white' :
                                     rarity === 'legendary' ? 'bg-yellow-500 text-white' :
                                         rarity === 'epic' ? 'bg-purple-600 text-white' :
-                                            rarity === 'rare' ? 'bg-blue-500 text-white' :
+                                            rarity === 'rare' ? 'bg-primary/100 text-white' :
                                                 'bg-gray-600 text-white'
-                                : 'bg-white text-gray-600 hover:bg-gray-50'
+                                : 'bg-card text-gray-600 hover:bg-background'
                                 }`}
                         >
                             {rarity === 'all' ? t('shop.rarity.all') : getRarityLabel(rarity)} {/* Updated */}
@@ -241,10 +241,10 @@ export default function ShopPage() {
 
                 {/* 裝備網格 */}
                 {filteredEquipment.length === 0 ? (
-                    <div className="bg-white rounded-xl shadow-sm p-12 text-center">
+                    <div className="bg-card rounded-xl shadow-card p-12 text-center">
                         <span className="text-6xl mb-4 block">🛒</span>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('shop.empty.title')}</h3> {/* Updated */}
-                        <p className="text-gray-500">{t('shop.empty.desc')}</p> {/* Updated */}
+                        <h3 className="text-lg font-semibold text-foreground mb-2">{t('shop.empty.title')}</h3> {/* Updated */}
+                        <p className="text-muted-foreground">{t('shop.empty.desc')}</p> {/* Updated */}
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -255,13 +255,13 @@ export default function ShopPage() {
                             return (
                                 <div
                                     key={item.id}
-                                    className={`bg-white rounded-xl shadow-sm overflow-hidden border-2 transition-all hover:shadow-lg ${getRarityColor(item.rarity)}`}
+                                    className={`bg-card rounded-xl shadow-card overflow-hidden border-2 transition-all hover:shadow-lg ${getRarityColor(item.rarity)}`}
                                 >
                                     {/* 裝備圖標 */}
                                     <div className={`h-32 flex items-center justify-center ${item.rarity === 'legendary' ? 'bg-gradient-to-br from-yellow-100 to-orange-100' :
                                         item.rarity === 'epic' ? 'bg-gradient-to-br from-purple-100 to-pink-100' :
                                             item.rarity === 'rare' ? 'bg-gradient-to-br from-blue-100 to-cyan-100' :
-                                                'bg-gray-50'
+                                                'bg-background'
                                         }`}>
                                         {item.image_url ? (
                                             <img
@@ -281,18 +281,18 @@ export default function ShopPage() {
                                     {/* 裝備信息 */}
                                     <div className="p-4">
                                         <div className="flex items-center justify-between mb-2">
-                                            <h3 className="font-semibold text-gray-900">{item.name}</h3>
+                                            <h3 className="font-semibold text-foreground">{item.name}</h3>
                                             <span className={`text-xs px-2 py-1 rounded-full ${getRarityColor(item.rarity)}`}>
                                                 {getRarityLabel(item.rarity)}
                                             </span>
                                         </div>
-                                        <p className="text-sm text-gray-500 mb-3 line-clamp-2">{item.description}</p>
+                                        <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{item.description}</p>
 
                                         {/* 屬性 */}
                                         {item.attributes && Object.keys(item.attributes).length > 0 && (
                                             <div className="flex gap-2 flex-wrap mb-3">
                                                 {Object.entries(item.attributes).map(([key, value]) => (
-                                                    <span key={key} className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                                                    <span key={key} className="text-xs bg-muted text-gray-600 px-2 py-1 rounded">
                                                         {key}: +{value}
                                                     </span>
                                                 ))}
@@ -300,19 +300,19 @@ export default function ShopPage() {
                                         )}
 
                                         {/* 價格和購買按鈕 */}
-                                        <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                                        <div className="flex items-center justify-between pt-3 border-t border-border/50">
                                             <div className="flex items-center gap-1">
                                                 <span className="text-green-600">💎</span>
-                                                <span className="font-bold text-gray-900">{item.price}</span>
+                                                <span className="font-bold text-foreground">{item.price}</span>
                                             </div>
                                             <button
                                                 onClick={() => handlePurchase(item)}
                                                 disabled={!canAfford || isPurchasing}
                                                 className={`px-4 py-2 rounded-lg font-medium transition-colors ${isPurchasing
-                                                    ? 'bg-gray-300 text-gray-500 cursor-wait'
+                                                    ? 'bg-gray-300 text-muted-foreground cursor-wait'
                                                     : canAfford
                                                         ? 'bg-green-500 text-white hover:bg-green-600'
-                                                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                                        : 'bg-gray-200 text-muted-foreground cursor-not-allowed'
                                                     }`}
                                             >
                                                 {isPurchasing ? t('shop.buying') : canAfford ? t('shop.buy') : t('shop.insufficient')} {/* Updated */}

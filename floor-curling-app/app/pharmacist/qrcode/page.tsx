@@ -159,7 +159,7 @@ export default function ElderQRCodePage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-100">
+            <div className="min-h-screen flex items-center justify-center bg-muted">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
                     <p className="mt-4 text-gray-600">{t('common.loading')}</p>
@@ -169,21 +169,21 @@ export default function ElderQRCodePage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-100">
+        <div className="min-h-screen bg-muted">
             {/* 導航欄 */}
-            <nav className="bg-white shadow-sm sticky top-0 z-10">
+            <nav className="bg-card shadow-card sticky top-0 z-10">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16">
                         <div className="flex items-center">
                             <button
                                 onClick={() => router.back()}
-                                className="mr-4 text-gray-600 hover:text-gray-900"
+                                className="mr-4 text-gray-600 hover:text-foreground"
                             >
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                                 </svg>
                             </button>
-                            <h1 className="text-xl md:text-2xl font-bold text-blue-600">長輩 QR Code 管理</h1>
+                            <h1 className="text-xl md:text-2xl font-bold text-primary">長輩 QR Code 管理</h1>
                         </div>
                         <div className="flex items-center gap-4">
                             <LanguageSwitcher />
@@ -193,14 +193,14 @@ export default function ElderQRCodePage() {
             </nav>
 
             {/* Tabs */}
-            <div className="bg-white border-b border-gray-200">
+            <div className="bg-card border-b border-border">
                 <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex -mb-px">
                         <button
                             onClick={() => setActiveTab('generate')}
                             className={`w-1/2 py-4 px-1 text-center border-b-2 font-medium text-sm ${activeTab === 'generate'
-                                    ? 'border-blue-500 text-blue-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    ? 'border-blue-500 text-primary'
+                                    : 'border-transparent text-muted-foreground hover:text-gray-700 hover:border-gray-300'
                                 }`}
                         >
                             <span className="mr-2">🖨️</span> 列印條碼
@@ -208,8 +208,8 @@ export default function ElderQRCodePage() {
                         <button
                             onClick={() => setActiveTab('scan')}
                             className={`w-1/2 py-4 px-1 text-center border-b-2 font-medium text-sm ${activeTab === 'scan'
-                                    ? 'border-blue-500 text-blue-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    ? 'border-blue-500 text-primary'
+                                    : 'border-transparent text-muted-foreground hover:text-gray-700 hover:border-gray-300'
                                 }`}
                         >
                             <span className="mr-2">📷</span> 掃描綁定
@@ -225,11 +225,11 @@ export default function ElderQRCodePage() {
                 {activeTab === 'generate' && (
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         {/* 長輩列表 */}
-                        <div className="bg-white rounded-xl shadow-sm p-6">
-                            <h2 className="text-lg font-semibold text-gray-900 mb-4">選擇長輩</h2>
+                        <div className="bg-card rounded-xl shadow-card p-6">
+                            <h2 className="text-lg font-semibold text-foreground mb-4">選擇長輩</h2>
 
                             {elders.length === 0 ? (
-                                <div className="text-center py-8 text-gray-500">
+                                <div className="text-center py-8 text-muted-foreground">
                                     <p>尚無長輩資料</p>
                                 </div>
                             ) : (
@@ -239,8 +239,8 @@ export default function ElderQRCodePage() {
                                             key={elder.id}
                                             onClick={() => setSelectedElder(elder)}
                                             className={`w-full text-left p-4 rounded-lg border-2 transition-all ${selectedElder?.id === elder.id
-                                                ? 'border-blue-500 bg-blue-50'
-                                                : 'border-gray-200 hover:border-blue-300'
+                                                ? 'border-blue-500 bg-primary/10'
+                                                : 'border-border hover:border-blue-300'
                                                 }`}
                                         >
                                             <div className="flex items-center gap-3">
@@ -248,10 +248,10 @@ export default function ElderQRCodePage() {
                                                     {(elder.nickname || elder.full_name || '?')[0]}
                                                 </div>
                                                 <div>
-                                                    <p className="font-semibold text-gray-900">
+                                                    <p className="font-semibold text-foreground">
                                                         {elder.nickname || elder.full_name || '未命名長輩'}
                                                     </p>
-                                                    <p className="text-xs text-gray-500">
+                                                    <p className="text-xs text-muted-foreground">
                                                         ID: {elder.id.slice(0, 8)}...
                                                     </p>
                                                 </div>
@@ -263,8 +263,8 @@ export default function ElderQRCodePage() {
                         </div>
 
                         {/* QR Code 預覽 */}
-                        <div className="bg-white rounded-xl shadow-sm p-6">
-                            <h2 className="text-lg font-semibold text-gray-900 mb-4">QR Code 預覽</h2>
+                        <div className="bg-card rounded-xl shadow-card p-6">
+                            <h2 className="text-lg font-semibold text-foreground mb-4">QR Code 預覽</h2>
                             {selectedElder ? (
                                 <div className="text-center">
                                     <div ref={printRef} className="inline-block bg-gradient-to-br from-slate-50 to-slate-200 border-2 border-blue-900 rounded-xl p-6 mb-6">
@@ -273,20 +273,20 @@ export default function ElderQRCodePage() {
                                             <div className="text-left">
                                                 <p className="text-blue-900 font-bold text-lg mb-1">🥌 道里地壺球</p>
                                                 <p className="text-blue-900 font-semibold text-xl">{selectedElder.nickname || selectedElder.full_name || '長輩'}</p>
-                                                <p className="text-gray-500 text-sm">{storeId}</p>
+                                                <p className="text-muted-foreground text-sm">{storeId}</p>
                                             </div>
                                         </div>
                                     </div>
                                     <div className="flex justify-center gap-4">
-                                        <button onClick={handlePrint} className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">列印卡片</button>
+                                        <button onClick={handlePrint} className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-blue-700">列印卡片</button>
                                         <button onClick={handleDownload} className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700">下載圖片</button>
                                     </div>
-                                    <div className="mt-6 p-4 bg-gray-50 rounded-lg text-left">
+                                    <div className="mt-6 p-4 bg-background rounded-lg text-left">
                                         <p className="text-sm text-gray-600"><span className="font-semibold">ID：</span><span className="font-mono">{selectedElder.id}</span></p>
                                     </div>
                                 </div>
                             ) : (
-                                <div className="text-center py-16 text-gray-500"><p>請從左側選擇一位長輩</p></div>
+                                <div className="text-center py-16 text-muted-foreground"><p>請從左側選擇一位長輩</p></div>
                             )}
                         </div>
                     </div>
@@ -295,7 +295,7 @@ export default function ElderQRCodePage() {
                 {/* Mode: Scan */}
                 {activeTab === 'scan' && (
                     <div className="max-w-md mx-auto">
-                        <div className="bg-black rounded-3xl overflow-hidden shadow-2xl relative aspect-[3/4]">
+                        <div className="bg-black rounded-2xl overflow-hidden shadow-2xl relative aspect-[3/4]">
                             <QRCodeScanner onScan={handleScan} />
 
                             {/* Overlay UI */}
@@ -316,9 +316,9 @@ export default function ElderQRCodePage() {
                             </div>
                         )}
 
-                        <div className="mt-8 text-center text-gray-500 text-sm">
+                        <div className="mt-8 text-center text-muted-foreground text-sm">
                             <p>或是</p>
-                            <button className="text-blue-600 font-bold mt-2 hover:underline">
+                            <button className="text-primary font-bold mt-2 hover:underline">
                                 手動輸入 ID (開發中)
                             </button>
                         </div>

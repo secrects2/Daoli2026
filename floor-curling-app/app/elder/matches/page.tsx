@@ -106,7 +106,7 @@ export default function ElderMatchesPage() {
 
     const getWinnerBadge = (match: Match) => {
         if (!match.winner_color || match.winner_color === 'draw') {
-            return <span className="px-2 py-1 text-xs font-bold bg-gray-100 text-gray-600 rounded-full">平手</span>
+            return <span className="px-2 py-1 text-xs font-bold bg-muted text-gray-600 rounded-full">平手</span>
         }
         if (match.winner_color === 'red') {
             return <span className="px-2 py-1 text-xs font-bold bg-red-100 text-red-600 rounded-full">紅隊勝</span>
@@ -115,21 +115,21 @@ export default function ElderMatchesPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-20">
+        <div className="min-h-screen bg-background pb-20">
             {/* Header */}
-            <div className="sticky top-0 z-20 backdrop-blur-xl bg-white/80 border-b border-gray-100 px-5 pt-12 pb-4">
+            <div className="sticky top-0 z-20 backdrop-blur-xl bg-card/80 border-b border-border/50 px-5 pt-12 pb-4">
                 <div className="flex items-center gap-3">
                     <Link
                         href="/elder/dashboard"
-                        className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors"
+                        className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-gray-600 hover:bg-accent transition-colors"
                     >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                         </svg>
                     </Link>
                     <div>
-                        <h1 className="text-2xl font-black text-gray-900">我的比賽</h1>
-                        <p className="text-sm text-gray-500">共 {matches.length} 場比賽</p>
+                        <h1 className="text-2xl font-extrabold text-foreground">我的比賽</h1>
+                        <p className="text-sm text-muted-foreground">共 {matches.length} 場比賽</p>
                     </div>
                 </div>
             </div>
@@ -142,11 +142,11 @@ export default function ElderMatchesPage() {
                     </div>
                 ) : matches.length === 0 ? (
                     <div className="text-center py-20">
-                        <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
                             <span className="text-4xl">🏆</span>
                         </div>
-                        <h3 className="text-lg font-bold text-gray-900 mb-1">尚無比賽記錄</h3>
-                        <p className="text-gray-500 text-sm">參加比賽後，記錄會顯示在這裡</p>
+                        <h3 className="text-lg font-bold text-foreground mb-1">尚無比賽記錄</h3>
+                        <p className="text-muted-foreground text-sm">參加比賽後，記錄會顯示在這裡</p>
                     </div>
                 ) : (
                     matches.map(match => {
@@ -157,10 +157,10 @@ export default function ElderMatchesPage() {
                         return (
                             <div
                                 key={match.id}
-                                className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm"
+                                className="bg-card rounded-2xl p-5 border border-border/50 shadow-card"
                             >
                                 <div className="flex items-center justify-between mb-4">
-                                    <span className="text-xs text-gray-400 font-medium">
+                                    <span className="text-xs text-muted-foreground font-medium">
                                         {formatDate(match.created_at)}
                                     </span>
                                     {getWinnerBadge(match)}
@@ -171,34 +171,34 @@ export default function ElderMatchesPage() {
                                     <div className="flex-1 text-center">
                                         <div className={`w-16 h-16 mx-auto rounded-2xl flex items-center justify-center ${match.winner_color === 'red' ? 'bg-red-500 text-white' : 'bg-red-100'
                                             }`}>
-                                            <span className={`text-3xl font-black ${match.winner_color === 'red' ? 'text-white' : 'text-red-600'}`}>
+                                            <span className={`text-3xl font-extrabold ${match.winner_color === 'red' ? 'text-white' : 'text-red-600'}`}>
                                                 {redTotal}
                                             </span>
                                         </div>
-                                        <span className="text-sm text-gray-500 font-medium mt-2 block">紅隊</span>
+                                        <span className="text-sm text-muted-foreground font-medium mt-2 block">紅隊</span>
                                     </div>
 
-                                    <div className="text-gray-300 text-3xl font-black">VS</div>
+                                    <div className="text-gray-300 text-3xl font-extrabold">VS</div>
 
                                     <div className="flex-1 text-center">
                                         <div className={`w-16 h-16 mx-auto rounded-2xl flex items-center justify-center ${match.winner_color === 'yellow' ? 'bg-yellow-500 text-white' : 'bg-yellow-100'
                                             }`}>
-                                            <span className={`text-3xl font-black ${match.winner_color === 'yellow' ? 'text-white' : 'text-yellow-600'}`}>
+                                            <span className={`text-3xl font-extrabold ${match.winner_color === 'yellow' ? 'text-white' : 'text-yellow-600'}`}>
                                                 {yellowTotal}
                                             </span>
                                         </div>
-                                        <span className="text-sm text-gray-500 font-medium mt-2 block">黃隊</span>
+                                        <span className="text-sm text-muted-foreground font-medium mt-2 block">黃隊</span>
                                     </div>
                                 </div>
 
                                 {/* Ends Detail */}
                                 {ends.length > 0 && (
-                                    <div className="mt-4 pt-4 border-t border-gray-100">
-                                        <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-2">回合詳情</p>
+                                    <div className="mt-4 pt-4 border-t border-border/50">
+                                        <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider mb-2">回合詳情</p>
                                         <div className="flex gap-2 flex-wrap">
                                             {ends.map(end => (
-                                                <div key={end.end_number} className="flex items-center gap-1 bg-gray-50 rounded-lg px-3 py-1.5">
-                                                    <span className="text-xs text-gray-400">第{end.end_number}局</span>
+                                                <div key={end.end_number} className="flex items-center gap-1 bg-background rounded-lg px-3 py-1.5">
+                                                    <span className="text-xs text-muted-foreground">第{end.end_number}局</span>
                                                     <span className="text-sm font-bold text-red-600">{end.red_score}</span>
                                                     <span className="text-gray-300">:</span>
                                                     <span className="text-sm font-bold text-yellow-600">{end.yellow_score}</span>

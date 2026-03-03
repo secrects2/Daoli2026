@@ -43,19 +43,19 @@ export default function AdminMatchesPage() {
         fetchMatches()
     }, [])
 
-    if (loading) return <div className="p-8 text-center text-gray-500">載入數據中...</div>
+    if (loading) return <div className="p-8 text-center text-muted-foreground">載入數據中...</div>
 
     return (
-        <div className="min-h-screen bg-gray-50 p-6">
+        <div className="min-h-screen bg-background p-6">
             <div className="max-w-6xl mx-auto space-y-8">
                 {/* Header */}
                 <div className="flex items-center justify-between">
-                    <h1 className="text-2xl font-bold text-gray-900">比賽數據詳細報表</h1>
-                    <Link href="/admin" className="text-gray-500 hover:text-gray-900">返回總部</Link>
+                    <h1 className="text-2xl font-bold text-foreground">比賽數據詳細報表</h1>
+                    <Link href="/admin" className="text-muted-foreground hover:text-foreground">返回總部</Link>
                 </div>
 
                 {/* Chart Section */}
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <div className="bg-card p-6 rounded-2xl shadow-card border border-border/50">
                     <h2 className="text-lg font-bold text-gray-800 mb-6">近30日比賽趨勢</h2>
                     <div className="h-[300px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
@@ -79,13 +79,13 @@ export default function AdminMatchesPage() {
                 </div>
 
                 {/* Data Table */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div className="p-6 border-b border-gray-100">
+                <div className="bg-card rounded-2xl shadow-card border border-border/50 overflow-hidden">
+                    <div className="p-6 border-b border-border/50">
                         <h2 className="text-lg font-bold text-gray-800">最新比賽紀錄 (Top 100)</h2>
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-left text-sm text-gray-600">
-                            <thead className="bg-gray-50 text-gray-900 font-medium">
+                            <thead className="bg-background text-foreground font-medium">
                                 <tr>
                                     <th className="p-4">時間</th>
                                     <th className="p-4">紅隊 (長輩)</th>
@@ -96,7 +96,7 @@ export default function AdminMatchesPage() {
                             </thead>
                             <tbody className="divide-y divide-gray-100">
                                 {matches.map((match) => (
-                                    <tr key={match.id} className="hover:bg-gray-50 transition-colors">
+                                    <tr key={match.id} className="hover:bg-background transition-colors">
                                         <td className="p-4 whitespace-nowrap">
                                             {new Date(match.completed_at || match.created_at).toLocaleString('zh-TW')}
                                         </td>
@@ -110,13 +110,13 @@ export default function AdminMatchesPage() {
                                                 {match.yellow_elder?.nickname || match.yellow_elder?.full_name || '未知'}
                                             </div>
                                         </td>
-                                        <td className="p-4 text-gray-900">
+                                        <td className="p-4 text-foreground">
                                             {match.store?.name || '未知據點'}
                                         </td>
                                         <td className="p-4 text-center">
                                             <span className={`px-3 py-1 rounded-full text-xs font-bold 
                                                 ${match.winner_color === 'red' ? 'bg-red-100 text-red-800' :
-                                                    match.winner_color === 'yellow' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-600'}`}>
+                                                    match.winner_color === 'yellow' ? 'bg-yellow-100 text-yellow-800' : 'bg-muted text-gray-600'}`}>
                                                 {match.winner_color === 'red' ? '紅隊勝' : match.winner_color === 'yellow' ? '黃隊勝' : '平局'}
                                             </span>
                                         </td>

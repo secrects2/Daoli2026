@@ -52,8 +52,8 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
             {children}
             {isOpen && (
                 <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-                    <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 animate-scale-in">
-                        <h3 className="text-xl font-bold text-gray-900 mb-2">
+                    <div className="bg-card rounded-2xl shadow-xl max-w-sm w-full p-6 animate-scale-in">
+                        <h3 className="text-xl font-bold text-foreground mb-2">
                             {options.title || '確認'}
                         </h3>
                         <p className="text-gray-600 mb-6">
@@ -67,7 +67,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
                         <div className="flex gap-3">
                             <button
                                 onClick={handleCancel}
-                                className="flex-1 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-colors"
+                                className="flex-1 px-4 py-2.5 bg-muted hover:bg-accent text-gray-700 rounded-xl font-medium transition-colors"
                                 autoFocus
                             >
                                 {options.cancelLabel || '取消'}
@@ -75,7 +75,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
                             <button
                                 onClick={handleConfirm}
                                 className={`flex-1 px-4 py-2.5 rounded-xl font-bold text-white transition-colors shadow-lg ${options.variant === 'info'
-                                        ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-200'
+                                        ? 'bg-primary hover:bg-blue-700 shadow-blue-200'
                                         : 'bg-red-600 hover:bg-red-700 shadow-red-200'
                                     }`}
                             >

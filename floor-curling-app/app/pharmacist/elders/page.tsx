@@ -228,14 +228,14 @@ export default function EldersPage() {
     // Display error if any
     if (error) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-100">
-                <div className="text-center bg-white p-8 rounded-xl shadow-lg max-w-md">
+            <div className="min-h-screen flex items-center justify-center bg-muted">
+                <div className="text-center bg-card p-8 rounded-xl shadow-lg max-w-md">
                     <div className="text-red-500 text-5xl mb-4">⚠️</div>
-                    <h2 className="text-xl font-bold text-gray-900 mb-2">載入失敗</h2>
+                    <h2 className="text-xl font-bold text-foreground mb-2">載入失敗</h2>
                     <p className="text-gray-600 mb-4">{error}</p>
                     <button
                         onClick={() => window.location.reload()}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                        className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700"
                     >
                         重新載入
                     </button>
@@ -246,7 +246,7 @@ export default function EldersPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-100">
+            <div className="min-h-screen flex items-center justify-center bg-muted">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
                     <p className="mt-4 text-gray-600">{loadingStep}</p>
@@ -256,25 +256,25 @@ export default function EldersPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-100">
+        <div className="min-h-screen bg-muted">
             {/* 導航欄 */}
-            <nav className="bg-white shadow-sm">
+            <nav className="bg-card shadow-card">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16">
                         <div className="flex items-center">
                             <button
                                 onClick={() => router.push('/pharmacist/dashboard')}
-                                className="mr-4 text-gray-600 hover:text-gray-900"
+                                className="mr-4 text-gray-600 hover:text-foreground"
                             >
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                                 </svg>
                             </button>
-                            <h1 className="text-2xl font-bold text-blue-600">{t('elders.title')}</h1> {/* Updated */}
+                            <h1 className="text-2xl font-bold text-primary">{t('elders.title')}</h1> {/* Updated */}
                         </div>
                         <div className="flex items-center gap-4">
                             <LanguageSwitcher />
-                            <span className="text-sm text-gray-500">
+                            <span className="text-sm text-muted-foreground">
                                 {t('elders.total', { n: elders.length })} {/* Updated */}
                             </span>
                         </div>
@@ -292,16 +292,16 @@ export default function EldersPage() {
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             placeholder={t('elders.searchPlaceholder')}
-                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-foreground"
                         />
-                        <svg className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="absolute left-3 top-2.5 w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
                     </div>
 
                     <Link
                         href="/pharmacist/elders/new"
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm font-medium whitespace-nowrap"
+                        className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 transition-colors shadow-card font-medium whitespace-nowrap"
                     >
                         <span className="text-xl">+</span>
                         新增長輩
@@ -310,14 +310,14 @@ export default function EldersPage() {
 
                 {/* 長者列表 */}
                 {filteredElders.length === 0 ? (
-                    <div className="bg-white rounded-xl shadow-sm p-12 text-center">
+                    <div className="bg-card rounded-xl shadow-card p-12 text-center">
                         <svg className="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        <h3 className="text-lg font-semibold text-foreground mb-2">
                             {searchTerm ? t('elders.emptySearch.title') : t('elders.empty.title')} {/* Updated */}
                         </h3>
-                        <p className="text-gray-500">
+                        <p className="text-muted-foreground">
                             {searchTerm ? t('elders.emptySearch.desc') : t('elders.empty.desc')} {/* Updated */}
                         </p>
                     </div>
@@ -333,7 +333,7 @@ export default function EldersPage() {
                             return (
                                 <div
                                     key={elder.id}
-                                    className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow"
+                                    className="bg-card rounded-xl shadow-card p-6 hover:shadow-md transition-shadow"
                                 >
                                     {/* 頭部 */}
                                     <div className="flex items-start justify-between mb-4">
@@ -342,20 +342,20 @@ export default function EldersPage() {
                                                 <img
                                                     src={elder.avatar_url}
                                                     alt="Avatar"
-                                                    className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm"
+                                                    className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-card"
                                                 />
                                             ) : (
-                                                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center shadow-sm border-2 border-white">
+                                                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center shadow-card border-2 border-white">
                                                     <span className="text-white text-lg font-bold">
                                                         👴
                                                     </span>
                                                 </div>
                                             )}
                                             <div>
-                                                <p className="text-sm font-medium text-gray-900 truncate max-w-[150px]" title={elder.full_name || elder.nickname || elder.id}>
+                                                <p className="text-sm font-medium text-foreground truncate max-w-[150px]" title={elder.full_name || elder.nickname || elder.id}>
                                                     {elder.full_name || elder.nickname || `長輩 ${elder.id.slice(0, 4)}`}
                                                 </p>
-                                                <p className="text-xs text-gray-500">
+                                                <p className="text-xs text-muted-foreground">
                                                     {t('elders.registeredAt')} {formatDate(elder.created_at)} {/* Updated */}
                                                 </p>
                                             </div>
@@ -383,41 +383,41 @@ export default function EldersPage() {
                                     </div>
 
                                     {/* 比賽統計 */}
-                                    <div className="border-t border-gray-100 pt-4">
+                                    <div className="border-t border-border/50 pt-4">
                                         <p className="text-sm font-medium text-gray-700 mb-2">{t('elders.stats.title')}</p> {/* Updated */}
                                         <div className="flex justify-between text-sm">
                                             <div className="text-center">
-                                                <p className="text-gray-500">{t('elders.stats.matches')}</p> {/* Updated */}
-                                                <p className="font-bold text-gray-900">{stats.total_matches}</p>
+                                                <p className="text-muted-foreground">{t('elders.stats.matches')}</p> {/* Updated */}
+                                                <p className="font-bold text-foreground">{stats.total_matches}</p>
                                             </div>
                                             <div className="text-center">
-                                                <p className="text-gray-500">{t('elders.stats.wins')}</p> {/* Updated */}
+                                                <p className="text-muted-foreground">{t('elders.stats.wins')}</p> {/* Updated */}
                                                 <p className="font-bold text-green-600">{stats.wins}</p>
                                             </div>
                                             <div className="text-center">
-                                                <p className="text-gray-500">{t('elders.stats.losses')}</p> {/* Updated */}
+                                                <p className="text-muted-foreground">{t('elders.stats.losses')}</p> {/* Updated */}
                                                 <p className="font-bold text-red-600">{stats.losses}</p>
                                             </div>
                                             <div className="text-center">
-                                                <p className="text-gray-500">{t('elders.stats.rate')}</p> {/* Updated */}
-                                                <p className="font-bold text-blue-600">{winRate}%</p>
+                                                <p className="text-muted-foreground">{t('elders.stats.rate')}</p> {/* Updated */}
+                                                <p className="font-bold text-primary">{winRate}%</p>
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* 店鋪信息 */}
                                     {elder.store_id && (
-                                        <div className="mt-4 pt-4 border-t border-gray-100">
-                                            <p className="text-xs text-gray-500">
+                                        <div className="mt-4 pt-4 border-t border-border/50">
+                                            <p className="text-xs text-muted-foreground">
                                                 {t('elders.store')}: <span className="font-medium text-gray-700">{elder.store_id}</span> {/* Updated */}
                                             </p>
                                         </div>
                                     )}
                                     {/* Link to Details */}
-                                    <div className="mt-4 pt-4 border-t border-gray-100 text-center">
+                                    <div className="mt-4 pt-4 border-t border-border/50 text-center">
                                         <Link
                                             href={`/pharmacist/elders/${elder.id}`}
-                                            className="text-blue-600 font-bold hover:underline text-sm block w-full"
+                                            className="text-primary font-bold hover:underline text-sm block w-full"
                                         >
                                             詳情
                                         </Link>

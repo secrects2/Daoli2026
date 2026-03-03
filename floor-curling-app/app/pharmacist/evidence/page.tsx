@@ -111,28 +111,28 @@ export default function EvidencePage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-100">
+            <div className="min-h-screen flex items-center justify-center bg-muted">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
             </div>
         )
     }
 
     return (
-        <div className="min-h-screen bg-gray-100">
+        <div className="min-h-screen bg-muted">
             {/* 導航欄 */}
-            <nav className="bg-white shadow-sm">
+            <nav className="bg-card shadow-card">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16">
                         <div className="flex items-center">
                             <button
                                 onClick={() => router.back()}
-                                className="mr-4 text-gray-600 hover:text-gray-900"
+                                className="mr-4 text-gray-600 hover:text-foreground"
                             >
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                                 </svg>
                             </button>
-                            <h1 className="text-2xl font-bold text-blue-600">證據審核後台</h1>
+                            <h1 className="text-2xl font-bold text-primary">證據審核後台</h1>
                         </div>
                         <div className="flex items-center gap-4">
                             <LanguageSwitcher />
@@ -154,8 +154,8 @@ export default function EvidencePage() {
                             key={f.key}
                             onClick={() => setFilter(f.key as any)}
                             className={`px-4 py-2 rounded-lg font-medium transition-colors ${filter === f.key
-                                ? 'bg-blue-600 text-white'
-                                : 'bg-white text-gray-700 hover:bg-gray-100'
+                                ? 'bg-primary text-white'
+                                : 'bg-card text-gray-700 hover:bg-muted'
                                 }`}
                         >
                             {f.label}
@@ -167,10 +167,10 @@ export default function EvidencePage() {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* 左側：比賽列表 */}
                     <div className="lg:col-span-1 space-y-4">
-                        <h2 className="text-lg font-semibold text-gray-900">比賽列表 ({matches.length})</h2>
+                        <h2 className="text-lg font-semibold text-foreground">比賽列表 ({matches.length})</h2>
 
                         {matches.length === 0 ? (
-                            <div className="bg-white rounded-xl p-8 text-center text-gray-500">
+                            <div className="bg-card rounded-xl p-8 text-center text-muted-foreground">
                                 <svg className="w-12 h-12 mx-auto mb-2 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
@@ -184,13 +184,13 @@ export default function EvidencePage() {
                                         <button
                                             key={match.id}
                                             onClick={() => setSelectedMatch(match)}
-                                            className={`w-full text-left p-4 rounded-lg border-2 transition-all bg-white ${selectedMatch?.id === match.id
+                                            className={`w-full text-left p-4 rounded-lg border-2 transition-all bg-card ${selectedMatch?.id === match.id
                                                 ? 'border-blue-500'
-                                                : 'border-gray-200 hover:border-blue-300'
+                                                : 'border-border hover:border-blue-300'
                                                 }`}
                                         >
                                             <div className="flex items-center justify-between mb-2">
-                                                <span className="text-sm text-gray-500">
+                                                <span className="text-sm text-muted-foreground">
                                                     {new Date(match.created_at).toLocaleDateString('zh-TW')}
                                                 </span>
                                                 <span className={`text-xs px-2 py-1 rounded-full ${match.status === 'completed'
@@ -205,13 +205,13 @@ export default function EvidencePage() {
                                                     <span className="w-3 h-3 bg-red-500 rounded-full"></span>
                                                     {match.red_profile?.nickname || match.red_profile?.full_name || '紅方'}
                                                 </span>
-                                                <span className="text-gray-400">vs</span>
+                                                <span className="text-muted-foreground">vs</span>
                                                 <span className="flex items-center gap-1">
                                                     <span className="w-3 h-3 bg-yellow-500 rounded-full"></span>
                                                     {match.yellow_profile?.nickname || match.yellow_profile?.full_name || '黃方'}
                                                 </span>
                                             </div>
-                                            <div className="flex gap-3 text-xs text-gray-500">
+                                            <div className="flex gap-3 text-xs text-muted-foreground">
                                                 <span className="flex items-center gap-1">
                                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -235,12 +235,12 @@ export default function EvidencePage() {
                     {/* 右側：證據詳情 */}
                     <div className="lg:col-span-2">
                         {selectedMatch ? (
-                            <div className="bg-white rounded-xl p-6">
+                            <div className="bg-card rounded-xl p-6">
                                 <div className="flex items-center justify-between mb-6">
-                                    <h2 className="text-lg font-semibold text-gray-900">
+                                    <h2 className="text-lg font-semibold text-foreground">
                                         比賽證據 - {selectedMatch.match_ends?.length || 0} 回合
                                     </h2>
-                                    <span className="text-sm text-gray-500">
+                                    <span className="text-sm text-muted-foreground">
                                         {new Date(selectedMatch.created_at).toLocaleString('zh-TW')}
                                     </span>
                                 </div>
@@ -248,9 +248,9 @@ export default function EvidencePage() {
                                 {/* 回合證據 */}
                                 <div className="space-y-6">
                                     {selectedMatch.match_ends?.sort((a, b) => a.end_number - b.end_number).map(end => (
-                                        <div key={end.id} className="border border-gray-200 rounded-lg p-4">
+                                        <div key={end.id} className="border border-border rounded-lg p-4">
                                             <div className="flex items-center justify-between mb-4">
-                                                <h3 className="font-semibold text-gray-900">
+                                                <h3 className="font-semibold text-foreground">
                                                     第 {end.end_number} 回合
                                                 </h3>
                                                 <div className="flex gap-4 text-sm">
@@ -267,8 +267,8 @@ export default function EvidencePage() {
 
                                             <div className="grid grid-cols-2 gap-4">
                                                 {/* House Snapshot */}
-                                                <div className="bg-gray-50 rounded-lg p-3">
-                                                    <p className="text-xs text-gray-500 mb-2 flex items-center gap-1">
+                                                <div className="bg-background rounded-lg p-3">
+                                                    <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
                                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -287,15 +287,15 @@ export default function EvidencePage() {
                                                             />
                                                         </button>
                                                     ) : (
-                                                        <div className="w-full aspect-video bg-gray-200 rounded-lg flex items-center justify-center text-gray-400">
+                                                        <div className="w-full aspect-video bg-gray-200 rounded-lg flex items-center justify-center text-muted-foreground">
                                                             無照片
                                                         </div>
                                                     )}
                                                 </div>
 
                                                 {/* Vibe Video */}
-                                                <div className="bg-gray-50 rounded-lg p-3">
-                                                    <p className="text-xs text-gray-500 mb-2 flex items-center gap-1">
+                                                <div className="bg-background rounded-lg p-3">
+                                                    <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
                                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                                         </svg>
@@ -311,7 +311,7 @@ export default function EvidencePage() {
                                                             </svg>
                                                         </button>
                                                     ) : (
-                                                        <div className="w-full aspect-video bg-gray-200 rounded-lg flex items-center justify-center text-gray-400">
+                                                        <div className="w-full aspect-video bg-gray-200 rounded-lg flex items-center justify-center text-muted-foreground">
                                                             無影片
                                                         </div>
                                                     )}
@@ -322,7 +322,7 @@ export default function EvidencePage() {
                                 </div>
                             </div>
                         ) : (
-                            <div className="bg-white rounded-xl p-8 text-center text-gray-500">
+                            <div className="bg-card rounded-xl p-8 text-center text-muted-foreground">
                                 <svg className="w-16 h-16 mx-auto mb-4 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />

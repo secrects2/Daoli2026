@@ -39,45 +39,45 @@ export default function OnboardingPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+        <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
             <div className="max-w-md w-full text-center space-y-8">
                 <div>
                     <h1 className="ios-large-title text-center">歡迎加入</h1>
-                    <p className="text-gray-500 mt-2">請選擇您的身份以繼續</p>
+                    <p className="text-muted-foreground mt-2">請選擇您的身份以繼續</p>
                 </div>
 
                 <div className="grid grid-cols-1 gap-4">
                     <button
                         onClick={() => handleSelectRole('elder')}
                         disabled={loading}
-                        className="bg-white p-6 rounded-2xl shadow-sm border-2 border-transparent hover:border-blue-500 transition-all flex items-center gap-4 text-left group"
+                        className="bg-card p-6 rounded-2xl shadow-card border-2 border-transparent hover:border-blue-500 transition-all flex items-center gap-4 text-left group"
                     >
                         <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center text-3xl group-hover:scale-110 transition-transform">
                             👴
                         </div>
                         <div>
-                            <h3 className="font-bold text-lg text-gray-900">我是長輩 / 參賽者</h3>
-                            <p className="text-sm text-gray-500">查看我的比賽成績與 QR Code</p>
+                            <h3 className="font-bold text-lg text-foreground">我是長輩 / 參賽者</h3>
+                            <p className="text-sm text-muted-foreground">查看我的比賽成績與 QR Code</p>
                         </div>
                     </button>
 
                     <button
                         onClick={() => handleSelectRole('family')}
                         disabled={loading}
-                        className="bg-white p-6 rounded-2xl shadow-sm border-2 border-transparent hover:border-green-500 transition-all flex items-center gap-4 text-left group"
+                        className="bg-card p-6 rounded-2xl shadow-card border-2 border-transparent hover:border-green-500 transition-all flex items-center gap-4 text-left group"
                     >
                         <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center text-3xl group-hover:scale-110 transition-transform">
                             👨‍👩‍👧‍👦
                         </div>
                         <div>
-                            <h3 className="font-bold text-lg text-gray-900">我是家屬 / 照護者</h3>
-                            <p className="text-sm text-gray-500">綁定長輩帳號並接收通知</p>
+                            <h3 className="font-bold text-lg text-foreground">我是家屬 / 照護者</h3>
+                            <p className="text-sm text-muted-foreground">綁定長輩帳號並接收通知</p>
                         </div>
                     </button>
                 </div>
 
                 {loading && (
-                    <div className="text-sm text-gray-400 animate-pulse">
+                    <div className="text-sm text-muted-foreground animate-pulse">
                         正在設定您的身份...
                     </div>
                 )}

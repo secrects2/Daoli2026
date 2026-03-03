@@ -37,18 +37,18 @@ export default function AISetupGuideModal({ isOpen, onClose }: AISetupGuideModal
                             leaveFrom="opacity-100 scale-100 translate-y-0"
                             leaveTo="opacity-0 scale-95 translate-y-4"
                         >
-                            <Dialog.Panel className="w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden">
+                            <Dialog.Panel className="w-full max-w-2xl bg-card rounded-2xl shadow-2xl overflow-hidden">
                                 {/* Header */}
                                 <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-white flex justify-between items-start">
                                     <div>
-                                        <h3 className="text-xl font-black flex items-center gap-2">
+                                        <h3 className="text-xl font-extrabold flex items-center gap-2">
                                             <span>📏</span> AI 檢測架設規範
                                         </h3>
                                         <p className="text-blue-100 text-sm mt-1 opacity-90">準確度取決於架設位置，請務必遵守以下 SOP</p>
                                     </div>
                                     <button
                                         onClick={onClose}
-                                        className="bg-white/20 hover:bg-white/30 rounded-full p-2 transition-colors"
+                                        className="bg-card/20 hover:bg-card/30 rounded-full p-2 transition-colors"
                                     >
                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                                     </button>
@@ -58,15 +58,15 @@ export default function AISetupGuideModal({ isOpen, onClose }: AISetupGuideModal
                                 <div className="p-6 grid gap-6 md:grid-cols-2">
 
                                     {/* 1. Angle */}
-                                    <div className="bg-blue-50 rounded-2xl p-5 border border-blue-100">
+                                    <div className="bg-primary/10 rounded-2xl p-5 border border-blue-100">
                                         <div className="flex items-center gap-3 mb-3">
-                                            <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xl">
+                                            <div className="w-10 h-10 bg-blue-100 text-primary rounded-full flex items-center justify-center text-xl">
                                                 📐
                                             </div>
-                                            <h4 className="font-bold text-gray-900">1. 拍攝角度：45° 側前</h4>
+                                            <h4 className="font-bold text-foreground">1. 拍攝角度：45° 側前</h4>
                                         </div>
                                         {/* SVG Schema: Top-down 45 degree view */}
-                                        <div className="w-full h-32 bg-white rounded-lg border border-blue-100 mb-3 flex items-center justify-center overflow-hidden">
+                                        <div className="w-full h-32 bg-card rounded-lg border border-blue-100 mb-3 flex items-center justify-center overflow-hidden">
                                             <svg viewBox="0 0 200 120" className="w-full h-full">
                                                 {/* Person (Top view) */}
                                                 <circle cx="100" cy="80" r="15" fill="#CBD5E1" /> {/* Head */}
@@ -102,10 +102,10 @@ export default function AISetupGuideModal({ isOpen, onClose }: AISetupGuideModal
                                             <div className="w-10 h-10 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-xl">
                                                 📏
                                             </div>
-                                            <h4 className="font-bold text-gray-900">2. 拍攝高度：視線平行</h4>
+                                            <h4 className="font-bold text-foreground">2. 拍攝高度：視線平行</h4>
                                         </div>
                                         {/* SVG Schema: Side view eye level */}
-                                        <div className="w-full h-32 bg-white rounded-lg border border-purple-100 mb-3 flex items-center justify-center overflow-hidden">
+                                        <div className="w-full h-32 bg-card rounded-lg border border-purple-100 mb-3 flex items-center justify-center overflow-hidden">
                                             <svg viewBox="0 0 200 120" className="w-full h-full">
                                                 {/* Person (Side view sitting) */}
                                                 <circle cx="140" cy="50" r="10" fill="#CBD5E1" /> {/* Head */}
@@ -140,10 +140,10 @@ export default function AISetupGuideModal({ isOpen, onClose }: AISetupGuideModal
                                             <div className="w-10 h-10 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-xl">
                                                 💡
                                             </div>
-                                            <h4 className="font-bold text-gray-900">3. 環境光線</h4>
+                                            <h4 className="font-bold text-foreground">3. 環境光線</h4>
                                         </div>
                                         {/* SVG Schema: Lighting */}
-                                        <div className="w-full h-32 bg-white rounded-lg border border-amber-100 mb-3 flex items-center justify-center overflow-hidden">
+                                        <div className="w-full h-32 bg-card rounded-lg border border-amber-100 mb-3 flex items-center justify-center overflow-hidden">
                                             <svg viewBox="0 0 200 120" className="w-full h-full">
                                                 {/* Good Light */}
                                                 <g transform="translate(40, 20)">
@@ -189,10 +189,10 @@ export default function AISetupGuideModal({ isOpen, onClose }: AISetupGuideModal
                                             <div className="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-xl">
                                                 🪑
                                             </div>
-                                            <h4 className="font-bold text-gray-900">4. 亞健康長輩坐姿</h4>
+                                            <h4 className="font-bold text-foreground">4. 亞健康長輩坐姿</h4>
                                         </div>
                                         {/* SVG Schema: Seated Posture */}
-                                        <div className="w-full h-32 bg-white rounded-lg border border-green-100 mb-3 flex items-center justify-center overflow-hidden">
+                                        <div className="w-full h-32 bg-card rounded-lg border border-green-100 mb-3 flex items-center justify-center overflow-hidden">
                                             <svg viewBox="0 0 200 120" className="w-full h-full">
                                                 {/* Chair */}
                                                 <path d="M80 60 L80 110" stroke="#94A3B8" strokeWidth="4" />
@@ -226,10 +226,10 @@ export default function AISetupGuideModal({ isOpen, onClose }: AISetupGuideModal
                                 </div>
 
                                 {/* Footer Action */}
-                                <div className="p-6 bg-gray-50 border-t border-gray-100 flex justify-end">
+                                <div className="p-6 bg-background border-t border-border/50 flex justify-end">
                                     <button
                                         onClick={onClose}
-                                        className="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 hover:scale-105 transition-all shadow-lg shadow-blue-200"
+                                        className="bg-primary text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 hover:scale-105 transition-all shadow-lg shadow-blue-200"
                                     >
                                         我了解了，開始檢測
                                     </button>

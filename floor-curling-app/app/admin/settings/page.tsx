@@ -73,29 +73,29 @@ export default function AdminSettingsPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-20">
+        <div className="min-h-screen bg-background pb-20">
             {/* Header */}
-            <div className="sticky top-0 z-20 backdrop-blur-xl bg-white/80 border-b border-gray-100 px-5 pt-12 pb-4">
+            <div className="sticky top-0 z-20 backdrop-blur-xl bg-card/80 border-b border-border/50 px-5 pt-12 pb-4">
                 <div className="max-w-4xl mx-auto flex items-center gap-3">
                     <Link
                         href="/admin"
-                        className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors"
+                        className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-gray-600 hover:bg-accent transition-colors"
                     >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                         </svg>
                     </Link>
                     <div>
-                        <h1 className="text-2xl font-black text-gray-900">系統設定</h1>
-                        <p className="text-sm text-gray-500">管理系統配置與匯出報表</p>
+                        <h1 className="text-2xl font-extrabold text-foreground">系統設定</h1>
+                        <p className="text-sm text-muted-foreground">管理系統配置與匯出報表</p>
                     </div>
                 </div>
             </div>
 
             <div className="max-w-4xl mx-auto px-5 py-6 space-y-6">
                 {/* System Overview */}
-                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                    <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <div className="bg-card rounded-2xl p-6 shadow-card border border-border/50">
+                    <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
                         📊 系統概覽
                     </h3>
 
@@ -105,16 +105,16 @@ export default function AdminSettingsPage() {
                         </div>
                     ) : (
                         <div className="grid grid-cols-3 gap-4">
-                            <div className="bg-blue-50 rounded-xl p-4 text-center">
-                                <p className="text-3xl font-black text-blue-600">{stats?.totalMatches || 0}</p>
+                            <div className="bg-primary/10 rounded-xl p-4 text-center">
+                                <p className="text-3xl font-extrabold text-primary">{stats?.totalMatches || 0}</p>
                                 <p className="text-sm text-blue-700 font-medium mt-1">總比賽數</p>
                             </div>
                             <div className="bg-green-50 rounded-xl p-4 text-center">
-                                <p className="text-3xl font-black text-green-600">{stats?.totalUsers || 0}</p>
+                                <p className="text-3xl font-extrabold text-green-600">{stats?.totalUsers || 0}</p>
                                 <p className="text-sm text-green-700 font-medium mt-1">總用戶數</p>
                             </div>
                             <div className="bg-purple-50 rounded-xl p-4 text-center">
-                                <p className="text-3xl font-black text-purple-600">{stats?.totalPointsDistributed || 0}</p>
+                                <p className="text-3xl font-extrabold text-purple-600">{stats?.totalPointsDistributed || 0}</p>
                                 <p className="text-sm text-purple-700 font-medium mt-1">已發放積分</p>
                             </div>
                         </div>
@@ -122,8 +122,8 @@ export default function AdminSettingsPage() {
                 </div>
 
                 {/* Export Reports */}
-                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                    <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <div className="bg-card rounded-2xl p-6 shadow-card border border-border/50">
+                    <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
                         📥 匯出報表
                     </h3>
 
@@ -142,8 +142,8 @@ export default function AdminSettingsPage() {
                                         key={opt.value}
                                         onClick={() => setExportType(opt.value)}
                                         className={`p-3 rounded-xl border-2 transition-all text-sm font-bold ${exportType === opt.value
-                                            ? 'border-blue-500 bg-blue-50 text-blue-700'
-                                            : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                                            ? 'border-blue-500 bg-primary/10 text-blue-700'
+                                            : 'border-border hover:border-gray-300 text-gray-600'
                                             }`}
                                     >
                                         <span className="mr-1">{opt.emoji}</span>
@@ -161,7 +161,7 @@ export default function AdminSettingsPage() {
                                     type="date"
                                     value={dateRange.start}
                                     onChange={e => setDateRange({ ...dateRange, start: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                                    className="w-full px-4 py-2 border border-border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                                 />
                             </div>
                             <div>
@@ -170,7 +170,7 @@ export default function AdminSettingsPage() {
                                     type="date"
                                     value={dateRange.end}
                                     onChange={e => setDateRange({ ...dateRange, end: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                                    className="w-full px-4 py-2 border border-border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                                 />
                             </div>
                         </div>
@@ -188,7 +188,7 @@ export default function AdminSettingsPage() {
                             <button
                                 onClick={() => handleExport('json')}
                                 disabled={exporting}
-                                className="flex-1 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                                className="flex-1 py-3 bg-primary text-white rounded-xl font-bold hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                             >
                                 <span>📋</span>
                                 {exporting ? '匯出中...' : '匯出 JSON'}
@@ -198,69 +198,69 @@ export default function AdminSettingsPage() {
                 </div>
 
                 {/* Quick Links */}
-                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                    <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <div className="bg-card rounded-2xl p-6 shadow-card border border-border/50">
+                    <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
                         ⚡ 快速操作
                     </h3>
 
                     <div className="grid grid-cols-2 gap-3">
                         <Link
                             href="/admin/users"
-                            className="p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors flex items-center gap-3"
+                            className="p-4 bg-background rounded-xl hover:bg-muted transition-colors flex items-center gap-3"
                         >
                             <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
                                 <span className="text-xl">👥</span>
                             </div>
                             <div>
-                                <p className="font-bold text-gray-900">用戶管理</p>
-                                <p className="text-xs text-gray-500">管理所有用戶</p>
+                                <p className="font-bold text-foreground">用戶管理</p>
+                                <p className="text-xs text-muted-foreground">管理所有用戶</p>
                             </div>
                         </Link>
 
                         <Link
                             href="/admin/products"
-                            className="p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors flex items-center gap-3"
+                            className="p-4 bg-background rounded-xl hover:bg-muted transition-colors flex items-center gap-3"
                         >
                             <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
                                 <span className="text-xl">📦</span>
                             </div>
                             <div>
-                                <p className="font-bold text-gray-900">商品管理</p>
-                                <p className="text-xs text-gray-500">管理商品庫存</p>
+                                <p className="font-bold text-foreground">商品管理</p>
+                                <p className="text-xs text-muted-foreground">管理商品庫存</p>
                             </div>
                         </Link>
 
                         <Link
                             href="/admin/stores"
-                            className="p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors flex items-center gap-3"
+                            className="p-4 bg-background rounded-xl hover:bg-muted transition-colors flex items-center gap-3"
                         >
                             <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
                                 <span className="text-xl">🏪</span>
                             </div>
                             <div>
-                                <p className="font-bold text-gray-900">門店管理</p>
-                                <p className="text-xs text-gray-500">管理所有門店</p>
+                                <p className="font-bold text-foreground">門店管理</p>
+                                <p className="text-xs text-muted-foreground">管理所有門店</p>
                             </div>
                         </Link>
 
                         <Link
                             href="/admin"
-                            className="p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors flex items-center gap-3"
+                            className="p-4 bg-background rounded-xl hover:bg-muted transition-colors flex items-center gap-3"
                         >
                             <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center">
                                 <span className="text-xl">🏠</span>
                             </div>
                             <div>
-                                <p className="font-bold text-gray-900">管理後台</p>
-                                <p className="text-xs text-gray-500">返回主頁</p>
+                                <p className="font-bold text-foreground">管理後台</p>
+                                <p className="text-xs text-muted-foreground">返回主頁</p>
                             </div>
                         </Link>
                     </div>
                 </div>
 
                 {/* System Info */}
-                <div className="bg-gray-100 rounded-2xl p-4 text-center">
-                    <p className="text-xs text-gray-500">
+                <div className="bg-muted rounded-2xl p-4 text-center">
+                    <p className="text-xs text-muted-foreground">
                         地壺球活動管理系統 v1.0 |
                         最後更新: {new Date().toLocaleDateString('zh-TW')}
                     </p>

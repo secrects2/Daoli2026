@@ -33,25 +33,25 @@ export default function AiAnalysisSection({ elderId, showLink = false }: AiAnaly
 
     if (loading) {
         return (
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <div className="bg-card p-6 rounded-2xl shadow-card border border-border/50">
+                <h3 className="font-bold text-foreground mb-4 flex items-center gap-2">
                     <span>🤖</span> AI 動作分析與處方
                 </h3>
-                <p className="text-gray-400 text-sm text-center py-4">載入中...</p>
+                <p className="text-muted-foreground text-sm text-center py-4">載入中...</p>
             </div>
         )
     }
 
     return (
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-            <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+        <div className="bg-card p-6 rounded-2xl shadow-card border border-border/50">
+            <h3 className="font-bold text-foreground mb-4 flex items-center gap-2">
                 <span>🤖</span> AI 動作分析與處方
             </h3>
 
             {aiSessions.length > 0 ? (
                 <div className="space-y-6">
                     {/* 最新處方卡片 */}
-                    <div className={`p-5 rounded-xl border-l-4 shadow-sm ${getAiPrescription(aiSessions[0].metrics || {}).color}`}>
+                    <div className={`p-5 rounded-xl border-l-4 shadow-card ${getAiPrescription(aiSessions[0].metrics || {}).color}`}>
                         <div className="flex justify-between items-start mb-2">
                             <h4 className="font-bold text-lg">{getAiPrescription(aiSessions[0].metrics || {}).title}</h4>
                             <span className="text-xs opacity-75">{new Date(aiSessions[0].created_at).toLocaleDateString()}</span>
@@ -62,65 +62,65 @@ export default function AiAnalysisSection({ elderId, showLink = false }: AiAnaly
                         <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-black/5">
                             <div className="text-center">
                                 <p className="text-xs opacity-70">手肘 ROM</p>
-                                <p className="font-black text-xl">{aiSessions[0].metrics?.avg_rom || '--'}°</p>
+                                <p className="font-extrabold text-xl">{aiSessions[0].metrics?.avg_rom || '--'}°</p>
                             </div>
                             <div className="text-center">
                                 <p className="text-xs opacity-70">軀幹穩定</p>
-                                <p className="font-black text-xl">{aiSessions[0].metrics?.avg_trunk_tilt || '--'}°</p>
+                                <p className="font-extrabold text-xl">{aiSessions[0].metrics?.avg_trunk_tilt || '--'}°</p>
                             </div>
                             <div className="text-center">
                                 <p className="text-xs opacity-70">穩定率</p>
-                                <p className="font-black text-xl">{aiSessions[0].metrics?.stable_ratio || 0}%</p>
+                                <p className="font-extrabold text-xl">{aiSessions[0].metrics?.stable_ratio || 0}%</p>
                             </div>
                         </div>
                     </div>
 
                     {/* 進階數據面板（永遠顯示） */}
-                    <div className="rounded-xl border border-gray-200 overflow-hidden">
-                        <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
-                            <h5 className="text-xs font-bold text-gray-500 uppercase tracking-widest">進階生物力學數據</h5>
+                    <div className="rounded-xl border border-border overflow-hidden">
+                        <div className="bg-background px-4 py-2 border-b border-border">
+                            <h5 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">進階生物力學數據</h5>
                         </div>
                         <div className="p-4 space-y-3">
                             {/* 中轴稳定度 + 出手速度 */}
                             <div className="grid grid-cols-2 gap-3">
-                                <div className="p-3 bg-gray-50 rounded-lg">
-                                    <p className="text-[10px] text-gray-500 mb-1">中軸偏移</p>
+                                <div className="p-3 bg-background rounded-lg">
+                                    <p className="text-[10px] text-muted-foreground mb-1">中軸偏移</p>
                                     <p className={`text-lg font-bold ${(aiSessions[0].metrics?.core_stability_angle || 0) > 15 ? 'text-red-500' : 'text-cyan-600'}`}>
                                         {aiSessions[0].metrics?.core_stability_angle ?? '--'}°
                                     </p>
                                 </div>
-                                <div className="p-3 bg-gray-50 rounded-lg">
-                                    <p className="text-[10px] text-gray-500 mb-1">出手速度均值</p>
+                                <div className="p-3 bg-background rounded-lg">
+                                    <p className="text-[10px] text-muted-foreground mb-1">出手速度均值</p>
                                     <p className="text-lg font-bold text-emerald-600">{aiSessions[0].metrics?.avg_velocity ?? '--'}</p>
                                 </div>
                             </div>
 
                             {/* 角速度 */}
                             <div className="grid grid-cols-3 gap-2">
-                                <div className="p-2 bg-gray-50 rounded-lg text-center">
-                                    <p className="text-[10px] text-gray-500">肩角速</p>
+                                <div className="p-2 bg-background rounded-lg text-center">
+                                    <p className="text-[10px] text-muted-foreground">肩角速</p>
                                     <p className="text-sm font-bold text-purple-600">{aiSessions[0].metrics?.avg_shoulder_angular_vel ?? '--'}°/s</p>
                                 </div>
-                                <div className="p-2 bg-gray-50 rounded-lg text-center">
-                                    <p className="text-[10px] text-gray-500">肘角速</p>
+                                <div className="p-2 bg-background rounded-lg text-center">
+                                    <p className="text-[10px] text-muted-foreground">肘角速</p>
                                     <p className="text-sm font-bold text-purple-600">{aiSessions[0].metrics?.avg_elbow_angular_vel ?? '--'}°/s</p>
                                 </div>
-                                <div className="p-2 bg-gray-50 rounded-lg text-center">
-                                    <p className="text-[10px] text-gray-500">腕角速</p>
+                                <div className="p-2 bg-background rounded-lg text-center">
+                                    <p className="text-[10px] text-muted-foreground">腕角速</p>
                                     <p className="text-sm font-bold text-purple-600">{aiSessions[0].metrics?.avg_wrist_angular_vel ?? '--'}°/s</p>
                                 </div>
                             </div>
 
                             {/* 震颤 & 代偿 */}
                             <div className="grid grid-cols-2 gap-3">
-                                <div className={`p-3 rounded-lg ${(aiSessions[0].metrics?.tremor_detected_ratio || 0) > 0 ? 'bg-red-50 border border-red-100' : 'bg-gray-50'}`}>
-                                    <p className="text-[10px] text-gray-500 mb-1">震顫檢出率</p>
+                                <div className={`p-3 rounded-lg ${(aiSessions[0].metrics?.tremor_detected_ratio || 0) > 0 ? 'bg-red-50 border border-red-100' : 'bg-background'}`}>
+                                    <p className="text-[10px] text-muted-foreground mb-1">震顫檢出率</p>
                                     <p className={`text-lg font-bold ${(aiSessions[0].metrics?.tremor_detected_ratio || 0) > 0 ? 'text-red-500' : 'text-green-600'}`}>
                                         {aiSessions[0].metrics?.tremor_detected_ratio != null ? `${aiSessions[0].metrics.tremor_detected_ratio}%` : '--'}
                                     </p>
                                 </div>
-                                <div className={`p-3 rounded-lg ${(aiSessions[0].metrics?.compensation_detected_ratio || 0) > 0 ? 'bg-orange-50 border border-orange-100' : 'bg-gray-50'}`}>
-                                    <p className="text-[10px] text-gray-500 mb-1">代償動作</p>
+                                <div className={`p-3 rounded-lg ${(aiSessions[0].metrics?.compensation_detected_ratio || 0) > 0 ? 'bg-orange-50 border border-orange-100' : 'bg-background'}`}>
+                                    <p className="text-[10px] text-muted-foreground mb-1">代償動作</p>
                                     <p className={`text-lg font-bold ${(aiSessions[0].metrics?.compensation_detected_ratio || 0) > 0 ? 'text-orange-500' : 'text-green-600'}`}>
                                         {aiSessions[0].metrics?.compensation_detected_ratio != null ? `${aiSessions[0].metrics.compensation_detected_ratio}%` : '--'}
                                     </p>
@@ -132,12 +132,12 @@ export default function AiAnalysisSection({ elderId, showLink = false }: AiAnaly
 
                             {/* 坐姿修正 & 手指张开 */}
                             <div className="grid grid-cols-2 gap-3">
-                                <div className="p-3 bg-gray-50 rounded-lg">
-                                    <p className="text-[10px] text-gray-500 mb-1">坐姿修正量</p>
-                                    <p className="text-lg font-bold text-blue-600">{aiSessions[0].metrics?.posture_correction_avg ?? '--'}°</p>
+                                <div className="p-3 bg-background rounded-lg">
+                                    <p className="text-[10px] text-muted-foreground mb-1">坐姿修正量</p>
+                                    <p className="text-lg font-bold text-primary">{aiSessions[0].metrics?.posture_correction_avg ?? '--'}°</p>
                                 </div>
-                                <div className="p-3 bg-gray-50 rounded-lg">
-                                    <p className="text-[10px] text-gray-500 mb-1">🤚 手指張開度</p>
+                                <div className="p-3 bg-background rounded-lg">
+                                    <p className="text-[10px] text-muted-foreground mb-1">🤚 手指張開度</p>
                                     <p className="text-lg font-bold text-amber-600">{aiSessions[0].metrics?.finger_spread_avg ?? '--'}°</p>
                                 </div>
                             </div>
@@ -145,7 +145,7 @@ export default function AiAnalysisSection({ elderId, showLink = false }: AiAnaly
                     </div>
 
                     {/* AI 智能推薦 */}
-                    <div className="p-5 rounded-xl border border-indigo-100 bg-gradient-to-br from-indigo-50 to-purple-50 shadow-sm relative overflow-hidden">
+                    <div className="p-5 rounded-xl border border-indigo-100 bg-gradient-to-br from-indigo-50 to-purple-50 shadow-card relative overflow-hidden">
                         <div className="absolute -top-4 -right-4 text-7xl opacity-5">💡</div>
                         <h4 className="font-bold text-lg text-indigo-900 mb-2 flex items-center gap-2 relative z-10">
                             <span>✨</span> AI 智能推薦
@@ -155,10 +155,10 @@ export default function AiAnalysisSection({ elderId, showLink = false }: AiAnaly
                         </p>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 relative z-10">
                             {getAiPrescription(aiSessions[0].metrics || {}).recommendedProducts?.map((product, idx) => (
-                                <div key={idx} className="bg-white/90 backdrop-blur-sm p-3 rounded-xl flex items-center gap-3 shadow-sm border border-indigo-50 hover:border-indigo-200 transition-all">
+                                <div key={idx} className="bg-card/90 backdrop-blur-sm p-3 rounded-xl flex items-center gap-3 shadow-card border border-indigo-50 hover:border-indigo-200 transition-all">
                                     <div className="text-3xl bg-indigo-50/50 w-12 h-12 flex items-center justify-center rounded-lg">{product.icon}</div>
                                     <div>
-                                        <p className="font-bold text-gray-900">{product.name}</p>
+                                        <p className="font-bold text-foreground">{product.name}</p>
                                         <p className="text-xs text-gray-600 mt-0.5">{product.reason}</p>
                                     </div>
                                 </div>
@@ -169,19 +169,19 @@ export default function AiAnalysisSection({ elderId, showLink = false }: AiAnaly
                     {/* 歷史檢測紀錄（可展開） */}
                     {aiSessions.length > 1 && (
                         <div className="space-y-2">
-                            <h5 className="text-sm font-bold text-gray-500">歷史檢測紀錄</h5>
+                            <h5 className="text-sm font-bold text-muted-foreground">歷史檢測紀錄</h5>
                             {aiSessions.slice(1).map(session => {
                                 const isExpanded = expandedSessionId === session.id
                                 const m = session.metrics || {}
                                 return (
-                                    <div key={session.id} className="rounded-lg border border-gray-100 overflow-hidden">
+                                    <div key={session.id} className="rounded-lg border border-border/50 overflow-hidden">
                                         <button
                                             onClick={() => setExpandedSessionId(isExpanded ? null : session.id)}
-                                            className="w-full flex justify-between items-center p-3 bg-gray-50 hover:bg-gray-100 transition-colors text-left"
+                                            className="w-full flex justify-between items-center p-3 bg-background hover:bg-muted transition-colors text-left"
                                         >
                                             <div>
                                                 <p className="font-bold text-sm">{new Date(session.created_at).toLocaleDateString()}</p>
-                                                <p className="text-xs text-gray-500">
+                                                <p className="text-xs text-muted-foreground">
                                                     ROM: {m.avg_rom ?? '--'}° | 穩定: {m.avg_trunk_tilt ?? '--'}°
                                                 </p>
                                             </div>
@@ -192,58 +192,58 @@ export default function AiAnalysisSection({ elderId, showLink = false }: AiAnaly
                                                     }`}>
                                                     {getAiPrescription(m).title.split(' ')[1]}
                                                 </span>
-                                                <span className="text-gray-400 text-xs">{isExpanded ? '▲' : '▼'}</span>
+                                                <span className="text-muted-foreground text-xs">{isExpanded ? '▲' : '▼'}</span>
                                             </div>
                                         </button>
                                         {isExpanded && (
-                                            <div className="p-3 border-t border-gray-100 space-y-2 bg-white">
+                                            <div className="p-3 border-t border-border/50 space-y-2 bg-card">
                                                 <div className="grid grid-cols-3 gap-2">
-                                                    <div className="p-2 bg-gray-50 rounded-lg text-center">
-                                                        <p className="text-[10px] text-gray-500">手肘 ROM</p>
-                                                        <p className="text-sm font-bold text-gray-900">{m.avg_rom ?? '--'}°</p>
+                                                    <div className="p-2 bg-background rounded-lg text-center">
+                                                        <p className="text-[10px] text-muted-foreground">手肘 ROM</p>
+                                                        <p className="text-sm font-bold text-foreground">{m.avg_rom ?? '--'}°</p>
                                                     </div>
-                                                    <div className="p-2 bg-gray-50 rounded-lg text-center">
-                                                        <p className="text-[10px] text-gray-500">軀幹傾斜</p>
-                                                        <p className="text-sm font-bold text-gray-900">{m.avg_trunk_tilt ?? '--'}°</p>
+                                                    <div className="p-2 bg-background rounded-lg text-center">
+                                                        <p className="text-[10px] text-muted-foreground">軀幹傾斜</p>
+                                                        <p className="text-sm font-bold text-foreground">{m.avg_trunk_tilt ?? '--'}°</p>
                                                     </div>
-                                                    <div className="p-2 bg-gray-50 rounded-lg text-center">
-                                                        <p className="text-[10px] text-gray-500">穩定率</p>
-                                                        <p className="text-sm font-bold text-gray-900">{m.stable_ratio ?? '--'}%</p>
+                                                    <div className="p-2 bg-background rounded-lg text-center">
+                                                        <p className="text-[10px] text-muted-foreground">穩定率</p>
+                                                        <p className="text-sm font-bold text-foreground">{m.stable_ratio ?? '--'}%</p>
                                                     </div>
                                                 </div>
                                                 <div className="grid grid-cols-2 gap-2">
-                                                    <div className="p-2 bg-gray-50 rounded-lg text-center">
-                                                        <p className="text-[10px] text-gray-500">中軸偏移</p>
+                                                    <div className="p-2 bg-background rounded-lg text-center">
+                                                        <p className="text-[10px] text-muted-foreground">中軸偏移</p>
                                                         <p className={`text-sm font-bold ${(m.core_stability_angle || 0) > 15 ? 'text-red-500' : 'text-cyan-600'}`}>{m.core_stability_angle ?? '--'}°</p>
                                                     </div>
-                                                    <div className="p-2 bg-gray-50 rounded-lg text-center">
-                                                        <p className="text-[10px] text-gray-500">出手速度</p>
+                                                    <div className="p-2 bg-background rounded-lg text-center">
+                                                        <p className="text-[10px] text-muted-foreground">出手速度</p>
                                                         <p className="text-sm font-bold text-emerald-600">{m.avg_velocity ?? '--'}</p>
                                                     </div>
                                                 </div>
                                                 <div className="grid grid-cols-3 gap-2">
-                                                    <div className="p-2 bg-gray-50 rounded-lg text-center">
-                                                        <p className="text-[10px] text-gray-500">肩角速</p>
+                                                    <div className="p-2 bg-background rounded-lg text-center">
+                                                        <p className="text-[10px] text-muted-foreground">肩角速</p>
                                                         <p className="text-xs font-bold text-purple-600">{m.avg_shoulder_angular_vel ?? '--'}°/s</p>
                                                     </div>
-                                                    <div className="p-2 bg-gray-50 rounded-lg text-center">
-                                                        <p className="text-[10px] text-gray-500">肘角速</p>
+                                                    <div className="p-2 bg-background rounded-lg text-center">
+                                                        <p className="text-[10px] text-muted-foreground">肘角速</p>
                                                         <p className="text-xs font-bold text-purple-600">{m.avg_elbow_angular_vel ?? '--'}°/s</p>
                                                     </div>
-                                                    <div className="p-2 bg-gray-50 rounded-lg text-center">
-                                                        <p className="text-[10px] text-gray-500">腕角速</p>
+                                                    <div className="p-2 bg-background rounded-lg text-center">
+                                                        <p className="text-[10px] text-muted-foreground">腕角速</p>
                                                         <p className="text-xs font-bold text-purple-600">{m.avg_wrist_angular_vel ?? '--'}°/s</p>
                                                     </div>
                                                 </div>
                                                 <div className="grid grid-cols-2 gap-2">
-                                                    <div className={`p-2 rounded-lg text-center ${(m.tremor_detected_ratio || 0) > 0 ? 'bg-red-50' : 'bg-gray-50'}`}>
-                                                        <p className="text-[10px] text-gray-500">震顫</p>
+                                                    <div className={`p-2 rounded-lg text-center ${(m.tremor_detected_ratio || 0) > 0 ? 'bg-red-50' : 'bg-background'}`}>
+                                                        <p className="text-[10px] text-muted-foreground">震顫</p>
                                                         <p className={`text-sm font-bold ${(m.tremor_detected_ratio || 0) > 0 ? 'text-red-500' : 'text-green-600'}`}>
                                                             {m.tremor_detected_ratio != null ? `${m.tremor_detected_ratio}%` : '--'}
                                                         </p>
                                                     </div>
-                                                    <div className={`p-2 rounded-lg text-center ${(m.compensation_detected_ratio || 0) > 0 ? 'bg-orange-50' : 'bg-gray-50'}`}>
-                                                        <p className="text-[10px] text-gray-500">代償</p>
+                                                    <div className={`p-2 rounded-lg text-center ${(m.compensation_detected_ratio || 0) > 0 ? 'bg-orange-50' : 'bg-background'}`}>
+                                                        <p className="text-[10px] text-muted-foreground">代償</p>
                                                         <p className={`text-sm font-bold ${(m.compensation_detected_ratio || 0) > 0 ? 'text-orange-500' : 'text-green-600'}`}>
                                                             {m.compensation_detected_ratio != null ? `${m.compensation_detected_ratio}%` : '--'}
                                                         </p>
@@ -266,10 +266,10 @@ export default function AiAnalysisSection({ elderId, showLink = false }: AiAnaly
                     )}
                 </div>
             ) : (
-                <div className="text-center py-8 bg-gray-50 rounded-xl border border-dashed border-gray-300">
-                    <p className="text-gray-500">尚無 AI 檢測紀錄</p>
+                <div className="text-center py-8 bg-background rounded-xl border border-dashed border-gray-300">
+                    <p className="text-muted-foreground">尚無 AI 檢測紀錄</p>
                     {showLink && (
-                        <Link href="/pharmacist/ai-test" className="text-blue-600 font-bold text-sm mt-2 inline-block hover:underline">
+                        <Link href="/pharmacist/ai-test" className="text-primary font-bold text-sm mt-2 inline-block hover:underline">
                             前往進行檢測 &rarr;
                         </Link>
                     )}

@@ -158,7 +158,7 @@ export default function MatchEditPage() {
     return (
         <div className="min-h-screen bg-gray-50 pb-20">
             {/* Header */}
-            <div className="sticky top-0 z-20 backdrop-blur-xl bg-white/80 border-b border-gray-100 px-5 pt-12 pb-4">
+            <div className="sticky top-0 z-20 backdrop-blur-xl bg-card/80 border-b border-gray-100 px-5 pt-12 pb-4">
                 <div className="max-w-2xl mx-auto flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <Link
@@ -170,7 +170,7 @@ export default function MatchEditPage() {
                             </svg>
                         </Link>
                         <div>
-                            <h1 className="text-2xl font-black text-gray-900">編輯比賽</h1>
+                            <h1 className="text-2xl font-extrabold text-gray-900">編輯比賽</h1>
                             <p className="text-sm text-gray-500">
                                 {new Date(match.created_at).toLocaleDateString('zh-TW')}
                             </p>
@@ -187,19 +187,19 @@ export default function MatchEditPage() {
 
             <div className="max-w-2xl mx-auto px-5 py-6 space-y-6">
                 {/* Score Summary */}
-                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                <div className="bg-card rounded-2xl p-6 shadow-card border border-gray-100">
                     <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">目前比分</h3>
                     <div className="flex items-center justify-center gap-8">
                         <div className="text-center">
                             <div className="w-20 h-20 bg-red-100 rounded-2xl flex items-center justify-center mb-2">
-                                <span className="text-4xl font-black text-red-600">{redTotal}</span>
+                                <span className="text-4xl font-extrabold text-red-600">{redTotal}</span>
                             </div>
                             <span className="text-sm font-bold text-gray-600">紅隊</span>
                         </div>
                         <span className="text-3xl font-bold text-gray-300">VS</span>
                         <div className="text-center">
                             <div className="w-20 h-20 bg-yellow-100 rounded-2xl flex items-center justify-center mb-2">
-                                <span className="text-4xl font-black text-yellow-600">{yellowTotal}</span>
+                                <span className="text-4xl font-extrabold text-yellow-600">{yellowTotal}</span>
                             </div>
                             <span className="text-sm font-bold text-gray-600">黃隊</span>
                         </div>
@@ -208,7 +208,7 @@ export default function MatchEditPage() {
 
                 {/* Participants */}
                 {participants.length > 0 && (
-                    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                    <div className="bg-card rounded-2xl p-6 shadow-card border border-gray-100">
                         <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">參賽者</h3>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
@@ -232,7 +232,7 @@ export default function MatchEditPage() {
                 )}
 
                 {/* Ends Editor */}
-                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                <div className="bg-card rounded-2xl p-6 shadow-card border border-gray-100">
                     <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">回合分數</h3>
                     <div className="space-y-3">
                         {ends.map((end, index) => (

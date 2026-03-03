@@ -103,15 +103,15 @@ export default function ManagerMessagesPage() {
         c.role?.includes(searchTerm)
     )
 
-    if (loading) return <div className="p-8 text-center text-gray-500">載入中...</div>
+    if (loading) return <div className="p-8 text-center text-muted-foreground">載入中...</div>
 
     return (
-        <div className="flex h-screen bg-gray-100 overflow-hidden">
+        <div className="flex h-screen bg-muted overflow-hidden">
             {/* Sidebar (Contacts) */}
-            <div className={`w-full md:w-80 bg-white border-r border-gray-200 flex flex-col ${activeContact ? 'hidden md:flex' : 'flex'}`}>
-                <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+            <div className={`w-full md:w-80 bg-card border-r border-border flex flex-col ${activeContact ? 'hidden md:flex' : 'flex'}`}>
+                <div className="p-4 border-b border-border flex justify-between items-center">
                     <h2 className="font-bold text-lg">對話列表</h2>
-                    <Link href="/pharmacist/dashboard" className="text-sm text-blue-600 hover:underline">返回看板</Link>
+                    <Link href="/pharmacist/dashboard" className="text-sm text-primary hover:underline">返回看板</Link>
                 </div>
 
                 {/* Search */}
@@ -121,7 +121,7 @@ export default function ManagerMessagesPage() {
                         placeholder="搜尋長輩或家屬..."
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
-                        className="w-full bg-gray-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full bg-muted rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                 </div>
 
@@ -130,7 +130,7 @@ export default function ManagerMessagesPage() {
                         <div
                             key={contact.id}
                             onClick={() => setActiveContact(contact)}
-                            className={`p-4 flex items-center gap-3 cursor-pointer hover:bg-gray-50 transition-colors ${activeContact?.id === contact.id ? 'bg-blue-50' : ''}`}
+                            className={`p-4 flex items-center gap-3 cursor-pointer hover:bg-background transition-colors ${activeContact?.id === contact.id ? 'bg-primary/10' : ''}`}
                         >
                             <img
                                 src={contact.avatar_url || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + contact.id}
@@ -138,17 +138,17 @@ export default function ManagerMessagesPage() {
                             />
                             <div className="flex-1 min-w-0">
                                 <div className="flex justify-between items-baseline mb-0.5">
-                                    <h3 className="font-semibold text-gray-900 truncate">{contact.full_name}</h3>
-                                    <span className="text-xs text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-500">
+                                    <h3 className="font-semibold text-foreground truncate">{contact.full_name}</h3>
+                                    <span className="text-xs text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
                                         {contact.role === 'elder' ? '長輩' : '家屬'}
                                     </span>
                                 </div>
-                                <p className="text-sm text-gray-500 truncate">點擊開始對話</p>
+                                <p className="text-sm text-muted-foreground truncate">點擊開始對話</p>
                             </div>
                         </div>
                     ))}
                     {filteredContacts.length === 0 && (
-                        <div className="p-4 text-center text-gray-500 text-sm">沒有找到相關聯絡人</div>
+                        <div className="p-4 text-center text-muted-foreground text-sm">沒有找到相關聯絡人</div>
                     )}
                 </div>
             </div>
@@ -157,9 +157,9 @@ export default function ManagerMessagesPage() {
             {activeContact ? (
                 <div className="flex-1 flex flex-col h-full">
                     {/* Chat Header */}
-                    <div className="bg-white px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+                    <div className="bg-card px-4 py-3 border-b border-border flex justify-between items-center">
                         <div className="flex items-center gap-3">
-                            <button onClick={() => setActiveContact(null)} className="md:hidden text-gray-500">
+                            <button onClick={() => setActiveContact(null)} className="md:hidden text-muted-foreground">
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path></svg>
                             </button>
                             <img
@@ -167,26 +167,26 @@ export default function ManagerMessagesPage() {
                                 className="w-8 h-8 rounded-full bg-gray-200"
                             />
                             <div>
-                                <h3 className="font-bold text-gray-900">{activeContact.full_name}</h3>
+                                <h3 className="font-bold text-foreground">{activeContact.full_name}</h3>
                                 <p className="text-xs text-green-600">線上</p>
                             </div>
                         </div>
                         <div className="text-sm">
-                            <Link href={`/pharmacist/${activeContact.role === 'elder' ? 'elders' : 'family'}/${activeContact.id}`} className="text-blue-600 hover:underline">
+                            <Link href={`/pharmacist/${activeContact.role === 'elder' ? 'elders' : 'family'}/${activeContact.id}`} className="text-primary hover:underline">
                                 查看詳細資料
                             </Link>
                         </div>
                     </div>
 
                     {/* Messages */}
-                    <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+                    <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-background">
                         {messages.map(msg => {
                             const isMe = msg.sender_id === currentUserId
                             return (
                                 <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-                                    <div className={`max-w-[70%] rounded-2xl px-4 py-3 shadow-sm ${isMe ? 'bg-blue-600 text-white' : 'bg-white text-gray-900'}`}>
+                                    <div className={`max-w-[70%] rounded-2xl px-4 py-3 shadow-card ${isMe ? 'bg-primary text-white' : 'bg-card text-foreground'}`}>
                                         <p className="whitespace-pre-wrap">{msg.content}</p>
-                                        <div className={`text-xs mt-1 text-right ${isMe ? 'text-blue-100' : 'text-gray-400'}`}>
+                                        <div className={`text-xs mt-1 text-right ${isMe ? 'text-blue-100' : 'text-muted-foreground'}`}>
                                             {new Date(msg.created_at).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })}
                                         </div>
                                     </div>
@@ -197,7 +197,7 @@ export default function ManagerMessagesPage() {
                     </div>
 
                     {/* Input */}
-                    <div className="bg-white p-4 border-t border-gray-200">
+                    <div className="bg-card p-4 border-t border-border">
                         <div className="flex gap-2">
                             <input
                                 type="text"
@@ -205,12 +205,12 @@ export default function ManagerMessagesPage() {
                                 onChange={e => setInput(e.target.value)}
                                 onKeyDown={e => e.key === 'Enter' && handleSend()}
                                 placeholder="輸入訊息以回覆..."
-                                className="flex-1 bg-gray-100 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                className="flex-1 bg-muted rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                             />
                             <button
                                 onClick={handleSend}
                                 disabled={!input.trim()}
-                                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                                className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
                             >
                                 發送
                             </button>
@@ -218,7 +218,7 @@ export default function ManagerMessagesPage() {
                     </div>
                 </div>
             ) : (
-                <div className="hidden md:flex flex-1 items-center justify-center bg-gray-50 text-gray-400 flex-col">
+                <div className="hidden md:flex flex-1 items-center justify-center bg-background text-muted-foreground flex-col">
                     <svg className="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
                     <p>請選擇左側聯絡人開始對話</p>
                 </div>

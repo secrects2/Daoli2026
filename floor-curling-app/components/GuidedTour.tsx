@@ -129,7 +129,7 @@ export function TourProvider({ children }: { children: ReactNode }) {
                     {/* 說明卡片 */}
                     {currentStepData && highlightRect && (
                         <div
-                            className="absolute bg-white rounded-2xl shadow-2xl p-5 max-w-sm pointer-events-auto"
+                            className="absolute bg-card rounded-2xl shadow-2xl p-5 max-w-sm pointer-events-auto"
                             style={{
                                 top: highlightRect.bottom + 20,
                                 left: Math.max(16, Math.min(
@@ -141,19 +141,19 @@ export function TourProvider({ children }: { children: ReactNode }) {
                         >
                             {/* 進度指示 */}
                             <div className="flex items-center justify-between mb-3">
-                                <span className="text-xs text-gray-400">
+                                <span className="text-xs text-muted-foreground">
                                     步驟 {currentStep + 1} / {steps.length}
                                 </span>
                                 <button
                                     onClick={skipTour}
-                                    className="text-xs text-gray-400 hover:text-gray-600"
+                                    className="text-xs text-muted-foreground hover:text-gray-600"
                                 >
                                     跳過導覽
                                 </button>
                             </div>
 
                             {/* 標題 */}
-                            <h3 className="text-lg font-bold text-gray-900 mb-2">
+                            <h3 className="text-lg font-bold text-foreground mb-2">
                                 {currentStepData.title}
                             </h3>
 
@@ -164,7 +164,7 @@ export function TourProvider({ children }: { children: ReactNode }) {
 
                             {/* 動作提示 */}
                             {currentStepData.action && (
-                                <div className="bg-blue-50 text-blue-700 text-sm px-3 py-2 rounded-lg mb-4 flex items-center gap-2">
+                                <div className="bg-primary/10 text-blue-700 text-sm px-3 py-2 rounded-lg mb-4 flex items-center gap-2">
                                     <span>👆</span>
                                     {currentStepData.action}
                                 </div>
@@ -175,14 +175,14 @@ export function TourProvider({ children }: { children: ReactNode }) {
                                 {currentStep > 0 && (
                                     <button
                                         onClick={prevStep}
-                                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 text-sm font-medium"
+                                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-background text-sm font-medium"
                                     >
                                         上一步
                                     </button>
                                 )}
                                 <button
                                     onClick={nextStep}
-                                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium"
+                                    className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 text-sm font-medium"
                                 >
                                     {currentStep === steps.length - 1 ? '完成 🎉' : '下一步'}
                                 </button>

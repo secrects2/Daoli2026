@@ -26,16 +26,16 @@ export default function NewStorePage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 p-6">
+        <div className="min-h-screen bg-background p-6">
             <div className="max-w-2xl mx-auto">
                 <div className="flex justify-between items-center mb-6">
-                    <h1 className="text-2xl font-bold text-gray-900">新增加盟店</h1>
-                    <Link href="/admin/stores" className="text-gray-500 hover:text-gray-900">
+                    <h1 className="text-2xl font-bold text-foreground">新增加盟店</h1>
+                    <Link href="/admin/stores" className="text-muted-foreground hover:text-foreground">
                         取消
                     </Link>
                 </div>
 
-                <div className="bg-white shadow rounded-lg p-6">
+                <div className="bg-card shadow rounded-lg p-6">
                     {error && (
                         <div className="bg-red-50 text-red-700 p-4 rounded-md mb-6 text-sm">
                             {error}
@@ -59,7 +59,7 @@ export default function NewStorePage() {
 
                         <div>
                             <label htmlFor="id" className="block text-sm font-medium text-gray-700">
-                                自訂 ID (Custom ID) <span className="text-gray-400 font-normal">- 可選，若留空將自動生成</span>
+                                自訂 ID (Custom ID) <span className="text-muted-foreground font-normal">- 可選，若留空將自動生成</span>
                             </label>
                             <input
                                 type="text"
@@ -69,7 +69,7 @@ export default function NewStorePage() {
                                 placeholder="例如：TP_DAAN_01 (只能包含英數字與底線)"
                                 pattern="[A-Za-z0-9_]+"
                             />
-                            <p className="mt-1 text-xs text-gray-500">ID 建立後無法修改。</p>
+                            <p className="mt-1 text-xs text-muted-foreground">ID 建立後無法修改。</p>
                         </div>
 
                         <div>
@@ -88,7 +88,7 @@ export default function NewStorePage() {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="ios-btn bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
+                                className="ios-btn bg-primary hover:bg-blue-700 w-full sm:w-auto"
                             >
                                 {loading ? '建立中...' : '確認建立'}
                             </button>

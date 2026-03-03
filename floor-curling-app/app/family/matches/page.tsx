@@ -111,13 +111,13 @@ export default function FamilyMatchesPage() {
     }
 
     const getMatchResult = (match: Match) => {
-        if (!elderId) return { text: '—', color: 'text-gray-500', won: false }
+        if (!elderId) return { text: '—', color: 'text-muted-foreground', won: false }
         const isRed = match.red_team_elder_id === elderId
         const won = (isRed && match.winner_color === 'red') ||
             (match.yellow_team_elder_id === elderId && match.winner_color === 'yellow')
 
         if (match.winner_color === null) {
-            return { text: '平手', color: 'text-gray-500', icon: '🤝', won: false }
+            return { text: '平手', color: 'text-muted-foreground', icon: '🤝', won: false }
         }
         return won
             ? { text: '勝利', color: 'text-green-600', icon: '🏆', won: true }
@@ -157,13 +157,13 @@ export default function FamilyMatchesPage() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
             {/* 導航欄 */}
-            <nav className="bg-white/80 backdrop-blur-sm shadow-sm sticky top-0 z-10">
+            <nav className="bg-card/80 backdrop-blur-sm shadow-card sticky top-0 z-10">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16">
                         <div className="flex items-center">
                             <button
                                 onClick={() => router.back()}
-                                className="mr-4 text-gray-600 hover:text-gray-900"
+                                className="mr-4 text-gray-600 hover:text-foreground"
                             >
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -181,10 +181,10 @@ export default function FamilyMatchesPage() {
             {/* 主內容 */}
             <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {matches.length === 0 ? (
-                    <div className="bg-white rounded-xl p-12 text-center">
+                    <div className="bg-card rounded-xl p-12 text-center">
                         <span className="text-6xl mb-4 block">🥌</span>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">尚無比賽記錄</h3>
-                        <p className="text-gray-500">長輩完成比賽後會顯示在這裡</p>
+                        <h3 className="text-lg font-semibold text-foreground mb-2">尚無比賽記錄</h3>
+                        <p className="text-muted-foreground">長輩完成比賽後會顯示在這裡</p>
                     </div>
                 ) : (
                     <div className="space-y-4">
@@ -195,11 +195,11 @@ export default function FamilyMatchesPage() {
                             return (
                                 <div
                                     key={match.id}
-                                    className="bg-white rounded-xl shadow-sm overflow-hidden"
+                                    className="bg-card rounded-xl shadow-card overflow-hidden"
                                 >
                                     {/* 比賽標題 */}
                                     <div
-                                        className={`p-4 cursor-pointer ${result.won ? 'bg-gradient-to-r from-green-50 to-emerald-50' : 'bg-gray-50'
+                                        className={`p-4 cursor-pointer ${result.won ? 'bg-gradient-to-r from-green-50 to-emerald-50' : 'bg-background'
                                             }`}
                                         onClick={() => setSelectedMatch(selectedMatch?.id === match.id ? null : match)}
                                     >
@@ -211,11 +211,11 @@ export default function FamilyMatchesPage() {
                                                         <span className={`text-xl font-bold ${result.color}`}>
                                                             {result.text}
                                                         </span>
-                                                        <span className="text-2xl font-bold text-gray-400">
+                                                        <span className="text-2xl font-bold text-muted-foreground">
                                                             {score.elder} : {score.opponent}
                                                         </span>
                                                     </div>
-                                                    <p className="text-sm text-gray-500">
+                                                    <p className="text-sm text-muted-foreground">
                                                         {new Date(match.created_at).toLocaleString('zh-TW', {
                                                             year: 'numeric',
                                                             month: 'numeric',
@@ -227,7 +227,7 @@ export default function FamilyMatchesPage() {
                                                 </div>
                                             </div>
                                             <svg
-                                                className={`w-5 h-5 text-gray-400 transition-transform ${selectedMatch?.id === match.id ? 'rotate-180' : ''
+                                                className={`w-5 h-5 text-muted-foreground transition-transform ${selectedMatch?.id === match.id ? 'rotate-180' : ''
                                                     }`}
                                                 fill="none"
                                                 stroke="currentColor"
@@ -251,9 +251,9 @@ export default function FamilyMatchesPage() {
                                                     return (
                                                         <div
                                                             key={end.id}
-                                                            className="bg-gray-50 rounded-lg p-3 text-center"
+                                                            className="bg-background rounded-lg p-3 text-center"
                                                         >
-                                                            <p className="text-xs text-gray-500 mb-1">第 {end.end_number} 回合</p>
+                                                            <p className="text-xs text-muted-foreground mb-1">第 {end.end_number} 回合</p>
                                                             <p className={`text-lg font-bold ${elderScore > opponentScore ? 'text-green-600' :
                                                                 elderScore < opponentScore ? 'text-red-500' : 'text-gray-600'
                                                                 }`}>

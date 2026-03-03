@@ -40,19 +40,19 @@ export default function FamilyPointsPage() {
     }, [supabase])
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-20">
+        <div className="min-h-screen bg-background pb-20">
             {/* Header */}
-            <div className="sticky top-0 z-10 bg-white/90 backdrop-blur-md border-b border-gray-200">
+            <div className="sticky top-0 z-10 bg-card/90 backdrop-blur-md border-b border-border">
                 <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <button onClick={() => router.back()} className="text-gray-600 hover:text-gray-900">
+                        <button onClick={() => router.back()} className="text-gray-600 hover:text-foreground">
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                             </svg>
                         </button>
                         <h1 className="text-lg font-bold">積分查詢</h1>
                     </div>
-                    <Link href="/family/shop" className="text-sm font-bold text-blue-600">
+                    <Link href="/family/shop" className="text-sm font-bold text-primary">
                         去兌換商品 →
                     </Link>
                 </div>
@@ -73,7 +73,7 @@ export default function FamilyPointsPage() {
                         </div>
                     </div>
                     <div className="mt-4 flex gap-3">
-                        <Link href="/family/shop" className="bg-white/20 hover:bg-white/30 backdrop-blur-sm px-4 py-2 rounded-lg text-sm font-bold transition-colors">
+                        <Link href="/family/shop" className="bg-card/20 hover:bg-card/30 backdrop-blur-sm px-4 py-2 rounded-lg text-sm font-bold transition-colors">
                             🛍️ 兌換商品
                         </Link>
                     </div>
@@ -81,22 +81,22 @@ export default function FamilyPointsPage() {
 
                 {/* History */}
                 <div>
-                    <h3 className="font-bold text-gray-900 mb-3 px-1">積分記錄</h3>
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 divide-y divide-gray-50 overflow-hidden">
+                    <h3 className="font-bold text-foreground mb-3 px-1">積分記錄</h3>
+                    <div className="bg-card rounded-xl shadow-card border border-border/50 divide-y divide-gray-50 overflow-hidden">
                         {history.map(item => (
                             <div key={item.id} className="p-4 flex items-center justify-between">
                                 <div className="flex items-center gap-3">
                                     <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg
-                                        ${item.type === 'earn' ? 'bg-yellow-100 text-yellow-600' : 'bg-blue-100 text-blue-600'}
+                                        ${item.type === 'earn' ? 'bg-yellow-100 text-yellow-600' : 'bg-blue-100 text-primary'}
                                     `}>
                                         {item.type === 'earn' ? '💰' : '🎁'}
                                     </div>
                                     <div>
-                                        <p className="font-bold text-gray-900">{item.title}</p>
-                                        <p className="text-xs text-gray-500">{item.date}</p>
+                                        <p className="font-bold text-foreground">{item.title}</p>
+                                        <p className="text-xs text-muted-foreground">{item.date}</p>
                                     </div>
                                 </div>
-                                <span className={`font-mono font-bold ${item.amount > 0 ? 'text-green-600' : 'text-gray-900'}`}>
+                                <span className={`font-mono font-bold ${item.amount > 0 ? 'text-green-600' : 'text-foreground'}`}>
                                     {item.amount > 0 ? '+' : ''}{item.amount}
                                 </span>
                             </div>

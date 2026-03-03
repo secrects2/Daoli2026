@@ -63,7 +63,7 @@ export default function ElderDashboardClient({
     return (
         <div className="min-h-screen pb-24 space-y-6">
             {/* Glass Header */}
-            <div className="sticky top-0 z-20 backdrop-blur-xl bg-white/80 border-b border-gray-100 px-5 pt-12 pb-4 shadow-soft transition-all duration-300">
+            <div className="sticky top-0 z-20 backdrop-blur-xl bg-card/80 border-b border-border/50 px-5 pt-12 pb-4 shadow-soft transition-all duration-300">
                 <div className="flex justify-between items-center">
                     <div>
                         <h1 className="text-2xl font-extrabold text-foreground tracking-tight">長輩主頁</h1>
@@ -78,7 +78,7 @@ export default function ElderDashboardClient({
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
                             登出
                         </button>
-                        <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden ring-2 ring-white shadow-sm">
+                        <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden ring-2 ring-white shadow-card">
                             {user?.user_metadata?.avatar_url ? (
                                 <img src={user.user_metadata.avatar_url} alt="User Avatar" className="w-full h-full object-cover" />
                             ) : (
@@ -120,25 +120,25 @@ export default function ElderDashboardClient({
                                     <span className="w-2 h-2 rounded-full bg-teal-300 animate-pulse"></span>
                                     本週健康存摺
                                 </p>
-                                <h3 className="text-4xl font-black tracking-tight mb-2">
+                                <h3 className="text-4xl font-extrabold tracking-tight mb-2">
                                     {stats?.weeklyMatches || 0}
                                     <span className="text-xl font-medium opacity-80 ml-1">場</span>
                                 </h3>
                                 <div className="inline-flex items-center gap-3 flex-wrap">
-                                    <span className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-lg text-xs font-bold">
+                                    <span className="bg-card/20 backdrop-blur-sm px-3 py-1 rounded-lg text-xs font-bold">
                                         🏅 榮譽積分 {stats?.globalPoints || 0}
                                     </span>
-                                    <span className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-lg text-xs font-bold">
+                                    <span className="bg-card/20 backdrop-blur-sm px-3 py-1 rounded-lg text-xs font-bold">
                                         💰 兌換積分 {stats?.localPoints || 0}
                                     </span>
                                 </div>
                             </div>
-                            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md shadow-inner text-3xl">
+                            <div className="w-16 h-16 bg-card/20 rounded-2xl flex items-center justify-center backdrop-blur-md shadow-inner text-3xl">
                                 🏃
                             </div>
                         </div>
                         {/* Decor */}
-                        <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
+                        <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-card/10 rounded-full blur-xl"></div>
                     </div>
                 </Link>
 
@@ -149,9 +149,9 @@ export default function ElderDashboardClient({
                 <div className="grid grid-cols-2 gap-4">
                     <button
                         onClick={handleCheckIn}
-                        className="bg-gradient-to-br from-[#34C759] to-[#2DB34C] hover:from-[#3eda65] hover:to-[#33cc55] active:scale-95 transition-all rounded-3xl p-5 shadow-lg shadow-green-500/20 text-white text-left group"
+                        className="bg-gradient-to-br from-[#34C759] to-[#2DB34C] hover:from-[#3eda65] hover:to-[#33cc55] active:scale-95 transition-all rounded-2xl p-5 shadow-lg shadow-green-500/20 text-white text-left group"
                     >
-                        <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center text-2xl mb-3 group-hover:scale-110 transition-transform">
+                        <div className="w-12 h-12 bg-card/20 rounded-2xl flex items-center justify-center text-2xl mb-3 group-hover:scale-110 transition-transform">
                             📍
                         </div>
                         <h3 className="font-bold text-lg leading-tight">報平安</h3>
@@ -160,9 +160,9 @@ export default function ElderDashboardClient({
 
                     <Link
                         href="/elder/messages"
-                        className="bg-gradient-to-br from-[#FF9500] to-[#FF8000] hover:from-[#ff9f1a] hover:to-[#ff8c1a] active:scale-95 transition-all rounded-3xl p-5 shadow-lg shadow-orange-500/20 text-white text-left group"
+                        className="bg-gradient-to-br from-[#FF9500] to-[#FF8000] hover:from-[#ff9f1a] hover:to-[#ff8c1a] active:scale-95 transition-all rounded-2xl p-5 shadow-lg shadow-orange-500/20 text-white text-left group"
                     >
-                        <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center text-2xl mb-3 group-hover:scale-110 transition-transform">
+                        <div className="w-12 h-12 bg-card/20 rounded-2xl flex items-center justify-center text-2xl mb-3 group-hover:scale-110 transition-transform">
                             💬
                         </div>
                         <h3 className="font-bold text-lg leading-tight">聊天室</h3>
@@ -171,9 +171,9 @@ export default function ElderDashboardClient({
 
                     <Link
                         href="/elder/matches"
-                        className="bg-gradient-to-br from-[#AF52DE] to-[#9930D0] hover:from-[#b86ce0] hover:to-[#a340d8] active:scale-95 transition-all rounded-3xl p-5 shadow-lg shadow-purple-500/20 text-white text-left group"
+                        className="bg-gradient-to-br from-[#AF52DE] to-[#9930D0] hover:from-[#b86ce0] hover:to-[#a340d8] active:scale-95 transition-all rounded-2xl p-5 shadow-lg shadow-purple-500/20 text-white text-left group"
                     >
-                        <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center text-2xl mb-3 group-hover:scale-110 transition-transform">
+                        <div className="w-12 h-12 bg-card/20 rounded-2xl flex items-center justify-center text-2xl mb-3 group-hover:scale-110 transition-transform">
                             🏆
                         </div>
                         <h3 className="font-bold text-lg leading-tight">比賽記錄</h3>
@@ -182,9 +182,9 @@ export default function ElderDashboardClient({
 
                     <Link
                         href="/elder/shop"
-                        className="bg-gradient-to-br from-[#FF2D55] to-[#E0194E] hover:from-[#ff4368] hover:to-[#e82d5a] active:scale-95 transition-all rounded-3xl p-5 shadow-lg shadow-pink-500/20 text-white text-left group"
+                        className="bg-gradient-to-br from-[#FF2D55] to-[#E0194E] hover:from-[#ff4368] hover:to-[#e82d5a] active:scale-95 transition-all rounded-2xl p-5 shadow-lg shadow-pink-500/20 text-white text-left group"
                     >
-                        <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center text-2xl mb-3 group-hover:scale-110 transition-transform">
+                        <div className="w-12 h-12 bg-card/20 rounded-2xl flex items-center justify-center text-2xl mb-3 group-hover:scale-110 transition-transform">
                             🛍️
                         </div>
                         <h3 className="font-bold text-lg leading-tight">積分商店</h3>
@@ -207,9 +207,9 @@ export default function ElderDashboardClient({
                         <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-2 px-2">
                             {inventory.map((item: any) => (
                                 <div key={item.id} className="flex-shrink-0 w-24 flex flex-col items-center gap-2">
-                                    <div className="w-20 h-20 bg-gray-50 rounded-2xl flex items-center justify-center border border-gray-100 shadow-sm p-2">
+                                    <div className="w-20 h-20 bg-background rounded-2xl flex items-center justify-center border border-border/50 shadow-card p-2">
                                         {item.products?.image_url ? (
-                                            <img src={item.products.image_url} alt={item.products.name || "Product Image"} className="w-full h-full object-contain drop-shadow-sm" />
+                                            <img src={item.products.image_url} alt={item.products.name || "Product Image"} className="w-full h-full object-contain drop-shadow-card" />
                                         ) : (
                                             <span className="text-3xl">🛡️</span>
                                         )}
@@ -219,9 +219,9 @@ export default function ElderDashboardClient({
                             ))}
                         </div>
                     ) : (
-                        <div className="text-center py-6 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200">
-                            <p className="text-gray-400 text-sm mb-2">尚無裝備</p>
-                            <Link href="/elder/shop" className="text-blue-600 text-sm font-bold underline decoration-2 underline-offset-2">
+                        <div className="text-center py-6 bg-gray-50/50 rounded-2xl border border-dashed border-border">
+                            <p className="text-muted-foreground text-sm mb-2">尚無裝備</p>
+                            <Link href="/elder/shop" className="text-primary text-sm font-bold underline decoration-2 underline-offset-2">
                                 去商店逛逛
                             </Link>
                         </div>
@@ -233,21 +233,21 @@ export default function ElderDashboardClient({
                     <h3 className="font-bold text-foreground text-lg mb-4">已連結家屬</h3>
                     {familyMembers.length === 0 ? (
                         <div className="text-center py-6">
-                            <p className="text-gray-400 text-sm">還沒有家屬連結</p>
+                            <p className="text-muted-foreground text-sm">還沒有家屬連結</p>
                         </div>
                     ) : (
                         <div className="space-y-3">
                             {familyMembers.map((member) => (
-                                <div key={member.id} className="flex items-center gap-4 p-3 bg-gray-50/50 rounded-2xl border border-gray-100">
-                                    <div className="w-12 h-12 bg-white rounded-xl shadow-sm overflow-hidden p-0.5">
+                                <div key={member.id} className="flex items-center gap-4 p-3 bg-gray-50/50 rounded-2xl border border-border/50">
+                                    <div className="w-12 h-12 bg-card rounded-xl shadow-card overflow-hidden p-0.5">
                                         {member.avatar_url ? (
                                             <img src={member.avatar_url} alt={member.full_name || "Family Member"} className="w-full h-full object-cover rounded-lg" />
                                         ) : (
-                                            <div className="w-full h-full bg-gray-100 rounded-lg flex items-center justify-center">👤</div>
+                                            <div className="w-full h-full bg-muted rounded-lg flex items-center justify-center">👤</div>
                                         )}
                                     </div>
                                     <div>
-                                        <p className="font-bold text-gray-900">{member.full_name}</p>
+                                        <p className="font-bold text-foreground">{member.full_name}</p>
                                         <p className="text-xs text-green-600 font-medium flex items-center gap-1">
                                             <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
                                             連結中
