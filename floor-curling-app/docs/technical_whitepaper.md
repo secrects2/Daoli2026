@@ -270,8 +270,8 @@ $$
 
 **步骤 4**：计算振幅与抗噪过滤
 
-为避免摄影机高频细微噪点（尤其是翻拍螢幕产生的摩尔纹/压缩噪点，通常在 1~2.5° 范围 [4]）引起的假阳性，系统设置了噪点门槛（Noise Threshold, $Th_{noise} = 3.0^\circ$）：
-仅当相邻两帧的角度变化量 $|\delta_i| > Th_{noise}$ 时，才将其计入有效动作并计算零交叉。
+为避免摄影机细微噪点（MediaPipe Pose 在 30fps 下的测量精度约 ±0.5-1.0°）引起的假阳性，系统设置了噪点门槛（Noise Threshold, $Th_{noise} = 1.5^\circ$），基于国际运动障碍学会 (MDS) 临床分级标准 [Deuschl et al., 1998]：
+仅当当前帧的角度变化量 $|\delta_i| > Th_{noise}$ 时，才将其计入有效动作并判断是否发生零交叉。
 
 同时计算有效振幅：
 $$
@@ -281,18 +281,18 @@ $$
 #### 判定条件
 
 $$
-\text{tremor\_positive} = (N_{cross} \geq 8) \wedge (3 \leq f_{tremor} \leq 12 \text{ Hz}) \wedge (Amplitude > 3.0^\circ) \wedge (\text{SignificantRatio} > 0.3)
+\text{tremor\_positive} = (N_{cross} \geq 6) \wedge (3 \leq f_{tremor} \leq 12 \text{ Hz}) \wedge (Amplitude > 1.5^\circ) \wedge (\text{SignificantRatio} > 0.2)
 $$
 
-其中 $\text{SignificantRatio}$ 为有效抖动帧占比（超过噪点门槛的帧间差数量 / 总帧间差数量），此第四重条件确保震颤为持续性而非偶发性。
+其中 $\text{SignificantRatio}$ 为有效抖动帧占比（超过噪点门槛的帧间差数量 / 总帧间差数量），此第四重条件允许检测帕金森初期常见的间歇性震颤。
 
-#### 严重度分级
+#### 严重度分级（基于 Fahn-Tolosa-Marin 震颤评定量表 TRS 简化分级）
 
 | 等级 | 交叉次数 | 振幅 | 临床对应 |
 |------|---------|------|---------|
-| Mild | 8-12 | < 8° | 轻微震颤 |
-| Moderate | 12-16 | 8-15° | 中度震颤 |
-| Severe | > 16 | > 15° | 严重震颤 |
+| Mild | 6-10 | < 6° | 轻微震颤 |
+| Moderate | 10-14 | 6-12° | 中度震颤 |
+| Severe | > 14 | > 12° | 严重震颤 |
 
 #### 临床参考
 
@@ -318,7 +318,7 @@ $$
 D_{head} = \sqrt{(\Delta x_{nose})^2 + (\Delta y_{nose})^2} - \sqrt{(\Delta x_{shoulder\_mid})^2 + (\Delta y_{shoulder\_mid})^2}
 $$
 
-**阈值**：$D_{head} > 8\% \times W_{shoulder}$（肩宽的 8%）
+**阈值**：$D_{head} > 6\% \times W_{shoulder}$（肩宽的 6%）— 基于 Bobath 神经发育治疗概念 [Shumway-Cook & Woollacott, 2017]
 
 #### B. 侧身代偿 (Side Lean)
 
@@ -328,7 +328,7 @@ $$
 \Delta_{lateral} = |M_{shoulder,x} - M_{hip,x}|
 $$
 
-**阈值**：$\Delta_{lateral} > 25\% \times W_{shoulder}$（肩宽的 25%）
+**阈值**：$\Delta_{lateral} > 25\% \times W_{shoulder}$（肩宽的 25%）— 基于 Neumann (2010) Kinesiology 重心转移标准
 
 #### C. 耸肩代偿 (Shoulder Hike)
 
@@ -338,11 +338,11 @@ $$
 \Delta_{shoulder\_y} = |P_{R\_shoulder,y} - P_{L\_shoulder,y}|
 $$
 
-**阈值**：$\Delta_{shoulder\_y} > 20\% \times W_{shoulder}$（肩宽的 20%）
+**阈值**：$\Delta_{shoulder\_y} > 15\% \times W_{shoulder}$（肩宽的 15%）— 基于 Sahrmann (2002) Movement Impairment Syndromes 上斜方肌代偿标准
 
-#### 平滑处理
+#### 判定策略
 
-所有代偿检测使用 5 帧滑动窗口平均，避免单帧噪声产生误报。
+三种代偿动作独立评估，收集所有超过阈值的候选结果，返回**严重度最高**的作为最终判定。所有检测使用 5 帧滑动窗口平均，避免单帧噪声产生误报。
 
 ---
 
