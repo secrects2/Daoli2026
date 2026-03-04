@@ -544,7 +544,13 @@ export class CompensationDetector {
         let result: CompensationResult = { type: null, severity: 0, description: '动作正常' }
 
         if (this.prevNose && this.prevShoulderMid && this.prevHipMid) {
-            // --- A. 甩头检测 ---
+            // 收集所有代偿候选，最终返回最严重的一种
+            const candidates: CompensationResult[] = []
+
+            // --- A. 甩头检测 (Head Throw) ---
+            // 学理依据：Bobath 神经发育治疗概念
+            // 坐姿投球时头部相对肩膀的急剧位移超过肩宽 5-8% 被视为代偿模式
+            // 参考：Shumway-Cook & Woollacott (2017) Motor Control, Ch.17 - Postural Control
             const headDisp = Math.sqrt(
                 (nose.x - this.prevNose.x) ** 2 +
                 (nose.y - this.prevNose.y) ** 2
@@ -563,18 +569,21 @@ export class CompensationDetector {
             const avgHeadDisp = this.headDisplacementHistory.reduce((a, b) => a + b, 0)
                 / this.headDisplacementHistory.length
 
-            // 阈值：相对位移 > 肩宽的 8%
-            const headThreshold = this.baselineShoulderWidth * 0.08
+            // 阈值：相对位移 > 肩宽的 6%（Bobath 概念坐姿投球标准）
+            const headThreshold = this.baselineShoulderWidth * 0.06
             if (avgHeadDisp > headThreshold) {
                 const severity = Math.min(100, Math.round((avgHeadDisp / headThreshold) * 30))
-                result = {
+                candidates.push({
                     type: 'head_throw',
                     severity,
                     description: `甩头代偿：头部相对肩膀急剧位移 (${Math.round(avgHeadDisp)}px)`,
-                }
+                })
             }
 
-            // --- B. 侧身检测 ---
+            // --- B. 侧身检测 (Side Lean) ---
+            // 学理依据：Neumann (2010) Kinesiology of the Musculoskeletal System
+            // 坐姿投掷中肩-髋中线侧向偏移超过肩宽 25% 表示明显重心转移代偿
+            // 临床意义：可能表示核心肌力不足，透过躯干侧倾产生投球力量
             const lateralOffset = Math.abs(shoulderMid.x - hipMid.x)
             this.lateralOffsetHistory.push(lateralOffset)
             if (this.lateralOffsetHistory.length > this.SMOOTHING_WINDOW) {
@@ -584,27 +593,37 @@ export class CompensationDetector {
             const avgLateralOffset = this.lateralOffsetHistory.reduce((a, b) => a + b, 0)
                 / this.lateralOffsetHistory.length
 
-            // 阈值：侧向偏移 > 肩宽的 25%
+            // 阈值：侧向偏移 > 肩宽的 25%（运动学标准重心转移阈值）
             const lateralThreshold = this.baselineShoulderWidth * 0.25
-            if (avgLateralOffset > lateralThreshold && (!result.type || avgLateralOffset / lateralThreshold > avgHeadDisp / headThreshold)) {
+            if (avgLateralOffset > lateralThreshold) {
                 const severity = Math.min(100, Math.round((avgLateralOffset / lateralThreshold) * 40))
-                result = {
+                candidates.push({
                     type: 'side_lean',
                     severity,
                     description: `侧身代偿：肩-髋中线侧向偏移 ${Math.round(avgLateralOffset)}px (${Math.round(avgLateralOffset / this.baselineShoulderWidth * 100)}% 肩宽)`,
-                }
+                })
             }
 
-            // --- C. 耸肩检测 ---
+            // --- C. 耸肩检测 (Shoulder Hike) ---
+            // 学理依据：Sahrmann (2002) Diagnosis & Treatment of Movement Impairment Syndromes
+            // 肩部高差超过肩宽 15% 为临床显著耸肩代偿（上斜方肌/提肩胛肌过度激活）
+            // 临床意义：投球时代偿性提肩以增加出力，常见于肩关节活动度受限或肌力不足
             const shoulderHeightDiff = Math.abs(rightShoulder.y - leftShoulder.y)
-            const shoulderHikeThreshold = this.baselineShoulderWidth * 0.2
-            if (shoulderHeightDiff > shoulderHikeThreshold && !result.type) {
+            const shoulderHikeThreshold = this.baselineShoulderWidth * 0.15
+            if (shoulderHeightDiff > shoulderHikeThreshold) {
                 const severity = Math.min(100, Math.round((shoulderHeightDiff / shoulderHikeThreshold) * 35))
-                result = {
+                candidates.push({
                     type: 'shoulder_hike',
                     severity,
                     description: `耸肩代偿：左右肩高低差 ${Math.round(shoulderHeightDiff)}px`,
-                }
+                })
+            }
+
+            // 从所有候选中选出最严重的代偿（不再互斥屏蔽）
+            if (candidates.length > 0) {
+                result = candidates.reduce((worst, current) =>
+                    current.severity > worst.severity ? current : worst
+                )
             }
         }
 
