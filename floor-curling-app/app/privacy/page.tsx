@@ -17,7 +17,7 @@ export default function PrivacyPolicyPage() {
 
                     <h2 className="text-xl font-semibold text-foreground mt-6">1. 引言</h2>
                     <p>
-                        歡迎使用道里地壺球數位平台（以下簡稱「本平台」）。我們非常重視您的隱私權。
+                        歡迎使用VOVOBALL 數位平台（以下簡稱「本平台」）。我們非常重視您的隱私權。
                         本政策旨在說明我們如何收集、使用及保護您的個人資訊。
                     </p>
 
@@ -63,7 +63,7 @@ export default function PrivacyPolicyPage() {
 
                     <h2 className="text-xl font-semibold text-foreground mt-6">7. 聯絡我們</h2>
                     <p>
-                        若您對本隱私權政策有任何疑問，請聯繫道里總部管理團隊。
+                        若您對本隱私權政策有任何疑問，請聯繫VOVOBALL 總部管理團隊。
                     </p>
                 </div>
             </div>

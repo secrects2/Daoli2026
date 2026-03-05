@@ -104,7 +104,7 @@ export default function ElderQRCodePage() {
                 <div class="card">
                     <div class="qr-section"><img class="qr-code" src="${qrDataUrl}" alt="QR Code" /></div>
                     <div class="info-section">
-                        <div class="logo">🥌 道里地壺球</div>
+                        <div class="logo">🥌 VOVOBALL</div>
                         <div class="name">${elderName}</div>
                         <div class="store">${storeId || ''}</div>
                         <div class="instructions">請藥師掃描此 QR Code<br/>參加比賽</div>
@@ -271,7 +271,7 @@ export default function ElderQRCodePage() {
                                         <div className="flex items-center gap-4">
                                             <QRCodeGenerator value={generateElderQRContent(selectedElder.id)} size={180} className="rounded-lg" />
                                             <div className="text-left">
-                                                <p className="text-blue-900 font-bold text-lg mb-1">🥌 道里地壺球</p>
+                                                <p className="text-blue-900 font-bold text-lg mb-1">🥌 VOVOBALL</p>
                                                 <p className="text-blue-900 font-semibold text-xl">{selectedElder.nickname || selectedElder.full_name || '長輩'}</p>
                                                 <p className="text-muted-foreground text-sm">{storeId}</p>
                                             </div>

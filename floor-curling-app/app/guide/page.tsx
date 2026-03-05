@@ -74,7 +74,7 @@ export default function GuidePage() {
                         <div className="flex items-center gap-3">
                             <span className="text-3xl">🥌</span>
                             <div>
-                                <h1 className="text-xl font-bold text-white">道里地壺球</h1>
+                                <h1 className="text-xl font-bold text-white">VOVOBALL</h1>
                                 <p className="text-xs text-white/60">Floor Curling Platform</p>
                             </div>
                         </div>
@@ -251,7 +251,7 @@ export default function GuidePage() {
             {/* 頁尾 */}
             <footer className="bg-black/20 mt-16 py-8">
                 <div className="max-w-6xl mx-auto px-4 text-center text-white/50 text-sm">
-                    <p>道里國際地壺球 © 2026 - 內部測試版</p>
+                    <p>VOVOBALL © 2026 - 內部測試版</p>
                     <p className="mt-1">如有問題請聯繫開發團隊</p>
                 </div>
             </footer>

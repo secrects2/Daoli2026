@@ -17,7 +17,7 @@ export default function TermsOfServicePage() {
 
                     <h2 className="text-xl font-semibold text-foreground mt-6">1. 同意條款</h2>
                     <p>
-                        當您訪問或使用道里地壺球數位平台（以下簡稱「本服務」），即表示您已閱讀、理解並同意受本服務條款的約束。
+                        當您訪問或使用VOVOBALL 數位平台（以下簡稱「本服務」），即表示您已閱讀、理解並同意受本服務條款的約束。
                         若您不同意本條款的任何部分，請停止使用本服務。
                     </p>
 
@@ -45,7 +45,7 @@ export default function TermsOfServicePage() {
 
                     <h2 className="text-xl font-semibold text-foreground mt-6">5. 智慧財產權</h2>
                     <p>
-                        本服務包含的所有內容（包括但不限於文字、圖標、程式碼及系統架構）均歸道里總部或相關權利人所有，
+                        本服務包含的所有內容（包括但不限於文字、圖標、程式碼及系統架構）均歸VOVOBALL 總部或相關權利人所有，
                         受著作權法及相關法律保護。未經授權，不得擅自複製或使用。
                     </p>
 

@@ -8,7 +8,7 @@ import NextTopLoader from 'nextjs-toploader'
 import { Metadata, Viewport } from 'next'
 
 export const metadata: Metadata = {
-    title: '道里運動平台 - DaoLi Sports Platform',
+    title: 'VOVOBALL - Sports & Health Platform',
     description: 'Professional Sports management platform',
     manifest: '/manifest.json',
     icons: {
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     appleWebApp: {
         capable: true,
         statusBarStyle: 'default',
-        title: '道里運動',
+        title: 'VOVOBALL',
     },
 }
 

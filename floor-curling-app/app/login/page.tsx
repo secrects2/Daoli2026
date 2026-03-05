@@ -25,7 +25,7 @@ export default function LoginPage() {
                             </svg>
                         </div>
                         <h2 className="text-3xl font-extrabold tracking-tight text-foreground">
-                            道里運動平台
+                            VOVOBALL
                         </h2>
                         <p className="mt-2 text-sm font-medium text-muted-foreground uppercase tracking-widest">
                             數位管理平台
@@ -44,7 +44,7 @@ export default function LoginPage() {
 
                 {/* Footer */}
                 <p className="mt-8 text-center text-xs text-muted-foreground font-medium tracking-wide">
-                    &copy; 2026 DaoLi Sports Platform. <br /> Designed for Digital Health.
+                    &copy; 2026 VOVOBALL. <br /> Designed for Digital Health.
                 </p>
             </div>
         </div>
